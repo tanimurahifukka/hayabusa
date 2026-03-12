@@ -1,0 +1,36 @@
+# Build artifacts
+.build/
+*.o
+*.d
+*.swp
+
+# Xcode
+*.xcodeproj/
+*.xcworkspace/
+xcuserdata/
+DerivedData/
+
+# Model files (too large for git)
+models/*.gguf
+models/.cache/
+
+# HuggingFace cache
+.cache/
+
+# macOS
+.DS_Store
+
+# Benchmark results (regenerate locally)
+scripts/bench_results*.json
+scripts/bench_llama_vs_mlx.json
+scripts/bench_qwen35_final.json
+
+# SwiftPM
+Package.resolved
+
+# Vendor (users build llama.cpp locally)
+vendor/
+
+# IDE
+.vscode/
+.idea/
