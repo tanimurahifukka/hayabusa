@@ -2,7 +2,7 @@
 import PackageDescription
 
 // Absolute path to llama.cpp build artifacts
-let llamaBuildDir = "/Users/tanimura/Desktop/Lang/hayabusa/vendor/llama.cpp/build"
+let llamaBuildDir = "/Users/tanimura/hayabusa/vendor/llama.cpp/build"
 
 let package = Package(
     name: "Hayabusa",

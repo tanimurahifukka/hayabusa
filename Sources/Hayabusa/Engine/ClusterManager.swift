@@ -209,52 +209,61 @@ final class ClusterManager: @unchecked Sendable {
     }
 
     /// Query the peer's HTTP health endpoint to discover its port and register it.
-    /// Tries port 8080 first, then common ports.
+    /// Uses async dispatch to avoid blocking the Bonjour callback queue.
     private func discoverNode(host: String, serviceName: String) {
         // Try the same port as ours first (most common case), then 8080
         let portsToTry = Array(Set([httpPort, 8080]))
 
-        for tryPort in portsToTry {
-            let url = URL(string: "http://\(host):\(tryPort)/health")!
-            var request = URLRequest(url: url)
-            request.timeoutInterval = 5
+        DispatchQueue.global(qos: .utility).async { [weak self] in
+            guard let self else { return }
 
-            let sem = DispatchSemaphore(value: 0)
-            var success = false
+            for tryPort in portsToTry {
+                guard let url = URL(string: "http://\(host):\(tryPort)/health") else {
+                    print("[Cluster] Invalid URL for host: \(host):\(tryPort), skipping")
+                    continue
+                }
+                var request = URLRequest(url: url)
+                request.timeoutInterval = 5
 
-            let task = URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
-                defer { sem.signal() }
-                guard let self, error == nil,
-                      let httpResp = response as? HTTPURLResponse,
-                      httpResp.statusCode == 200 else { return }
+                let sem = DispatchSemaphore(value: 0)
+                var success = false
 
-                success = true
-                let isLocal = self.isLocalAddress(host) && tryPort == self.httpPort
-                let nodeId = "\(host):\(tryPort)"
+                let task = URLSession.shared.dataTask(with: request) { data, response, error in
+                    defer { sem.signal() }
+                    guard error == nil,
+                          let httpResp = response as? HTTPURLResponse,
+                          httpResp.statusCode == 200 else { return }
+                    success = true
+                }
+                task.resume()
+                _ = sem.wait(timeout: .now() + 6)
 
-                let node = ClusterNode(
-                    id: nodeId,
-                    host: host,
-                    port: tryPort,
-                    backend: self.backend,  // assume same backend for now
-                    model: "",
-                    slots: 0,
-                    isLocal: isLocal,
-                    isHealthy: true,
-                    lastSeen: Date(),
-                    consecutiveFailures: 0
-                )
+                if success {
+                    let isLocal = self.isLocalAddress(host) && tryPort == self.httpPort
+                    let nodeId = "\(host):\(tryPort)"
 
-                self.lock.lock()
-                self.nodes[nodeId] = node
-                self.lock.unlock()
-                print("[Cluster] Peer added: \(nodeId) (name: \(serviceName), local: \(isLocal))")
+                    let node = ClusterNode(
+                        id: nodeId,
+                        host: host,
+                        port: tryPort,
+                        backend: self.backend,
+                        model: "",
+                        slots: 0,
+                        isLocal: isLocal,
+                        isHealthy: true,
+                        lastSeen: Date(),
+                        consecutiveFailures: 0
+                    )
+
+                    self.lock.lock()
+                    self.nodes[nodeId] = node
+                    self.lock.unlock()
+                    print("[Cluster] Peer added: \(nodeId) (name: \(serviceName), local: \(isLocal))")
+                    return
+                }
             }
-            task.resume()
-            _ = sem.wait(timeout: .now() + 6)
-            if success { return }
+            print("[Cluster] Could not reach \(serviceName) at \(host)")
         }
-        print("[Cluster] Could not reach \(serviceName) at \(host)")
     }
 
     private func handlePeerRemoved(_ result: NWBrowser.Result) {
