@@ -191,8 +191,12 @@ final class ClusterManager: @unchecked Sendable {
                    let endpoint = path.remoteEndpoint,
                    case .hostPort(let host, _) = endpoint {
                     // Strip interface suffix (e.g., "192.168.11.34%en1" -> "192.168.11.34")
-                    let rawHost = "\(host)"
-                    let hostStr = rawHost.components(separatedBy: "%").first ?? rawHost
+                    var rawHost = "\(host)"
+                    // Remove IPv6 scope ID and any percent-encoded interface
+                    if let pctIdx = rawHost.firstIndex(of: "%") {
+                        rawHost = String(rawHost[rawHost.startIndex..<pctIdx])
+                    }
+                    let hostStr = rawHost
 
                     // Query the HTTP API to discover port and metadata
                     self.discoverNode(host: hostStr, serviceName: name)
@@ -215,7 +219,10 @@ final class ClusterManager: @unchecked Sendable {
         let portsToTry = Array(Set([httpPort, 8080]))
 
         for tryPort in portsToTry {
-            let url = URL(string: "http://\(host):\(tryPort)/health")!
+            guard let url = URL(string: "http://\(host):\(tryPort)/health") else {
+                print("[Cluster] Invalid URL for host=\(host) port=\(tryPort)")
+                continue
+            }
             var request = URLRequest(url: url)
             request.timeoutInterval = 5
 
@@ -255,6 +262,61 @@ final class ClusterManager: @unchecked Sendable {
             if success { return }
         }
         print("[Cluster] Could not reach \(serviceName) at \(host)")
+    }
+
+    // MARK: - Explicit Peer Registration
+
+    /// Register a peer by address (e.g., "192.168.11.49:8080" or "192.168.11.49").
+    func addExplicitPeer(_ address: String) {
+        let parts = address.split(separator: ":")
+        let host = String(parts[0])
+        let port = parts.count > 1 ? Int(parts[1]) ?? 8080 : 8080
+
+        let isLocal = self.isLocalAddress(host) && port == self.httpPort
+        if isLocal {
+            // Skip adding self as a remote peer
+            return
+        }
+
+        // Verify the peer is reachable via health check
+        DispatchQueue.global(qos: .utility).async { [weak self] in
+            guard let self else { return }
+            guard let url = URL(string: "http://\(host):\(port)/health") else { return }
+            var request = URLRequest(url: url)
+            request.timeoutInterval = 10
+
+            let sem = DispatchSemaphore(value: 0)
+            let task = URLSession.shared.dataTask(with: request) { [weak self] _, response, error in
+                defer { sem.signal() }
+                guard let self, error == nil,
+                      let httpResp = response as? HTTPURLResponse,
+                      httpResp.statusCode == 200 else {
+                    print("[Cluster] Explicit peer \(host):\(port) unreachable")
+                    return
+                }
+
+                let nodeId = "\(host):\(port)"
+                let node = ClusterNode(
+                    id: nodeId,
+                    host: host,
+                    port: port,
+                    backend: "",
+                    model: "",
+                    slots: 0,
+                    isLocal: false,
+                    isHealthy: true,
+                    lastSeen: Date(),
+                    consecutiveFailures: 0
+                )
+
+                self.lock.lock()
+                self.nodes[nodeId] = node
+                self.lock.unlock()
+                print("[Cluster] Explicit peer added: \(nodeId)")
+            }
+            task.resume()
+            _ = sem.wait(timeout: .now() + 12)
+        }
     }
 
     private func handlePeerRemoved(_ result: NWBrowser.Result) {

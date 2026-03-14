@@ -14,6 +14,7 @@ struct HayabusaApp {
         var maxMemoryGB: Double?
         var maxContext: Int?
         var clusterMode = false
+        var peers: [String] = []
 
         var i = 0
         while i < args.count {
@@ -39,6 +40,12 @@ struct HayabusaApp {
                 if i < args.count, let n = Int(args[i]) { maxContext = n }
             case "--cluster":
                 clusterMode = true
+            case "--peers":
+                i += 1
+                if i < args.count {
+                    // Parse comma-separated peers: "192.168.1.10:8080,192.168.1.11:8080"
+                    peers = args[i].split(separator: ",").map(String.init)
+                }
             default:
                 if modelPath == nil && !args[i].hasPrefix("-") {
                     modelPath = args[i]
@@ -57,6 +64,7 @@ struct HayabusaApp {
             print("  --max-memory    MLX memory limit in GB (e.g. 14GB, mlx only)")
             print("  --max-context   Max KV cache context per generation (mlx only)")
             print("  --cluster       Enable cluster mode (Bonjour LAN auto-discovery)")
+            print("  --peers         Comma-separated peer addresses (e.g. 192.168.1.10:8080)")
             print("")
             print("  llama backend:  hayabusa models/Qwen3.5-9B-Q4_K_M.gguf --backend llama")
             print("  mlx backend:    hayabusa mlx-community/Qwen2.5-7B-Instruct-4bit --backend mlx")
@@ -87,10 +95,10 @@ struct HayabusaApp {
         print("[Hayabusa] Model loaded (\(engine.modelDescription))")
         print("[Hayabusa] Slots: \(slotCount)")
 
-        // Cluster mode
+        // Cluster mode (--cluster for Bonjour, --peers for explicit peers)
         let bindAddress: String
         var clusterManager: ClusterManager?
-        if clusterMode {
+        if clusterMode || !peers.isEmpty {
             bindAddress = "0.0.0.0"
             let cm = ClusterManager(
                 httpPort: port,
@@ -99,10 +107,18 @@ struct HayabusaApp {
                 slots: slotCount
             )
             cm.start()
+            // Register explicit peers
+            for peer in peers {
+                cm.addExplicitPeer(peer)
+            }
             clusterManager = cm
             let clusterEngine = ClusterEngine(localEngine: engine, clusterManager: cm)
             engine = clusterEngine
-            print("[Hayabusa] Cluster mode enabled (Bonjour: _hayabusa._tcp)")
+            if peers.isEmpty {
+                print("[Hayabusa] Cluster mode enabled (Bonjour: _hayabusa._tcp)")
+            } else {
+                print("[Hayabusa] Cluster mode enabled (peers: \(peers.joined(separator: ", ")))")
+            }
         } else {
             bindAddress = "127.0.0.1"
         }
