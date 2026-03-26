@@ -1,0 +1,53 @@
+{
+  "timestamp": "2026-03-20T19:50:58",
+  "model": "mlx-community/Qwen3.5-4B-4bit",
+  "num_layers": 32,
+  "backend": "mlx (Python mlx-lm 0.31.1)",
+  "method": "true_layer_skip (generation-phase only)",
+  "max_tokens": 256,
+  "num_samples": 10,
+  "sweet_spot": {
+    "threshold": 0.093,
+    "skipped_layers": [
+      4,
+      5,
+      7,
+      9,
+      12,
+      13
+    ],
+    "skipped_count": 6,
+    "description": "Skip 6 lowest-importance layers during token generation; all layers run during prompt processing"
+  },
+  "results": [
+    {
+      "name": "no-skip",
+      "threshold": null,
+      "skipped_layers": 0,
+      "avg_tok_per_sec": 154.2,
+      "median_tok_per_sec": 154.3,
+      "speedup": 1.0
+    },
+    {
+      "name": "skip-sweet-spot",
+      "threshold": 0.093,
+      "skipped_layers": 6,
+      "skipped_indices": [
+        4,
+        5,
+        7,
+        9,
+        12,
+        13
+      ],
+      "avg_tok_per_sec": 182.5,
+      "median_tok_per_sec": 182.7,
+      "speedup": 1.184
+    }
+  ],
+  "sample_outputs": {
+    "prompt": "Write a SOAP note for a 45-year-old male with a 3-day history of headache and low-grade fever.",
+    "no-skip": "Here's a thinking process that leads to the suggested SOAP note:\n\n1.  **Analyze the Request:**\n    *   **Patient:** 45-year-old male.\n    *   **Chief Complaint (CC):** Headache and low-grade fever.\n    *   **Duration:** 3 days.\n    *   **Format:** SOAP Note (Subjective, Objective, Assessment, Plan).\n    *   **Goal:** Create a realistic, medically plausible clinical note.\n\n2.  **Determine the Clinical Context (Differential Diagnosis):**\n    *   *Headache + Fever* in a middle-aged male could sugge",
+    "skip-sweet-spot": "Here's a thinking process about the request:\n\n1.  **Analyze the user's request:**\n    *   The user wants a SOAP note for a specific clinical scenario.\n    *   The scenario is a 45-year-old male with a 3-day history of headache and low-grade fever.\n    *   The user wants a SOAP note.\n\n2.  **Evaluate the constraints and safety/quality guidelines:**\n    *   The user is asking for a SOAP note.\n    *   The user is a medical professional.\n    *   The user is asking for a SOAP note.\n    *   The user is"
+  }
+}

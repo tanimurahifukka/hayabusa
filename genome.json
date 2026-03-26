@@ -1,0 +1,275 @@
+{
+  "inputTokens" : 0,
+  "layers" : [
+    {
+      "attentionEntropy" : -0.6364092,
+      "l2Norm" : 433.93304,
+      "layerIndex" : 0,
+      "layerType" : "linear_attn",
+      "meanActivation" : 0.0037384033,
+      "sparsity" : 6.2713116e-05
+    },
+    {
+      "attentionEntropy" : -0.57060724,
+      "l2Norm" : 417.5354,
+      "layerIndex" : 1,
+      "layerType" : "linear_attn",
+      "meanActivation" : 0.0037841797,
+      "sparsity" : 8.102756e-05
+    },
+    {
+      "attentionEntropy" : -0.5563933,
+      "l2Norm" : 424.73526,
+      "layerIndex" : 2,
+      "layerType" : "linear_attn",
+      "meanActivation" : 0.003829956,
+      "sparsity" : 8.602241e-05
+    },
+    {
+      "attentionEntropy" : -1.7705181,
+      "l2Norm" : 482.9108,
+      "layerIndex" : 3,
+      "layerType" : "attention",
+      "meanActivation" : 0.0038146973,
+      "sparsity" : 0
+    },
+    {
+      "attentionEntropy" : -0.5920519,
+      "l2Norm" : 438.0067,
+      "layerIndex" : 4,
+      "layerType" : "linear_attn",
+      "meanActivation" : 0.003829956,
+      "sparsity" : 5.9938197e-05
+    },
+    {
+      "attentionEntropy" : -0.61353165,
+      "l2Norm" : 440.82068,
+      "layerIndex" : 5,
+      "layerType" : "linear_attn",
+      "meanActivation" : 0.0037841797,
+      "sparsity" : 6.1048166e-05
+    },
+    {
+      "attentionEntropy" : -0.63435054,
+      "l2Norm" : 429.48334,
+      "layerIndex" : 6,
+      "layerType" : "linear_attn",
+      "meanActivation" : 0.0037841797,
+      "sparsity" : 5.1613446e-05
+    },
+    {
+      "attentionEntropy" : -1.6687942,
+      "l2Norm" : 466.1452,
+      "layerIndex" : 7,
+      "layerType" : "attention",
+      "meanActivation" : 0.0036621094,
+      "sparsity" : 0
+    },
+    {
+      "attentionEntropy" : -0.6579961,
+      "l2Norm" : 448.3472,
+      "layerIndex" : 8,
+      "layerType" : "linear_attn",
+      "meanActivation" : 0.0037384033,
+      "sparsity" : 4.550863e-05
+    },
+    {
+      "attentionEntropy" : -0.6690268,
+      "l2Norm" : 450.34842,
+      "layerIndex" : 9,
+      "layerType" : "linear_attn",
+      "meanActivation" : 0.0037384033,
+      "sparsity" : 4.7728565e-05
+    },
+    {
+      "attentionEntropy" : -0.6579961,
+      "l2Norm" : 437.69995,
+      "layerIndex" : 10,
+      "layerType" : "linear_attn",
+      "meanActivation" : 0.0037078857,
+      "sparsity" : 5.9938197e-05
+    },
+    {
+      "attentionEntropy" : -1.6244909,
+      "l2Norm" : 464.3312,
+      "layerIndex" : 11,
+      "layerType" : "attention",
+      "meanActivation" : 0.003616333,
+      "sparsity" : 0
+    },
+    {
+      "attentionEntropy" : -0.7145978,
+      "l2Norm" : 438.7868,
+      "layerIndex" : 12,
+      "layerType" : "linear_attn",
+      "meanActivation" : 0.0036468506,
+      "sparsity" : 4.6063615e-05
+    },
+    {
+      "attentionEntropy" : -0.6908312,
+      "l2Norm" : 451.06882,
+      "layerIndex" : 13,
+      "layerType" : "linear_attn",
+      "meanActivation" : 0.0036621094,
+      "sparsity" : 4.9948496e-05
+    },
+    {
+      "attentionEntropy" : -0.7038679,
+      "l2Norm" : 439.46695,
+      "layerIndex" : 14,
+      "layerType" : "linear_attn",
+      "meanActivation" : 0.003616333,
+      "sparsity" : 4.4398665e-05
+    },
+    {
+      "attentionEntropy" : -1.5926569,
+      "l2Norm" : 469.38177,
+      "layerIndex" : 15,
+      "layerType" : "attention",
+      "meanActivation" : 0.0036468506,
+      "sparsity" : 0
+    },
+    {
+      "attentionEntropy" : -0.69869554,
+      "l2Norm" : 443.1768,
+      "layerIndex" : 16,
+      "layerType" : "linear_attn",
+      "meanActivation" : 0.0035705566,
+      "sparsity" : 4.051378e-05
+    },
+    {
+      "attentionEntropy" : -0.75763917,
+      "l2Norm" : 454.02756,
+      "layerIndex" : 17,
+      "layerType" : "linear_attn",
+      "meanActivation" : 0.0036468506,
+      "sparsity" : 3.3853983e-05
+    },
+    {
+      "attentionEntropy" : -0.7294711,
+      "l2Norm" : 452.08197,
+      "layerIndex" : 18,
+      "layerType" : "linear_attn",
+      "meanActivation" : 0.003616333,
+      "sparsity" : 3.163405e-05
+    },
+    {
+      "attentionEntropy" : -1.6129769,
+      "l2Norm" : 494.55676,
+      "layerIndex" : 19,
+      "layerType" : "attention",
+      "meanActivation" : 0.004180908,
+      "sparsity" : 0
+    },
+    {
+      "attentionEntropy" : -0.86027527,
+      "l2Norm" : 506.29422,
+      "layerIndex" : 20,
+      "layerType" : "linear_attn",
+      "meanActivation" : 0.0036621094,
+      "sparsity" : 3.66289e-05
+    },
+    {
+      "attentionEntropy" : -0.8373798,
+      "l2Norm" : 515.39056,
+      "layerIndex" : 21,
+      "layerType" : "linear_attn",
+      "meanActivation" : 0.0037078857,
+      "sparsity" : 2.6639198e-05
+    },
+    {
+      "attentionEntropy" : -0.73410594,
+      "l2Norm" : 526.0287,
+      "layerIndex" : 22,
+      "layerType" : "linear_attn",
+      "meanActivation" : 0.0038146973,
+      "sparsity" : 2.3864282e-05
+    },
+    {
+      "attentionEntropy" : -1.7401329,
+      "l2Norm" : 516.89417,
+      "layerIndex" : 23,
+      "layerType" : "attention",
+      "meanActivation" : 0.0043029785,
+      "sparsity" : 0
+    },
+    {
+      "attentionEntropy" : -0.85445917,
+      "l2Norm" : 540.6822,
+      "layerIndex" : 24,
+      "layerType" : "linear_attn",
+      "meanActivation" : 0.0037384033,
+      "sparsity" : 2.6639198e-05
+    },
+    {
+      "attentionEntropy" : -0.81139046,
+      "l2Norm" : 560.72784,
+      "layerIndex" : 25,
+      "layerType" : "linear_attn",
+      "meanActivation" : 0.0038604736,
+      "sparsity" : 1.6094516e-05
+    },
+    {
+      "attentionEntropy" : -0.7454272,
+      "l2Norm" : 570.76514,
+      "layerIndex" : 26,
+      "layerType" : "linear_attn",
+      "meanActivation" : 0.0038604736,
+      "sparsity" : 2.6639198e-05
+    },
+    {
+      "attentionEntropy" : -1.678072,
+      "l2Norm" : 551.0298,
+      "layerIndex" : 27,
+      "layerType" : "attention",
+      "meanActivation" : 0.005065918,
+      "sparsity" : 5.934746e-07
+    },
+    {
+      "attentionEntropy" : -0.8362197,
+      "l2Norm" : 578.48956,
+      "layerIndex" : 28,
+      "layerType" : "linear_attn",
+      "meanActivation" : 0.0038909912,
+      "sparsity" : 1.4429566e-05
+    },
+    {
+      "attentionEntropy" : -0.68495834,
+      "l2Norm" : 566.0793,
+      "layerIndex" : 29,
+      "layerType" : "linear_attn",
+      "meanActivation" : 0.003967285,
+      "sparsity" : 2.9414115e-05
+    },
+    {
+      "attentionEntropy" : -0.71650153,
+      "l2Norm" : 550.2543,
+      "layerIndex" : 30,
+      "layerType" : "linear_attn",
+      "meanActivation" : 0.0040283203,
+      "sparsity" : 2.8304148e-05
+    },
+    {
+      "attentionEntropy" : -1.7016587,
+      "l2Norm" : 530.22705,
+      "layerIndex" : 31,
+      "layerType" : "attention",
+      "meanActivation" : 0.0048217773,
+      "sparsity" : 0
+    }
+  ],
+  "modelName" : "MLX mlx-community\/Qwen3.5-4B-4bit",
+  "summary" : {
+    "avgL2Norm" : 484.05328,
+    "avgSparsity" : 3.222492e-05,
+    "leastActiveLayer" : 16,
+    "meanActivationRange" : [
+      0.0035705566,
+      0.005065918
+    ],
+    "mostActiveLayer" : 27
+  },
+  "timestamp" : "2026-03-20T13:56:06Z",
+  "totalLayers" : 32,
+  "totalParameters" : 657959936
+}

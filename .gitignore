@@ -34,3 +34,6 @@ vendor/
 # IDE
 .vscode/
 .idea/
+
+# DMG dist
+dist/

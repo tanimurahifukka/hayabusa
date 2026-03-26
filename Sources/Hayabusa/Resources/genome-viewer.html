@@ -1,0 +1,1256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Genome Viewer</title>
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<style>
+:root {
+  --bg: #0a0a0a;
+  --bg-panel: #111118;
+  --bg-card: #16161e;
+  --border: #2a2a3a;
+  --text: #c8c8d8;
+  --text-dim: #6a6a7a;
+  --text-bright: #e8e8f8;
+  --accent1: #7c3aed;
+  --accent2: #06b6d4;
+  --accent3: #8b5cf6;
+  --gradient-start: #7c3aed;
+  --gradient-end: #06b6d4;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'SF Mono', 'Fira Code', 'JetBrains Mono', 'Cascadia Code', monospace;
+  font-size: 13px;
+  overflow-x: hidden;
+}
+
+/* Header */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--border);
+  background: linear-gradient(180deg, #0f0f18, var(--bg));
+}
+.header-left { display: flex; align-items: center; gap: 16px; }
+.logo {
+  font-size: 18px;
+  font-weight: 700;
+  background: linear-gradient(135deg, var(--accent1), var(--accent2));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  letter-spacing: 1px;
+}
+.logo-sub { font-size: 11px; color: var(--text-dim); }
+.model-badge {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 4px 12px;
+  font-size: 12px;
+  color: var(--accent2);
+}
+.header-right { display: flex; align-items: center; gap: 12px; }
+
+/* Tabs */
+.tabs {
+  display: flex;
+  gap: 2px;
+  padding: 8px 24px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg);
+}
+.tab {
+  padding: 8px 20px;
+  border-radius: 6px 6px 0 0;
+  cursor: pointer;
+  color: var(--text-dim);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  transition: all 0.2s;
+  border: 1px solid transparent;
+  border-bottom: none;
+}
+.tab:hover { color: var(--text); background: var(--bg-panel); }
+.tab.active {
+  color: var(--accent2);
+  background: var(--bg-panel);
+  border-color: var(--border);
+}
+
+/* Main layout */
+.main { display: flex; height: calc(100vh - 100px); }
+.content { flex: 1; overflow-y: auto; padding: 20px 24px; }
+
+/* View containers */
+.view { display: none; }
+.view.active { display: block; }
+
+/* Drop zone */
+.drop-zone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 70vh;
+  border: 2px dashed var(--border);
+  border-radius: 16px;
+  transition: all 0.3s;
+}
+.drop-zone.drag-over {
+  border-color: var(--accent2);
+  background: rgba(6, 182, 212, 0.05);
+}
+.drop-zone.hidden { display: none; }
+.drop-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+  opacity: 0.3;
+}
+.drop-title {
+  font-size: 16px;
+  color: var(--text-bright);
+  margin-bottom: 8px;
+}
+.drop-sub {
+  color: var(--text-dim);
+  font-size: 12px;
+  margin-bottom: 20px;
+}
+.drop-btn {
+  background: linear-gradient(135deg, var(--accent1), var(--accent2));
+  border: none;
+  padding: 10px 24px;
+  border-radius: 8px;
+  color: white;
+  font-family: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  font-weight: 600;
+}
+.drop-btn:hover { opacity: 0.9; }
+
+/* Panels */
+.panel {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  margin-bottom: 20px;
+  overflow: hidden;
+}
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-bright);
+}
+.panel-body { padding: 16px; }
+
+/* Heatmap */
+.heatmap-container { overflow-x: auto; }
+.heatmap-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 2px;
+}
+.heatmap-label {
+  width: 140px;
+  min-width: 140px;
+  text-align: right;
+  padding-right: 12px;
+  font-size: 11px;
+  color: var(--text-dim);
+}
+.heatmap-cells { display: flex; gap: 2px; }
+.heatmap-cell {
+  width: 24px;
+  height: 24px;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: transform 0.1s, box-shadow 0.2s;
+  position: relative;
+}
+.heatmap-cell:hover {
+  transform: scale(1.4);
+  z-index: 10;
+  box-shadow: 0 0 12px rgba(124, 58, 237, 0.5);
+}
+.heatmap-axis {
+  display: flex;
+  margin-left: 140px;
+  gap: 2px;
+  margin-top: 4px;
+}
+.heatmap-axis-label {
+  width: 24px;
+  text-align: center;
+  font-size: 9px;
+  color: var(--text-dim);
+}
+.heatmap-legend {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  margin-left: 140px;
+  font-size: 11px;
+  color: var(--text-dim);
+}
+.legend-gradient {
+  width: 120px;
+  height: 10px;
+  border-radius: 5px;
+}
+
+/* Tooltip */
+.tooltip {
+  position: fixed;
+  background: #1a1a2e;
+  border: 1px solid var(--accent3);
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 12px;
+  pointer-events: none;
+  z-index: 1000;
+  opacity: 0;
+  transition: opacity 0.15s;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+  max-width: 250px;
+}
+.tooltip.show { opacity: 1; }
+.tooltip-title {
+  font-weight: 700;
+  color: var(--accent2);
+  margin-bottom: 6px;
+}
+.tooltip-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 2px 0;
+}
+.tooltip-key { color: var(--text-dim); }
+.tooltip-val { color: var(--text-bright); font-weight: 600; }
+
+/* Brain Map */
+.brain-container {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+}
+.brain-svg-wrap {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+.brain-detail {
+  width: 340px;
+  min-width: 340px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px;
+}
+.brain-detail-title {
+  font-size: 15px;
+  font-weight: 700;
+  margin-bottom: 12px;
+  color: var(--text-bright);
+}
+.brain-detail-region {
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 12px;
+  display: inline-block;
+  margin-bottom: 12px;
+  font-weight: 600;
+}
+.brain-detail-metrics { margin-top: 8px; }
+.brain-metric-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+  border-bottom: 1px solid #1e1e2e;
+  font-size: 12px;
+}
+.brain-metric-label { color: var(--text-dim); }
+.brain-metric-val { color: var(--text-bright); font-weight: 600; }
+.brain-region-label {
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+.brain-region-label:hover { opacity: 0.8; }
+
+/* Meridian Map */
+.meridian-controls {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+  padding: 12px 16px;
+  background: var(--bg-card);
+  border-radius: 8px;
+}
+.meridian-controls label {
+  font-size: 12px;
+  color: var(--text-dim);
+}
+.slider-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+input[type="range"] {
+  -webkit-appearance: none;
+  width: 200px;
+  height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  outline: none;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--accent2);
+  cursor: pointer;
+}
+.slider-val {
+  font-size: 12px;
+  color: var(--accent2);
+  font-weight: 700;
+  min-width: 50px;
+}
+.meridian-chart { position: relative; }
+
+/* Compare */
+.compare-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 16px;
+}
+.compare-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px;
+}
+.compare-card-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-bright);
+  margin-bottom: 4px;
+}
+.compare-card-sub {
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-bottom: 12px;
+}
+.compare-drop {
+  border: 1px dashed var(--border);
+  border-radius: 8px;
+  padding: 40px;
+  text-align: center;
+  color: var(--text-dim);
+  font-size: 12px;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+.compare-drop:hover, .compare-drop.drag-over {
+  border-color: var(--accent2);
+}
+
+/* Export */
+.export-btn {
+  background: var(--bg-card);
+  border: 1px solid var(--accent3);
+  color: var(--accent3);
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.export-btn:hover {
+  background: var(--accent3);
+  color: white;
+}
+
+/* Pruning table */
+.pruning-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+.pruning-table th {
+  text-align: left;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-dim);
+  font-weight: 600;
+}
+.pruning-table td {
+  padding: 8px 12px;
+  border-bottom: 1px solid #1a1a24;
+}
+.risk-low { color: #22c55e; }
+.risk-medium { color: #eab308; }
+.risk-high { color: #ef4444; }
+.sparsity-bar {
+  height: 4px;
+  border-radius: 2px;
+  background: var(--border);
+  position: relative;
+  overflow: hidden;
+}
+.sparsity-bar-fill {
+  height: 100%;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--accent1), var(--accent2));
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #3a3a4a; }
+
+/* Scanline effect overlay */
+.scanline {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  pointer-events: none;
+  z-index: 9999;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0,0,0,0.03) 2px,
+    rgba(0,0,0,0.03) 4px
+  );
+}
+</style>
+</head>
+<body>
+<div class="scanline"></div>
+
+<div class="header">
+  <div class="header-left">
+    <div>
+      <div class="logo">AI GENOME VIEWER</div>
+      <div class="logo-sub">Neural Architecture Diagnostics</div>
+    </div>
+    <div class="model-badge" id="modelBadge">No model loaded</div>
+  </div>
+  <div class="header-right">
+    <button class="export-btn" id="exportBtn" style="display:none" onclick="exportPruning()">Export Pruning Candidates</button>
+  </div>
+</div>
+
+<div class="tabs">
+  <div class="tab active" data-view="heatmap">HEATMAP</div>
+  <div class="tab" data-view="brain">BRAIN MAP</div>
+  <div class="tab" data-view="meridian">MERIDIAN MAP</div>
+  <div class="tab" data-view="compare">COMPARE</div>
+  <div class="tab" data-view="pruning">PRUNING</div>
+</div>
+
+<div class="main">
+  <div class="content">
+    <!-- Drop zone -->
+    <div class="drop-zone" id="dropZone">
+      <div class="drop-icon">&#x1F9EC;</div>
+      <div class="drop-title">Drop genome.json to begin analysis</div>
+      <div class="drop-sub">Generated by: hayabusa --genome-mode</div>
+      <button class="drop-btn" onclick="document.getElementById('fileInput').click()">Select File</button>
+      <input type="file" id="fileInput" accept=".json" style="display:none">
+    </div>
+
+    <!-- Heatmap View -->
+    <div class="view" id="view-heatmap">
+      <div class="panel">
+        <div class="panel-header">
+          <span>Layer Activation Heatmap</span>
+          <span id="heatmapInfo" style="font-weight:400;color:var(--text-dim);font-size:11px"></span>
+        </div>
+        <div class="panel-body">
+          <div class="heatmap-container" id="heatmapContainer"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Brain Map View -->
+    <div class="view" id="view-brain">
+      <div class="panel">
+        <div class="panel-header">Brain Region Mapping</div>
+        <div class="panel-body">
+          <div class="brain-container">
+            <div class="brain-svg-wrap" id="brainSvg"></div>
+            <div class="brain-detail" id="brainDetail">
+              <div class="brain-detail-title">Select a brain region</div>
+              <div style="color:var(--text-dim);font-size:12px;margin-top:8px">
+                Click on a region in the brain map to view layer metrics.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Meridian View -->
+    <div class="view" id="view-meridian">
+      <div class="panel">
+        <div class="panel-header">Meridian Map &mdash; Acupoint Analysis</div>
+        <div class="panel-body">
+          <div class="meridian-controls">
+            <label>Acupoint Sensitivity</label>
+            <div class="slider-wrap">
+              <input type="range" id="meridianSlider" min="0" max="100" value="50">
+              <span class="slider-val" id="meridianVal">50%</span>
+            </div>
+          </div>
+          <div class="meridian-chart" id="meridianChart"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Compare View -->
+    <div class="view" id="view-compare">
+      <div class="panel">
+        <div class="panel-header">Model Comparison</div>
+        <div class="panel-body">
+          <div class="compare-grid" id="compareGrid"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pruning View -->
+    <div class="view" id="view-pruning">
+      <div class="panel">
+        <div class="panel-header">
+          <span>Pruning Candidates</span>
+          <button class="export-btn" onclick="exportPruning()">Download JSON</button>
+        </div>
+        <div class="panel-body" id="pruningBody"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="tooltip" id="tooltip"></div>
+
+<script>
+// ─── State ───────────────────────────────────────────────────────────
+let genomeData = null;
+let compareModels = [];
+
+const BRAIN_REGIONS = [
+  { name: 'Cerebellum',       label: 'Reflex & Pattern',   layers: [0,1,2,3,4],      color: '#3b82f6' },
+  { name: 'Temporal Lobe',    label: 'Language & Semantics',layers: [5,6,7,8,9,10],   color: '#22c55e' },
+  { name: 'Parietal Lobe',    label: 'Integration & Context',layers:[11,12,13,14,15,16,17,18], color: '#eab308' },
+  { name: 'Prefrontal Cortex',label: 'Reasoning & Planning',layers: [19,20,21,22,23,24,25,26], color: '#f97316' },
+  { name: 'Cingulate Gyrus',  label: 'Output Control',      layers: [27,28,29,30,31], color: '#ef4444' },
+];
+
+const METRICS = [
+  { key: 'meanActivation',  label: 'Mean Activation', colorLow: '#0c0c1a', colorHigh: '#7c3aed' },
+  { key: 'l2Norm',          label: 'L2 Norm',         colorLow: '#0c0c1a', colorHigh: '#06b6d4' },
+  { key: 'sparsity',        label: 'Sparsity',        colorLow: '#0c0c1a', colorHigh: '#f97316' },
+  { key: 'attentionEntropy',label: 'Attn Entropy',    colorLow: '#0c0c1a', colorHigh: '#22c55e' },
+];
+
+const MERIDIAN_FUNCTIONS = {
+  0: 'Token embedding alignment',
+  1: 'Lexical pattern recognition',
+  2: 'Subword composition',
+  3: 'Syntactic structure',
+  4: 'Morphological analysis',
+  5: 'Semantic role labeling',
+  6: 'Named entity recognition',
+  7: 'Co-reference resolution',
+  8: 'Sentiment polarity',
+  9: 'Topic classification',
+  10: 'Discourse relations',
+  11: 'Context window integration',
+  12: 'Temporal reasoning',
+  13: 'Spatial reasoning',
+  14: 'Analogical mapping',
+  15: 'Causal inference',
+  16: 'Counterfactual reasoning',
+  17: 'Abstract generalization',
+  18: 'Multi-hop reasoning',
+  19: 'Task decomposition',
+  20: 'Goal formulation',
+  21: 'Strategy selection',
+  22: 'Plan validation',
+  23: 'Risk assessment',
+  24: 'Creative generation',
+  25: 'Style adaptation',
+  26: 'Tone calibration',
+  27: 'Output coherence',
+  28: 'Factual grounding',
+  29: 'Safety filtering',
+  30: 'Format compliance',
+  31: 'Final token selection',
+};
+
+// ─── Tabs ────────────────────────────────────────────────────────────
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('view-' + tab.dataset.view).classList.add('active');
+  });
+});
+
+// ─── File Loading ────────────────────────────────────────────────────
+const dropZone = document.getElementById('dropZone');
+const fileInput = document.getElementById('fileInput');
+
+['dragenter','dragover'].forEach(e => {
+  dropZone.addEventListener(e, ev => { ev.preventDefault(); dropZone.classList.add('drag-over'); });
+});
+['dragleave','drop'].forEach(e => {
+  dropZone.addEventListener(e, ev => { ev.preventDefault(); dropZone.classList.remove('drag-over'); });
+});
+
+dropZone.addEventListener('drop', ev => {
+  const file = ev.dataTransfer.files[0];
+  if (file) loadFile(file);
+});
+
+fileInput.addEventListener('change', ev => {
+  if (ev.target.files[0]) loadFile(ev.target.files[0]);
+});
+
+function loadFile(file) {
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (data.layers && Array.isArray(data.layers)) {
+        genomeData = normalizeData(data);
+        activateViews();
+      } else {
+        alert('Invalid genome.json: missing "layers" array');
+      }
+    } catch (err) {
+      alert('Failed to parse JSON: ' + err.message);
+    }
+  };
+  reader.readAsText(file);
+}
+
+function normalizeData(data) {
+  // Handle both "model" and "modelName" fields
+  data.modelName = data.modelName || data.model || 'Unknown Model';
+  data.totalLayers = data.totalLayers || data.layers.length;
+  // Adapt brain regions to actual layer count
+  return data;
+}
+
+function activateViews() {
+  dropZone.classList.add('hidden');
+  document.getElementById('modelBadge').textContent =
+    genomeData.modelName + ' | ' + genomeData.totalLayers + ' layers';
+  document.getElementById('exportBtn').style.display = '';
+  document.getElementById('view-heatmap').classList.add('active');
+  renderHeatmap();
+  renderBrainMap();
+  renderMeridian();
+  renderCompare();
+  renderPruning();
+}
+
+// ─── Adaptive Brain Regions ──────────────────────────────────────────
+function getAdaptedRegions(totalLayers) {
+  if (totalLayers <= 32) return BRAIN_REGIONS;
+  // Scale regions proportionally for larger models
+  const ratio = totalLayers / 32;
+  return BRAIN_REGIONS.map(r => ({
+    ...r,
+    layers: r.layers.map(l => {
+      const start = Math.floor(l * ratio);
+      const end = Math.floor((l + 1) * ratio);
+      return Array.from({length: end - start}, (_, i) => start + i);
+    }).flat()
+  }));
+}
+
+function getRegionForLayer(layerIdx, totalLayers) {
+  const regions = getAdaptedRegions(totalLayers);
+  for (const r of regions) {
+    if (r.layers.includes(layerIdx)) return r;
+  }
+  return regions[regions.length - 1];
+}
+
+// ─── Heatmap ─────────────────────────────────────────────────────────
+function renderHeatmap() {
+  const container = document.getElementById('heatmapContainer');
+  container.innerHTML = '';
+  const layers = genomeData.layers;
+  const n = layers.length;
+
+  document.getElementById('heatmapInfo').textContent =
+    n + ' layers | ' + (genomeData.totalParameters ? (genomeData.totalParameters / 1e9).toFixed(1) + 'B params' : '');
+
+  METRICS.forEach(metric => {
+    const vals = layers.map(l => l[metric.key]);
+    const absVals = vals.map(Math.abs);
+    const minV = Math.min(...absVals);
+    const maxV = Math.max(...absVals);
+    const scale = d3.scaleLinear().domain([minV, maxV]).range([0, 1]);
+    const colorScale = d3.interpolateRgb(metric.colorLow, metric.colorHigh);
+
+    const row = document.createElement('div');
+    row.className = 'heatmap-row';
+
+    const label = document.createElement('div');
+    label.className = 'heatmap-label';
+    label.textContent = metric.label;
+    row.appendChild(label);
+
+    const cells = document.createElement('div');
+    cells.className = 'heatmap-cells';
+
+    layers.forEach(layer => {
+      const cell = document.createElement('div');
+      cell.className = 'heatmap-cell';
+      const v = Math.abs(layer[metric.key]);
+      const t = maxV > minV ? scale(v) : 0.5;
+      cell.style.background = colorScale(t);
+
+      const region = getRegionForLayer(layer.layerIndex, n);
+      cell.style.borderBottom = '2px solid ' + region.color;
+
+      cell.addEventListener('mouseenter', ev => showTooltip(ev, layer, metric));
+      cell.addEventListener('mouseleave', hideTooltip);
+      cells.appendChild(cell);
+    });
+    row.appendChild(cells);
+    container.appendChild(row);
+  });
+
+  // Axis labels
+  const axis = document.createElement('div');
+  axis.className = 'heatmap-axis';
+  layers.forEach(l => {
+    const lbl = document.createElement('div');
+    lbl.className = 'heatmap-axis-label';
+    lbl.textContent = l.layerIndex;
+    axis.appendChild(lbl);
+  });
+  container.appendChild(axis);
+
+  // Legend
+  METRICS.forEach(metric => {
+    const legend = document.createElement('div');
+    legend.className = 'heatmap-legend';
+    const grad = document.createElement('div');
+    grad.className = 'legend-gradient';
+    grad.style.background = `linear-gradient(90deg, ${metric.colorLow}, ${metric.colorHigh})`;
+    legend.innerHTML = `<span>${metric.label}</span>`;
+    legend.appendChild(grad);
+    legend.innerHTML += '<span>low &rarr; high</span>';
+    container.appendChild(legend);
+  });
+}
+
+// ─── Tooltip ─────────────────────────────────────────────────────────
+const tooltip = document.getElementById('tooltip');
+
+function showTooltip(ev, layer, highlightMetric) {
+  const region = getRegionForLayer(layer.layerIndex, genomeData.layers.length);
+  let html = `<div class="tooltip-title">Layer ${layer.layerIndex} &mdash; ${region.name}</div>`;
+  if (layer.layerType) html += `<div class="tooltip-row"><span class="tooltip-key">Type</span><span class="tooltip-val">${layer.layerType}</span></div>`;
+  METRICS.forEach(m => {
+    const bold = highlightMetric && m.key === highlightMetric.key;
+    html += `<div class="tooltip-row">
+      <span class="tooltip-key">${m.label}</span>
+      <span class="tooltip-val" style="${bold ? 'color:' + m.colorHigh : ''}">${formatMetric(layer[m.key])}</span>
+    </div>`;
+  });
+  tooltip.innerHTML = html;
+  tooltip.classList.add('show');
+  positionTooltip(ev);
+}
+
+function positionTooltip(ev) {
+  const x = ev.clientX + 16;
+  const y = ev.clientY + 16;
+  tooltip.style.left = Math.min(x, window.innerWidth - 270) + 'px';
+  tooltip.style.top = Math.min(y, window.innerHeight - 200) + 'px';
+}
+
+function hideTooltip() { tooltip.classList.remove('show'); }
+
+document.addEventListener('mousemove', ev => {
+  if (tooltip.classList.contains('show')) positionTooltip(ev);
+});
+
+function formatMetric(v) {
+  if (v === undefined || v === null) return 'N/A';
+  const abs = Math.abs(v);
+  if (abs === 0) return '0';
+  if (abs < 0.0001) return v.toExponential(2);
+  if (abs < 1) return v.toFixed(6);
+  if (abs < 100) return v.toFixed(4);
+  return v.toFixed(2);
+}
+
+// ─── Brain Map ───────────────────────────────────────────────────────
+function renderBrainMap() {
+  const wrap = document.getElementById('brainSvg');
+  wrap.innerHTML = '';
+
+  const W = 500, H = 420;
+  const svg = d3.select(wrap).append('svg').attr('width', W).attr('height', H)
+    .attr('viewBox', `0 0 ${W} ${H}`);
+
+  // Brain outline (side profile)
+  const brainPath = 'M250,50 C350,50 420,110 430,180 C440,250 420,310 380,340 C340,370 280,380 250,375 C220,380 160,370 120,340 C80,310 60,250 70,180 C80,110 150,50 250,50 Z';
+
+  // Glow filter
+  const defs = svg.append('defs');
+  const filter = defs.append('filter').attr('id', 'glow');
+  filter.append('feGaussianBlur').attr('stdDeviation', '3').attr('result', 'blur');
+  const merge = filter.append('feMerge');
+  merge.append('feMergeNode').attr('in', 'blur');
+  merge.append('feMergeNode').attr('in', 'SourceGraphic');
+
+  // Brain outline
+  svg.append('path').attr('d', brainPath)
+    .attr('fill', 'none').attr('stroke', '#2a2a3a').attr('stroke-width', 2);
+
+  // Region ellipses
+  const regionPositions = [
+    { cx: 250, cy: 330, rx: 70, ry: 30 },  // Cerebellum (bottom)
+    { cx: 150, cy: 240, rx: 55, ry: 45 },  // Temporal (left-lower)
+    { cx: 250, cy: 180, rx: 70, ry: 50 },  // Parietal (center)
+    { cx: 330, cy: 150, rx: 60, ry: 50 },  // Prefrontal (right-upper)
+    { cx: 250, cy: 100, rx: 50, ry: 25 },  // Cingulate (top-center)
+  ];
+
+  const regions = getAdaptedRegions(genomeData.totalLayers);
+
+  regions.forEach((region, i) => {
+    const pos = regionPositions[i] || regionPositions[regionPositions.length - 1];
+    const layerMetrics = genomeData.layers.filter(l => region.layers.includes(l.layerIndex));
+    const avgActivation = layerMetrics.length > 0
+      ? layerMetrics.reduce((s, l) => s + Math.abs(l.meanActivation), 0) / layerMetrics.length
+      : 0;
+
+    const g = svg.append('g').attr('class', 'brain-region-label')
+      .on('click', () => showBrainDetail(region, layerMetrics));
+
+    // Region ellipse
+    g.append('ellipse')
+      .attr('cx', pos.cx).attr('cy', pos.cy)
+      .attr('rx', pos.rx).attr('ry', pos.ry)
+      .attr('fill', region.color + '18')
+      .attr('stroke', region.color)
+      .attr('stroke-width', 1.5)
+      .attr('filter', 'url(#glow)');
+
+    // Pulse animation based on activation
+    g.append('ellipse')
+      .attr('cx', pos.cx).attr('cy', pos.cy)
+      .attr('rx', pos.rx * 0.4).attr('ry', pos.ry * 0.4)
+      .attr('fill', region.color + '40')
+      .attr('filter', 'url(#glow)');
+
+    // Region label
+    g.append('text')
+      .attr('x', pos.cx).attr('y', pos.cy - 8)
+      .attr('text-anchor', 'middle')
+      .attr('fill', region.color)
+      .attr('font-size', 11)
+      .attr('font-weight', 700)
+      .text(region.name);
+
+    g.append('text')
+      .attr('x', pos.cx).attr('y', pos.cy + 8)
+      .attr('text-anchor', 'middle')
+      .attr('fill', '#888')
+      .attr('font-size', 9)
+      .text(region.label);
+
+    g.append('text')
+      .attr('x', pos.cx).attr('y', pos.cy + 22)
+      .attr('text-anchor', 'middle')
+      .attr('fill', region.color)
+      .attr('font-size', 10)
+      .attr('font-weight', 600)
+      .text(`L${region.layers[0]}-${region.layers[region.layers.length-1]}`);
+  });
+}
+
+function showBrainDetail(region, layerMetrics) {
+  const detail = document.getElementById('brainDetail');
+  if (layerMetrics.length === 0) {
+    detail.innerHTML = '<div class="brain-detail-title">No layers in range</div>';
+    return;
+  }
+
+  const avg = key => layerMetrics.reduce((s, l) => s + (l[key] || 0), 0) / layerMetrics.length;
+  const min = key => Math.min(...layerMetrics.map(l => l[key] || 0));
+  const max = key => Math.max(...layerMetrics.map(l => l[key] || 0));
+
+  let html = `
+    <div class="brain-detail-title">${region.name}</div>
+    <div class="brain-detail-region" style="background:${region.color}22;color:${region.color}">${region.label}</div>
+    <div style="color:var(--text-dim);font-size:11px;margin-bottom:12px">
+      Layers ${region.layers[0]}&ndash;${region.layers[region.layers.length-1]}
+      (${layerMetrics.length} layers)
+    </div>
+    <div class="brain-detail-metrics">`;
+
+  METRICS.forEach(m => {
+    html += `
+      <div class="brain-metric-row">
+        <span class="brain-metric-label">${m.label} (avg)</span>
+        <span class="brain-metric-val">${formatMetric(avg(m.key))}</span>
+      </div>
+      <div class="brain-metric-row">
+        <span class="brain-metric-label">&nbsp;&nbsp;range</span>
+        <span class="brain-metric-val" style="font-size:11px;color:var(--text-dim)">
+          ${formatMetric(min(m.key))} &rarr; ${formatMetric(max(m.key))}
+        </span>
+      </div>`;
+  });
+
+  html += '</div><div style="margin-top:12px;font-size:11px;color:var(--text-dim)">';
+  html += '<strong style="color:var(--text)">Layer detail:</strong><br>';
+  layerMetrics.forEach(l => {
+    html += `<div style="margin-top:4px;padding:4px 8px;background:var(--bg-panel);border-radius:4px">
+      <span style="color:${region.color};font-weight:700">L${l.layerIndex}</span>
+      <span style="color:var(--text-dim)">${l.layerType || ''}</span>
+      &nbsp; act:${formatMetric(l.meanActivation)} | L2:${formatMetric(l.l2Norm)}
+    </div>`;
+  });
+  html += '</div>';
+
+  detail.innerHTML = html;
+}
+
+// ─── Meridian Map ────────────────────────────────────────────────────
+function renderMeridian() {
+  const chart = document.getElementById('meridianChart');
+  chart.innerHTML = '';
+
+  const layers = genomeData.layers;
+  const slider = document.getElementById('meridianSlider');
+  const valDisplay = document.getElementById('meridianVal');
+
+  function draw() {
+    chart.innerHTML = '';
+    const pct = parseInt(slider.value);
+    valDisplay.textContent = pct + '%';
+
+    // Sparsity values (use absolute)
+    const sparsities = layers.map(l => Math.abs(l.sparsity));
+    const maxS = Math.max(...sparsities);
+    const threshold = maxS * (1 - pct / 100);
+
+    const W = chart.clientWidth || 800;
+    const H = 400;
+    const svg = d3.select(chart).append('svg').attr('width', W).attr('height', H);
+
+    // Vertical backbone
+    const cx = W / 2;
+    const topY = 30, botY = H - 30;
+
+    svg.append('line')
+      .attr('x1', cx).attr('y1', topY).attr('x2', cx).attr('y2', botY)
+      .attr('stroke', '#2a2a3a').attr('stroke-width', 3);
+
+    const n = layers.length;
+    const spacing = (botY - topY) / (n - 1);
+
+    // Connection lines between nodes
+    for (let i = 0; i < n - 1; i++) {
+      const y1 = topY + i * spacing;
+      const y2 = topY + (i + 1) * spacing;
+      const isAcupoint = sparsities[i] <= threshold;
+      svg.append('line')
+        .attr('x1', cx).attr('y1', y1).attr('x2', cx).attr('y2', y2)
+        .attr('stroke', isAcupoint ? '#7c3aed' : '#1e1e2e')
+        .attr('stroke-width', isAcupoint ? 2 : 1);
+    }
+
+    layers.forEach((layer, i) => {
+      const y = topY + i * spacing;
+      const s = sparsities[i];
+      const isAcupoint = s <= threshold;
+      const region = getRegionForLayer(layer.layerIndex, n);
+      const r = isAcupoint ? 8 : 4;
+
+      // Glow for acupoints
+      if (isAcupoint) {
+        svg.append('circle')
+          .attr('cx', cx).attr('cy', y).attr('r', 16)
+          .attr('fill', region.color + '15');
+      }
+
+      // Node
+      svg.append('circle')
+        .attr('cx', cx).attr('cy', y).attr('r', r)
+        .attr('fill', isAcupoint ? region.color : '#2a2a3a')
+        .attr('stroke', isAcupoint ? region.color : 'none')
+        .attr('stroke-width', isAcupoint ? 2 : 0)
+        .style('cursor', 'pointer')
+        .on('mouseenter', ev => showTooltip(ev, layer, METRICS[2]))
+        .on('mouseleave', hideTooltip);
+
+      // Index label
+      const side = i % 2 === 0 ? -1 : 1;
+      svg.append('text')
+        .attr('x', cx + side * 24).attr('y', y + 4)
+        .attr('text-anchor', side < 0 ? 'end' : 'start')
+        .attr('fill', isAcupoint ? '#aaa' : '#444')
+        .attr('font-size', 10)
+        .text('L' + layer.layerIndex);
+
+      // Acupoint function label
+      if (isAcupoint) {
+        const fn = MERIDIAN_FUNCTIONS[layer.layerIndex] || 'Layer ' + layer.layerIndex;
+        svg.append('text')
+          .attr('x', cx + side * 50).attr('y', y + 4)
+          .attr('text-anchor', side < 0 ? 'end' : 'start')
+          .attr('fill', region.color)
+          .attr('font-size', 10)
+          .attr('font-weight', 600)
+          .text(fn);
+
+        // Risk label
+        svg.append('text')
+          .attr('x', cx - side * 24).attr('y', y + 4)
+          .attr('text-anchor', side > 0 ? 'end' : 'start')
+          .attr('fill', '#ef4444')
+          .attr('font-size', 9)
+          .text(isAcupoint ? 'CRITICAL' : '');
+      }
+    });
+
+    // Title annotations
+    svg.append('text').attr('x', cx).attr('y', 16)
+      .attr('text-anchor', 'middle').attr('fill', '#666').attr('font-size', 10)
+      .text('Input Embedding');
+    svg.append('text').attr('x', cx).attr('y', H - 10)
+      .attr('text-anchor', 'middle').attr('fill', '#666').attr('font-size', 10)
+      .text('Output Head');
+  }
+
+  slider.addEventListener('input', draw);
+  draw();
+}
+
+// ─── Compare Mode ────────────────────────────────────────────────────
+function renderCompare() {
+  const grid = document.getElementById('compareGrid');
+  grid.innerHTML = '';
+
+  // Current model card
+  if (genomeData) {
+    const card = createCompareCard(genomeData, 0);
+    grid.appendChild(card);
+  }
+
+  // Slots for additional models
+  for (let i = compareModels.length; i < 3; i++) {
+    if (compareModels[i]) {
+      const card = createCompareCard(compareModels[i], i + 1);
+      grid.appendChild(card);
+    } else {
+      const dropCard = document.createElement('div');
+      dropCard.className = 'compare-card';
+      dropCard.innerHTML = `<div class="compare-drop" id="compareDrop${i}">
+        Drop another genome.json to compare
+      </div>`;
+      grid.appendChild(dropCard);
+
+      const drop = dropCard.querySelector('.compare-drop');
+      ['dragenter','dragover'].forEach(e => {
+        drop.addEventListener(e, ev => { ev.preventDefault(); ev.stopPropagation(); drop.classList.add('drag-over'); });
+      });
+      ['dragleave','drop'].forEach(e => {
+        drop.addEventListener(e, ev => { ev.preventDefault(); ev.stopPropagation(); drop.classList.remove('drag-over'); });
+      });
+      drop.addEventListener('drop', ev => {
+        const file = ev.dataTransfer.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = re => {
+            try {
+              const data = normalizeData(JSON.parse(re.target.result));
+              compareModels[i] = data;
+              renderCompare();
+            } catch (err) { alert('Invalid JSON'); }
+          };
+          reader.readAsText(file);
+        }
+      });
+    }
+  }
+}
+
+function createCompareCard(data, idx) {
+  const card = document.createElement('div');
+  card.className = 'compare-card';
+
+  const layers = data.layers;
+  const n = layers.length;
+
+  let html = `
+    <div class="compare-card-title">${data.modelName}</div>
+    <div class="compare-card-sub">${n} layers | ${data.totalParameters ? (data.totalParameters/1e9).toFixed(1) + 'B' : '?'} params</div>
+  `;
+
+  // Mini sparklines for each metric
+  METRICS.forEach(m => {
+    const vals = layers.map(l => Math.abs(l[m.key]));
+    const maxV = Math.max(...vals) || 1;
+    const sparkW = 300, sparkH = 40;
+
+    html += `<div style="margin-bottom:8px">
+      <div style="font-size:10px;color:var(--text-dim);margin-bottom:2px">${m.label}</div>
+      <svg width="${sparkW}" height="${sparkH}" viewBox="0 0 ${sparkW} ${sparkH}">`;
+
+    const barW = sparkW / n - 1;
+    vals.forEach((v, i) => {
+      const h = (v / maxV) * (sparkH - 4);
+      const region = getRegionForLayer(i, n);
+      html += `<rect x="${i * (barW + 1)}" y="${sparkH - h - 2}" width="${barW}" height="${h}" fill="${region.color}" opacity="0.7" rx="1"/>`;
+    });
+
+    html += `</svg></div>`;
+  });
+
+  card.innerHTML = html;
+  return card;
+}
+
+// ─── Pruning ─────────────────────────────────────────────────────────
+function renderPruning() {
+  const body = document.getElementById('pruningBody');
+  const candidates = getPruningCandidates();
+
+  if (candidates.length === 0) {
+    body.innerHTML = '<div style="color:var(--text-dim);padding:20px;text-align:center">No pruning candidates found. All layers appear active.</div>';
+    return;
+  }
+
+  let html = `<table class="pruning-table">
+    <thead><tr>
+      <th>Layer</th><th>Type</th><th>Region</th><th>Sparsity</th>
+      <th>Mean Activation</th><th>Est. Size Reduction</th><th>Risk</th>
+    </tr></thead><tbody>`;
+
+  candidates.forEach(c => {
+    html += `<tr>
+      <td style="font-weight:700;color:var(--accent2)">L${c.layer_idx}</td>
+      <td>${c.layerType || '-'}</td>
+      <td style="color:${c.regionColor}">${c.region}</td>
+      <td>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div class="sparsity-bar" style="width:80px">
+            <div class="sparsity-bar-fill" style="width:${c.sparsity * 100}%"></div>
+          </div>
+          <span>${(c.sparsity * 100).toFixed(4)}%</span>
+        </div>
+      </td>
+      <td>${formatMetric(c.meanActivation)}</td>
+      <td>${c.estimated_size_reduction}</td>
+      <td class="risk-${c.risk}" style="font-weight:700">${c.risk.toUpperCase()}</td>
+    </tr>`;
+  });
+
+  html += '</tbody></table>';
+  body.innerHTML = html;
+}
+
+function getPruningCandidates() {
+  if (!genomeData) return [];
+
+  const layers = genomeData.layers;
+  const sparsities = layers.map(l => l.sparsity);
+  const activations = layers.map(l => Math.abs(l.meanActivation));
+
+  // Sort by sparsity (highest first) = most prunable
+  const sorted = [...layers].sort((a, b) => b.sparsity - a.sparsity);
+
+  // Top 25% by sparsity are candidates
+  const cutoff = Math.max(1, Math.ceil(sorted.length * 0.25));
+  const candidates = sorted.slice(0, cutoff);
+
+  const totalLayers = layers.length;
+  return candidates.map(l => {
+    const region = getRegionForLayer(l.layerIndex, totalLayers);
+    const sizeReduction = (100 / totalLayers).toFixed(1);
+
+    // Risk based on position: early/late layers are higher risk
+    let risk = 'low';
+    if (l.layerIndex < 3 || l.layerIndex >= totalLayers - 3) risk = 'high';
+    else if (l.layerIndex < 6 || l.layerIndex >= totalLayers - 5) risk = 'medium';
+
+    // Also high risk if activation is relatively high
+    const maxAct = Math.max(...activations);
+    if (Math.abs(l.meanActivation) > maxAct * 0.8) risk = 'high';
+
+    return {
+      layer_idx: l.layerIndex,
+      layerType: l.layerType || '',
+      region: region.name,
+      regionColor: region.color,
+      sparsity: l.sparsity,
+      meanActivation: l.meanActivation,
+      estimated_size_reduction: sizeReduction + '%',
+      risk
+    };
+  });
+}
+
+function exportPruning() {
+  const candidates = getPruningCandidates();
+  const output = {
+    model: genomeData.modelName,
+    timestamp: new Date().toISOString(),
+    total_layers: genomeData.totalLayers,
+    candidates: candidates.map(c => ({
+      layer_idx: c.layer_idx,
+      sparsity: c.sparsity,
+      mean_activation: c.meanActivation,
+      estimated_size_reduction: c.estimated_size_reduction,
+      risk: c.risk,
+      region: c.region,
+    }))
+  };
+
+  const blob = new Blob([JSON.stringify(output, null, 2)], {type: 'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'pruning_candidates.json';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+</script>
+</body>
+</html>

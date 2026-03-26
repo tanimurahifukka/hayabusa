@@ -1,0 +1,191 @@
+{
+  "timestamp": "2026-03-20T21:18:27",
+  "method": "true_layer_skip (generation-phase only)",
+  "config": {
+    "mlx_model": "mlx-community/Qwen3.5-9B-MLX-4bit",
+    "ollama_model": "qwen3.5:9b",
+    "num_layers": 32,
+    "max_tokens": 512,
+    "temperature": 0.0,
+    "num_samples": 10,
+    "concurrencies": [
+      1,
+      4,
+      8
+    ]
+  },
+  "safe_skip_threshold": {
+    "max_safe_layers": 11,
+    "threshold": 0.1155,
+    "skipped_indices": [
+      2,
+      4,
+      5,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      15,
+      16
+    ],
+    "first_degenerate_at": 12
+  },
+  "results": [
+    {
+      "name": "Ollama baseline",
+      "description": "Ollama qwen3.5:9b",
+      "backend": "ollama",
+      "threshold": null,
+      "skip_count": 0,
+      "skip_indices": [],
+      "concurrency_results": [
+        {
+          "concurrency": 1,
+          "successful": 10,
+          "avg_tok_per_sec": 45.8,
+          "median_tok_per_sec": 45.8,
+          "avg_latency_ms": 11171.0,
+          "p95_latency_ms": 11189.0,
+          "aggregate_tok_per_sec": 457.6,
+          "total_completion_tokens": 5120
+        },
+        {
+          "concurrency": 4,
+          "successful": 10,
+          "avg_tok_per_sec": 26.0,
+          "median_tok_per_sec": 23.0,
+          "avg_latency_ms": 25628.0,
+          "p95_latency_ms": 44528.0,
+          "aggregate_tok_per_sec": 115.0,
+          "total_completion_tokens": 5120
+        },
+        {
+          "concurrency": 8,
+          "successful": 10,
+          "avg_tok_per_sec": 19.3,
+          "median_tok_per_sec": 13.4,
+          "avg_latency_ms": 43433.0,
+          "p95_latency_ms": 89037.0,
+          "aggregate_tok_per_sec": 57.5,
+          "total_completion_tokens": 5120
+        }
+      ],
+      "rss_mb": 409,
+      "bertscore": null
+    },
+    {
+      "name": "MLX baseline",
+      "description": "MLX no skip (all 32 layers)",
+      "backend": "mlx",
+      "threshold": null,
+      "skip_count": 0,
+      "skip_indices": [],
+      "concurrency_results": [
+        {
+          "concurrency": 1,
+          "successful": 10,
+          "avg_tok_per_sec": 107.1,
+          "median_tok_per_sec": 107.1,
+          "avg_latency_ms": 4779.0,
+          "p95_latency_ms": 4784.0,
+          "aggregate_tok_per_sec": 1070.2,
+          "total_completion_tokens": 5120
+        }
+      ],
+      "rss_mb": 5613,
+      "bertscore": {
+        "precision": 0.918,
+        "recall": 0.9189,
+        "f1": 0.9185,
+        "num_pairs": 5
+      }
+    },
+    {
+      "name": "MLX skip-sweet",
+      "description": "MLX true skip 11/32 layers",
+      "backend": "mlx",
+      "threshold": 0.1155,
+      "skip_count": 11,
+      "skip_indices": [
+        2,
+        4,
+        5,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        15,
+        16
+      ],
+      "concurrency_results": [
+        {
+          "concurrency": 1,
+          "successful": 10,
+          "avg_tok_per_sec": 152.5,
+          "median_tok_per_sec": 153.2,
+          "avg_latency_ms": 3342.0,
+          "p95_latency_ms": 3347.0,
+          "aggregate_tok_per_sec": 1522.7,
+          "total_completion_tokens": 5097
+        }
+      ],
+      "rss_mb": 5613,
+      "bertscore": {
+        "precision": 0.7658,
+        "recall": 0.7709,
+        "f1": 0.7678,
+        "num_pairs": 5
+      }
+    },
+    {
+      "name": "MLX skip-aggr",
+      "description": "MLX true skip 12/32 layers (degenerate)",
+      "backend": "mlx",
+      "threshold": 0.1221,
+      "skip_count": 12,
+      "skip_indices": [
+        2,
+        4,
+        5,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        15,
+        16
+      ],
+      "concurrency_results": [
+        {
+          "concurrency": 1,
+          "successful": 10,
+          "avg_tok_per_sec": 157.5,
+          "median_tok_per_sec": 158.4,
+          "avg_latency_ms": 3080.0,
+          "p95_latency_ms": 3228.0,
+          "aggregate_tok_per_sec": 1506.0,
+          "total_completion_tokens": 4861
+        }
+      ],
+      "rss_mb": 5613,
+      "bertscore": {
+        "precision": 0.7628,
+        "recall": 0.7512,
+        "f1": 0.7568,
+        "num_pairs": 5
+      }
+    }
+  ],
+  "sample_outputs": {
+    "Ollama baseline": "Here's a thinking process that leads to the suggested SOAP note:\n\n1.  **Analyze the Request:**\n    *   **Role:** Medical Professional (Doctor/Nurse Practitioner/Physician Assistant).\n    *   **Task:** Write a detailed SOAP note.\n    *   **Patient:** 45-year-old male.\n    *   **Chief Complaint (CC):** Headache and low-grade fever.\n    *   **History of Present Illness (HPI):** 3-day duration.\n    *   **Goal:** Create a realistic, comprehensive, and clinically sound SOAP note based on limited initi",
+    "MLX baseline": "Here's a thinking process that leads to the suggested SOAP note:\n\n1.  **Analyze the Request:**\n    *   **Role:** Medical Professional.\n    *   **Task:** Write a detailed SOAP note.\n    *   **Patient:** 45-year-old male.\n    *   **Chief Complaint (CC):** Headache and low-grade fever.\n    *   **Duration:** 3 days.\n    *   **Constraint:** The prompt is very brief (\"3-day history of headache and low-grade fever\"). A *detailed* SOAP note requires fleshing out the missing information (Subjective, Obje",
+    "MLX skip-sweet": "Here is the patient's history.\nHere is a medical professional.\nI will write a detailed SOAP note for this patient, including the reason for the visit.\nI will write a detailed history and treatment plan for a patient with a 3-day history of headache and low-grade fever.\n\n**Important:**\n- **History:** The patient's history should be noted.\n- **Chief Complaint:** The patient's history should be detailed.\n- **Assessment**\n- **Assessment**\n- **Plan**\n- **Assessment**\n- **Plan**\n- **Assessment**\n- **P",
+    "MLX skip-aggr": "Here is the thinking process.\n\nHere is a 50-year-old male patient with a viral infection.\n\nOkay, here are some symptoms.\n\nOkay, let's review the history.\n\nOkay, let's review the history.\n\nOkay, let's review the history.\n\nOkay, let's review the history.\n\nLet's review the history.\n\nLet's review the history.\n\nLet's review the history.\n\nLet's review the history.\n\nLet's review the history.\n\nLet's review the history.\n\nLet's review.\n\nThe patient has a 3-day history of headaches and a 2-day viral infect"
+  }
+}

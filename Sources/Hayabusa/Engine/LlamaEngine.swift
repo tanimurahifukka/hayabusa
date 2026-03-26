@@ -71,6 +71,10 @@ final class LlamaEngine: InferenceEngine, @unchecked Sendable {
         ctxParams.n_threads = nThreads
         ctxParams.n_threads_batch = nThreads
 
+        // Apply KV cache quantization if configured
+        let kvQuantizer = KVCacheQuantizer(mode: KVCacheQuantizerConfig.shared.mode)
+        kvQuantizer.apply(to: &ctxParams)
+
         guard let context = llama_init_from_model(model, ctxParams) else {
             throw HayabusaError.contextCreationFailed
         }

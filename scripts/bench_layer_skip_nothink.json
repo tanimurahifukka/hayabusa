@@ -1,0 +1,121 @@
+{
+  "timestamp": "2026-03-20T21:49:28",
+  "method": "true_layer_skip (generation-phase only)",
+  "thinking": false,
+  "config": {
+    "mlx_model": "mlx-community/Qwen3.5-9B-MLX-4bit",
+    "ollama_model": "qwen3.5:9b",
+    "num_layers": 32,
+    "max_tokens": 512,
+    "temperature": 0.0,
+    "num_samples": 10,
+    "thinking_mode": "OFF (enable_thinking=False / think=false)"
+  },
+  "sweet_spot": {
+    "layers_skipped": 2,
+    "threshold": 0.0782,
+    "skipped_indices": [
+      4,
+      8
+    ]
+  },
+  "results": [
+    {
+      "name": "Ollama baseline",
+      "description": "Ollama qwen3.5:9b (think=false)",
+      "backend": "ollama",
+      "skip_count": 0,
+      "skip_indices": [],
+      "concurrency_results": [
+        {
+          "concurrency": 1,
+          "successful": 10,
+          "avg_tok_per_sec": 46.0,
+          "median_tok_per_sec": 45.9,
+          "avg_latency_ms": 11141.0,
+          "p95_latency_ms": 11156.0,
+          "total_completion_tokens": 5120
+        },
+        {
+          "concurrency": 4,
+          "successful": 10,
+          "avg_tok_per_sec": 26.0,
+          "median_tok_per_sec": 23.0,
+          "avg_latency_ms": 25563.0,
+          "p95_latency_ms": 44395.0,
+          "total_completion_tokens": 5120
+        },
+        {
+          "concurrency": 8,
+          "successful": 10,
+          "avg_tok_per_sec": 19.3,
+          "median_tok_per_sec": 13.4,
+          "avg_latency_ms": 43547.0,
+          "p95_latency_ms": 89177.0,
+          "total_completion_tokens": 5120
+        }
+      ],
+      "rss_mb": 461,
+      "bertscore": null
+    },
+    {
+      "name": "MLX baseline",
+      "description": "MLX no skip, no think (all 32 layers)",
+      "backend": "mlx",
+      "skip_count": 0,
+      "skip_indices": [],
+      "concurrency_results": [
+        {
+          "concurrency": 1,
+          "successful": 10,
+          "avg_tok_per_sec": 106.9,
+          "median_tok_per_sec": 107.0,
+          "avg_latency_ms": 4789.0,
+          "p95_latency_ms": 4806.0,
+          "total_completion_tokens": 5120
+        }
+      ],
+      "rss_mb": 5624,
+      "bertscore": {
+        "precision": 0.8842,
+        "recall": 0.8781,
+        "f1": 0.8811,
+        "num_pairs": 10
+      }
+    },
+    {
+      "name": "MLX skip-sweet",
+      "description": "MLX true skip 2/32, no think",
+      "backend": "mlx",
+      "skip_count": 2,
+      "skip_indices": [
+        4,
+        8
+      ],
+      "threshold": 0.0782,
+      "concurrency_results": [
+        {
+          "concurrency": 1,
+          "successful": 10,
+          "avg_tok_per_sec": 113.3,
+          "median_tok_per_sec": 113.4,
+          "avg_latency_ms": 4517.0,
+          "p95_latency_ms": 4529.0,
+          "total_completion_tokens": 5120
+        }
+      ],
+      "rss_mb": 5624,
+      "bertscore": {
+        "precision": 0.8764,
+        "recall": 0.8731,
+        "f1": 0.8747,
+        "num_pairs": 10
+      }
+    }
+  ],
+  "sample_outputs": {
+    "Ollama baseline": "**Patient Name:** [Redacted]\n**DOB/Age/Sex:** [Redacted] / 45 Years / Male\n**Date of Visit:** October 26, 2023\n**Chief Complaint:** \"Headache and feeling feverish for 3 days.\"\n\n---\n\n### **S (Subjective)**\n**History of Present Illness:**\nThe patient is a 45-year-old male presenting with a 3-day history of progressive headache. He describes the pain as a dull, throbbing sensation located in the bilateral frontal and temporal regions, rated at 6/10 intensity on the Numeric Rating Scale (NRS), worse",
+    "MLX baseline": "**Subjective (S)**\n\n**Chief Complaint:**\n\"Headache and fever for 3 days.\"\n\n**History of Present Illness (HPI):**\nMr. [Patient Name], a 45-year-old male, presents to the clinic reporting a 3-day history of progressive headache and low-grade fever.\n\n*   **Onset:** Symptoms began approximately 72 hours ago, starting as a dull ache in the frontal region.\n*   **Character:** The patient describes the headache as a \"pressure-like\" sensation, rated 6/10 in intensity at its peak, which has fluctuated but",
+    "MLX skip-sweet": "**Subjective (S)**\n*   **Chief Complaint:** Patient presents with a 3-day history of worsening headache and low-grade fever.\n*   **History of Present Illness (HPI):**\n    *   Onset: Symptoms began 3 days ago (approx. 2 days prior to presentation).\n    *   Headache: Described as a diffuse, bilateral pressure-type headache. Intensity rated 6/10, non-pulsating. No focal neurologic deficits (no weakness, numbness, or visual changes). No photophobia or phonophobia.\n    *   Fever: Patient reports feel"
+  }
+}

@@ -1,0 +1,90 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    runs-on: macos-14
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: '15.4'
+
+      - name: Clone llama.cpp
+        run: |
+          mkdir -p vendor
+          cd vendor
+          git clone --depth 1 https://github.com/ggerganov/llama.cpp.git
+
+      - name: Build llama.cpp (Metal)
+        run: |
+          cd vendor/llama.cpp
+          mkdir build && cd build
+          cmake .. \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DGGML_METAL=ON \
+            -DGGML_BLAS=ON \
+            -DGGML_BLAS_VENDOR=Apple \
+            -DBUILD_SHARED_LIBS=ON \
+            -DGGML_METAL_EMBED_LIBRARY=ON
+          cmake --build . --config Release -j $(sysctl -n hw.ncpu)
+
+      - name: Build Hayabusa server
+        run: |
+          swift build -c release
+
+      - name: Build HayabusaApp GUI
+        run: |
+          cd HayabusaApp
+          swift build -c release
+
+      - name: Create .app bundle
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          APP_DIR="dist/Hayabusa.app"
+
+          # Create bundle structure
+          mkdir -p "${APP_DIR}/Contents/MacOS"
+          mkdir -p "${APP_DIR}/Contents/Resources"
+
+          # Copy binaries
+          cp HayabusaApp/.build/release/HayabusaApp "${APP_DIR}/Contents/MacOS/HayabusaApp"
+          cp .build/release/Hayabusa "${APP_DIR}/Contents/MacOS/Hayabusa"
+
+          # Copy and update Info.plist
+          cp HayabusaApp/Resources/Info.plist "${APP_DIR}/Contents/Info.plist"
+          /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString ${VERSION}" "${APP_DIR}/Contents/Info.plist"
+
+          # Ad-hoc code sign
+          codesign --force --deep --sign - "${APP_DIR}"
+
+      - name: Create DMG
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          DMG_NAME="Hayabusa-${VERSION}.dmg"
+          TMP_DMG="dist/tmp.dmg"
+
+          hdiutil create -size 200m -fs HFS+ -volname "Hayabusa" "${TMP_DMG}"
+          MOUNT_DIR=$(hdiutil attach "${TMP_DMG}" | grep "Volumes" | awk '{print $3}')
+
+          cp -R dist/Hayabusa.app "${MOUNT_DIR}/"
+          ln -s /Applications "${MOUNT_DIR}/Applications"
+
+          hdiutil detach "${MOUNT_DIR}"
+          hdiutil convert "${TMP_DMG}" -format UDZO -o "dist/${DMG_NAME}"
+          rm -f "${TMP_DMG}"
+
+      - name: Upload Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/Hayabusa-*.dmg
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,0 +1,216 @@
+{
+  "timestamp": "2026-03-15T10:40:09",
+  "config": {
+    "model": "/Users/tanimura/Desktop/Lang/hayabusa/models/Qwen3.5-9B-Q4_K_M.gguf",
+    "single_backend": "llama",
+    "cluster": "Mac Studio (llama) + Mac mini (MLX)",
+    "max_output_tokens": 128,
+    "temperature": 0.0,
+    "samples_per_concurrency": 12,
+    "concurrency_levels": [
+      1,
+      2,
+      4,
+      8,
+      16,
+      24,
+      32,
+      40
+    ],
+    "slots": 4
+  },
+  "results": [
+    {
+      "concurrency": 1,
+      "single": {
+        "agg_tok_per_sec": 64.54,
+        "avg_latency_ms": 12900.2,
+        "p50_latency_ms": 12906.7,
+        "p95_latency_ms": 22707.8,
+        "successful": 12,
+        "failed": 0,
+        "wall_time_sec": 23.8,
+        "total_completion_tokens": 1536
+      },
+      "cluster": {
+        "agg_tok_per_sec": 30.08,
+        "avg_latency_ms": 28764.4,
+        "p50_latency_ms": 28724.9,
+        "p95_latency_ms": 49960.7,
+        "successful": 12,
+        "failed": 0,
+        "wall_time_sec": 51.057,
+        "total_completion_tokens": 1536
+      },
+      "ratio_cluster_over_single": 0.466
+    },
+    {
+      "concurrency": 2,
+      "single": {
+        "agg_tok_per_sec": 63.82,
+        "avg_latency_ms": 14038.1,
+        "p50_latency_ms": 14046.4,
+        "p95_latency_ms": 24057.8,
+        "successful": 12,
+        "failed": 0,
+        "wall_time_sec": 24.066,
+        "total_completion_tokens": 1536
+      },
+      "cluster": {
+        "agg_tok_per_sec": 40.54,
+        "avg_latency_ms": 19281.5,
+        "p50_latency_ms": 19148.5,
+        "p95_latency_ms": 35972.0,
+        "successful": 12,
+        "failed": 0,
+        "wall_time_sec": 37.889,
+        "total_completion_tokens": 1536
+      },
+      "ratio_cluster_over_single": 0.635
+    },
+    {
+      "concurrency": 4,
+      "single": {
+        "agg_tok_per_sec": 75.22,
+        "avg_latency_ms": 13638.9,
+        "p50_latency_ms": 13659.5,
+        "p95_latency_ms": 20410.3,
+        "successful": 12,
+        "failed": 0,
+        "wall_time_sec": 20.419,
+        "total_completion_tokens": 1536
+      },
+      "cluster": {
+        "agg_tok_per_sec": 40.74,
+        "avg_latency_ms": 21782.8,
+        "p50_latency_ms": 24661.6,
+        "p95_latency_ms": 37135.6,
+        "successful": 12,
+        "failed": 0,
+        "wall_time_sec": 37.7,
+        "total_completion_tokens": 1536
+      },
+      "ratio_cluster_over_single": 0.542
+    },
+    {
+      "concurrency": 8,
+      "single": {
+        "agg_tok_per_sec": 74.93,
+        "avg_latency_ms": 13806.5,
+        "p50_latency_ms": 13905.4,
+        "p95_latency_ms": 20489.9,
+        "successful": 12,
+        "failed": 0,
+        "wall_time_sec": 20.498,
+        "total_completion_tokens": 1536
+      },
+      "cluster": {
+        "agg_tok_per_sec": 40.93,
+        "avg_latency_ms": 19097.6,
+        "p50_latency_ms": 18071.4,
+        "p95_latency_ms": 37456.3,
+        "successful": 12,
+        "failed": 0,
+        "wall_time_sec": 37.525,
+        "total_completion_tokens": 1536
+      },
+      "ratio_cluster_over_single": 0.546
+    },
+    {
+      "concurrency": 16,
+      "single": {
+        "agg_tok_per_sec": 74.64,
+        "avg_latency_ms": 13857.3,
+        "p50_latency_ms": 13939.4,
+        "p95_latency_ms": 20570.0,
+        "successful": 12,
+        "failed": 0,
+        "wall_time_sec": 20.579,
+        "total_completion_tokens": 1536
+      },
+      "cluster": {
+        "agg_tok_per_sec": 40.88,
+        "avg_latency_ms": 19258.1,
+        "p50_latency_ms": 17952.2,
+        "p95_latency_ms": 37524.0,
+        "successful": 12,
+        "failed": 0,
+        "wall_time_sec": 37.572,
+        "total_completion_tokens": 1536
+      },
+      "ratio_cluster_over_single": 0.548
+    },
+    {
+      "concurrency": 24,
+      "single": {
+        "agg_tok_per_sec": 74.96,
+        "avg_latency_ms": 13767.0,
+        "p50_latency_ms": 13843.3,
+        "p95_latency_ms": 20482.5,
+        "successful": 12,
+        "failed": 0,
+        "wall_time_sec": 20.491,
+        "total_completion_tokens": 1536
+      },
+      "cluster": {
+        "agg_tok_per_sec": 40.9,
+        "avg_latency_ms": 19132.6,
+        "p50_latency_ms": 18040.9,
+        "p95_latency_ms": 37515.0,
+        "successful": 12,
+        "failed": 0,
+        "wall_time_sec": 37.559,
+        "total_completion_tokens": 1536
+      },
+      "ratio_cluster_over_single": 0.546
+    },
+    {
+      "concurrency": 32,
+      "single": {
+        "agg_tok_per_sec": 74.36,
+        "avg_latency_ms": 13935.7,
+        "p50_latency_ms": 14028.3,
+        "p95_latency_ms": 20647.0,
+        "successful": 12,
+        "failed": 0,
+        "wall_time_sec": 20.656,
+        "total_completion_tokens": 1536
+      },
+      "cluster": {
+        "agg_tok_per_sec": 40.91,
+        "avg_latency_ms": 19228.6,
+        "p50_latency_ms": 17965.6,
+        "p95_latency_ms": 37466.1,
+        "successful": 12,
+        "failed": 0,
+        "wall_time_sec": 37.543,
+        "total_completion_tokens": 1536
+      },
+      "ratio_cluster_over_single": 0.55
+    },
+    {
+      "concurrency": 40,
+      "single": {
+        "agg_tok_per_sec": 75.16,
+        "avg_latency_ms": 13772.9,
+        "p50_latency_ms": 13869.6,
+        "p95_latency_ms": 20429.4,
+        "successful": 12,
+        "failed": 0,
+        "wall_time_sec": 20.438,
+        "total_completion_tokens": 1536
+      },
+      "cluster": {
+        "agg_tok_per_sec": 13.34,
+        "avg_latency_ms": 32127.2,
+        "p50_latency_ms": 18076.6,
+        "p95_latency_ms": 115091.9,
+        "successful": 12,
+        "failed": 0,
+        "wall_time_sec": 115.14,
+        "total_completion_tokens": 1536
+      },
+      "ratio_cluster_over_single": 0.178
+    }
+  ]
+}

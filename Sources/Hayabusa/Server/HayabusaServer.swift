@@ -6,18 +6,35 @@ struct HayabusaServer {
     let port: Int
     let bindAddress: String
     let clusterManager: ClusterManager?
+    let speculativeDecoder: SpeculativeDecoder?
+    let kvQuantizeMode: KVQuantizeMode
+    let layerSkipConfig: LayerSkipConfig?
 
-    init(engine: any InferenceEngine, port: Int, bindAddress: String = "127.0.0.1", clusterManager: ClusterManager? = nil) {
+    init(
+        engine: any InferenceEngine,
+        port: Int,
+        bindAddress: String = "127.0.0.1",
+        clusterManager: ClusterManager? = nil,
+        speculativeDecoder: SpeculativeDecoder? = nil,
+        kvQuantizeMode: KVQuantizeMode = .off,
+        layerSkipConfig: LayerSkipConfig? = nil
+    ) {
         self.engine = engine
         self.port = port
         self.bindAddress = bindAddress
         self.clusterManager = clusterManager
+        self.speculativeDecoder = speculativeDecoder
+        self.kvQuantizeMode = kvQuantizeMode
+        self.layerSkipConfig = layerSkipConfig
     }
 
     func run() async throws {
         let router = Router()
         let engine = self.engine
         let clusterManager = self.clusterManager
+        let speculativeDecoder = self.speculativeDecoder
+        let kvQuantizeMode = self.kvQuantizeMode
+        let layerSkipConfig = self.layerSkipConfig
 
         // GET /health
         router.get("health") { _, _ -> String in
@@ -105,6 +122,58 @@ struct HayabusaServer {
             "nodes":[\(nodesJson.joined(separator: ","))],\
             "bandwidth":[\(bandwidthJson.joined(separator: ","))]}
             """
+        }
+
+        // GET /v1/stats — speculative decoding & KV quantization metrics
+        router.get("v1/stats") { _, _ -> String in
+            var parts: [String] = []
+
+            // Speculative decoding metrics
+            if let sd = speculativeDecoder {
+                let m = sd.metrics
+                parts.append("""
+                "speculative":{\
+                "enabled":true,\
+                "speculativeTokens":\(4),\
+                "totalDraftTokens":\(m.totalDraftTokens),\
+                "acceptedTokens":\(m.acceptedTokens),\
+                "acceptanceRate":\(String(format: "%.4f", m.acceptanceRate)),\
+                "totalGenerations":\(m.totalGenerations),\
+                "totalCompletionTokens":\(m.totalCompletionTokens),\
+                "effectiveTokPerSec":\(String(format: "%.1f", m.totalGenerations > 0 ? Double(m.totalCompletionTokens) / Double(m.totalGenerations) : 0))}
+                """)
+            } else {
+                parts.append("\"speculative\":{\"enabled\":false}")
+            }
+
+            // KV cache quantization info
+            let kvEnabled = kvQuantizeMode != .off
+            parts.append("""
+            "kvQuantize":{\
+            "enabled":\(kvEnabled),\
+            "mode":"\(kvQuantizeMode.rawValue)",\
+            "description":"\(kvQuantizeMode.description)"}
+            """)
+
+            // Layer skipping info
+            if let ls = layerSkipConfig {
+                parts.append("\"layerSkip\":\(ls.statsJSON)")
+            } else {
+                parts.append("\"layerSkip\":{\"enabled\":false}")
+            }
+
+            // Memory info
+            if let info = engine.memoryInfo() {
+                parts.append("""
+                "memory":{\
+                "totalPhysical":\(info.totalPhysical),\
+                "rssBytes":\(info.rssBytes),\
+                "freeEstimate":\(info.freeEstimate),\
+                "pressure":"\(info.pressure)"}
+                """)
+            }
+
+            return "{\(parts.joined(separator: ","))}"
         }
 
         let app = Application(

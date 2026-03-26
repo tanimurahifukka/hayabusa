@@ -1,0 +1,176 @@
+{
+  "model": "mlx-community/Qwen3.5-9B-MLX-4bit",
+  "num_layers": 32,
+  "analysis": {
+    "method": "perturbation_cosine_distance",
+    "description": "Cosine distance of hidden states when layer output projections are zeroed",
+    "num_prompts": 100
+  },
+  "profiles": {
+    "soap": {
+      "num_prompts": 100,
+      "layers": [
+        {
+          "index": 0,
+          "importance": 1.0,
+          "raw_activation_norm": 0.913146
+        },
+        {
+          "index": 1,
+          "importance": 0.126546,
+          "raw_activation_norm": 0.115555
+        },
+        {
+          "index": 2,
+          "importance": 0.087954,
+          "raw_activation_norm": 0.080315
+        },
+        {
+          "index": 3,
+          "importance": 0.103233,
+          "raw_activation_norm": 0.094266
+        },
+        {
+          "index": 4,
+          "importance": 0.070544,
+          "raw_activation_norm": 0.064417
+        },
+        {
+          "index": 5,
+          "importance": 0.094448,
+          "raw_activation_norm": 0.086245
+        },
+        {
+          "index": 6,
+          "importance": 0.176973,
+          "raw_activation_norm": 0.161603
+        },
+        {
+          "index": 7,
+          "importance": 0.122076,
+          "raw_activation_norm": 0.111473
+        },
+        {
+          "index": 8,
+          "importance": 0.078174,
+          "raw_activation_norm": 0.071384
+        },
+        {
+          "index": 9,
+          "importance": 0.111616,
+          "raw_activation_norm": 0.101921
+        },
+        {
+          "index": 10,
+          "importance": 0.11548,
+          "raw_activation_norm": 0.10545
+        },
+        {
+          "index": 11,
+          "importance": 0.110177,
+          "raw_activation_norm": 0.100608
+        },
+        {
+          "index": 12,
+          "importance": 0.090353,
+          "raw_activation_norm": 0.082506
+        },
+        {
+          "index": 13,
+          "importance": 0.102995,
+          "raw_activation_norm": 0.094049
+        },
+        {
+          "index": 14,
+          "importance": 0.136003,
+          "raw_activation_norm": 0.124191
+        },
+        {
+          "index": 15,
+          "importance": 0.108571,
+          "raw_activation_norm": 0.099141
+        },
+        {
+          "index": 16,
+          "importance": 0.109927,
+          "raw_activation_norm": 0.10038
+        },
+        {
+          "index": 17,
+          "importance": 0.150846,
+          "raw_activation_norm": 0.137745
+        },
+        {
+          "index": 18,
+          "importance": 0.239975,
+          "raw_activation_norm": 0.219132
+        },
+        {
+          "index": 19,
+          "importance": 0.259711,
+          "raw_activation_norm": 0.237154
+        },
+        {
+          "index": 20,
+          "importance": 0.173641,
+          "raw_activation_norm": 0.15856
+        },
+        {
+          "index": 21,
+          "importance": 0.215482,
+          "raw_activation_norm": 0.196767
+        },
+        {
+          "index": 22,
+          "importance": 0.361579,
+          "raw_activation_norm": 0.330174
+        },
+        {
+          "index": 23,
+          "importance": 0.229039,
+          "raw_activation_norm": 0.209146
+        },
+        {
+          "index": 24,
+          "importance": 0.169388,
+          "raw_activation_norm": 0.154676
+        },
+        {
+          "index": 25,
+          "importance": 0.153674,
+          "raw_activation_norm": 0.140327
+        },
+        {
+          "index": 26,
+          "importance": 0.234964,
+          "raw_activation_norm": 0.214556
+        },
+        {
+          "index": 27,
+          "importance": 0.330469,
+          "raw_activation_norm": 0.301767
+        },
+        {
+          "index": 28,
+          "importance": 0.204543,
+          "raw_activation_norm": 0.186777
+        },
+        {
+          "index": 29,
+          "importance": 0.167786,
+          "raw_activation_norm": 0.153213
+        },
+        {
+          "index": 30,
+          "importance": 0.222371,
+          "raw_activation_norm": 0.203057
+        },
+        {
+          "index": 31,
+          "importance": 0.183383,
+          "raw_activation_norm": 0.167455
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,92 @@
+{
+  "timestamp": "2026-03-15T15:14:59",
+  "config": {
+    "machine": "Mac Studio (M3 Ultra)",
+    "model": "mlx-community/Qwen3.5-9B-4bit",
+    "backend": "mlx",
+    "max_output_tokens": 128,
+    "temperature": 0,
+    "samples_per_concurrency": 12,
+    "slots": 4
+  },
+  "results": [
+    {
+      "concurrency": 1,
+      "total_requests": 12,
+      "successful": 12,
+      "failed": 0,
+      "agg_tok_per_sec": 59.47,
+      "avg_latency_ms": 14027.4,
+      "p50_latency_ms": 15113.8,
+      "p95_latency_ms": 25827.8,
+      "wall_time_sec": 25.828,
+      "total_completion_tokens": 1536,
+      "success_rate": 100.0
+    },
+    {
+      "concurrency": 2,
+      "total_requests": 12,
+      "successful": 12,
+      "failed": 0,
+      "agg_tok_per_sec": 68.63,
+      "avg_latency_ms": 13036.1,
+      "p50_latency_ms": 14866.4,
+      "p95_latency_ms": 22379.3,
+      "wall_time_sec": 22.38,
+      "total_completion_tokens": 1536,
+      "success_rate": 100.0
+    },
+    {
+      "concurrency": 4,
+      "total_requests": 12,
+      "successful": 12,
+      "failed": 0,
+      "agg_tok_per_sec": 73.24,
+      "avg_latency_ms": 13978.4,
+      "p50_latency_ms": 14063.3,
+      "p95_latency_ms": 20972.7,
+      "wall_time_sec": 20.973,
+      "total_completion_tokens": 1536,
+      "success_rate": 100.0
+    },
+    {
+      "concurrency": 8,
+      "total_requests": 12,
+      "successful": 12,
+      "failed": 0,
+      "agg_tok_per_sec": 73.56,
+      "avg_latency_ms": 13927.0,
+      "p50_latency_ms": 13991.5,
+      "p95_latency_ms": 20880.0,
+      "wall_time_sec": 20.881,
+      "total_completion_tokens": 1536,
+      "success_rate": 100.0
+    },
+    {
+      "concurrency": 12,
+      "total_requests": 12,
+      "successful": 12,
+      "failed": 0,
+      "agg_tok_per_sec": 73.34,
+      "avg_latency_ms": 13942.7,
+      "p50_latency_ms": 14006.4,
+      "p95_latency_ms": 20943.9,
+      "wall_time_sec": 20.945,
+      "total_completion_tokens": 1536,
+      "success_rate": 100.0
+    },
+    {
+      "concurrency": 16,
+      "total_requests": 12,
+      "successful": 12,
+      "failed": 0,
+      "agg_tok_per_sec": 73.7,
+      "avg_latency_ms": 13890.5,
+      "p50_latency_ms": 13941.0,
+      "p95_latency_ms": 20839.6,
+      "wall_time_sec": 20.84,
+      "total_completion_tokens": 1536,
+      "success_rate": 100.0
+    }
+  ]
+}

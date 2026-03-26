@@ -9,10 +9,12 @@ final class MLXEngine: InferenceEngine, @unchecked Sendable {
     private let memoryMonitor: MemoryMonitor
     let modelDescription: String
     private let initialSlotCount: Int
+    let layerSkipConfig: LayerSkipConfig?
 
     var slotCount: Int { scheduler.currentSlotCount }
 
-    init(modelId: String, slotCount: Int = 4, maxMemoryGB: Double? = nil, maxContext: Int? = nil) async throws {
+    init(modelId: String, slotCount: Int = 4, maxMemoryGB: Double? = nil, maxContext: Int? = nil,
+         layerSkipConfig: LayerSkipConfig? = nil) async throws {
         self.initialSlotCount = slotCount
 
         let configuration = ModelConfiguration(id: modelId)
@@ -37,6 +39,12 @@ final class MLXEngine: InferenceEngine, @unchecked Sendable {
         }
         if let ctx = maxContext {
             print("[MLX] Max KV context: \(ctx)")
+        }
+
+        // Apply layer skipping before creating scheduler
+        self.layerSkipConfig = layerSkipConfig
+        if let config = layerSkipConfig {
+            await config.apply(to: modelContainer)
         }
 
         self.modelDescription = "MLX \(modelId)"
@@ -104,6 +112,14 @@ final class MLXEngine: InferenceEngine, @unchecked Sendable {
 
     func slotSummary() -> [(index: Int, state: String, priority: String, pos: Int32)] {
         scheduler.slotSummary()
+    }
+
+    func collectGenome(config: GenomeConfig) async throws {
+        try await GenomeCollector.collect(
+            from: modelContainer,
+            modelName: modelDescription,
+            config: config
+        )
     }
 
     func memoryInfo() -> EngineMemoryInfo? {

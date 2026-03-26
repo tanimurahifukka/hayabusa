@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
-"""Hayabusa Cluster Benchmark: Single vs Cluster mode.
+"""Hayabusa Cluster Benchmark: Single Node vs 2-Node Cluster.
 
-Tests whether cluster mode (2 nodes on same machine) improves throughput
-compared to a single node.
+Compares throughput of a single Mac Studio vs Mac Studio + Mac mini cluster.
 
 Usage:
     python scripts/bench_cluster.py
@@ -28,23 +27,19 @@ import aiohttp
 HAYABUSA_BIN = Path("/Users/tanimura/Desktop/Lang/hayabusa/.build/debug/Hayabusa")
 MODEL = "/Users/tanimura/Desktop/Lang/hayabusa/models/Qwen3.5-9B-Q4_K_M.gguf"
 
-SINGLE_PORT = 8090
-CLUSTER_PORT_1 = 8091
-CLUSTER_PORT_2 = 8092
+MAC_MINI = "192.168.11.49:8080"
+LOCAL_PORT = 8080
 
 MAX_TOKENS = 128
 TEMPERATURE = 0.0
 
-CONCURRENCIES = [1, 2, 4, 8]
-SAMPLES_PER_CONC = 10
+CONCURRENCIES = [1, 2, 4, 8, 16, 24, 32, 40]
+SAMPLES_PER_CONC = 12
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 OUTPUT_PATH = SCRIPT_DIR / "bench_cluster.json"
 
-# Single mode: all slots on one server
-SINGLE_SLOTS = 8
-# Cluster mode: split across two servers
-CLUSTER_SLOTS_EACH = 4
+SLOTS = 4
 
 # ── Prompt ──────────────────────────────────────────────────────────
 
@@ -80,7 +75,6 @@ class BenchResult:
     total_prompt_tokens: int = 0
     total_completion_tokens: int = 0
     wall_time_sec: float = 0.0
-    memory_rss_mb: float = 0.0
 
     @property
     def p50(self) -> float:
@@ -112,32 +106,16 @@ def _pct(data: list[float], pct: int) -> float:
 
 # ── Server management ──────────────────────────────────────────────
 
-def get_rss_mb(pid: int) -> float:
-    try:
-        out = subprocess.check_output(
-            ["ps", "-o", "rss=", "-p", str(pid)],
-            text=True, timeout=5
-        ).strip()
-        return int(out) / 1024.0 if out else 0.0
-    except Exception:
-        return 0.0
-
-
-def start_server(
-    model: str, port: int, slots: int,
-    cluster: bool = False, backend: str = "llama"
-) -> subprocess.Popen:
+def start_server(port: int, slots: int, peers: str | None = None) -> subprocess.Popen:
     env = os.environ.copy()
     env["HAYABUSA_PORT"] = str(port)
-    cmd = [str(HAYABUSA_BIN), model, "--backend", backend, "--slots", str(slots)]
-    if backend == "llama":
-        cmd += ["--ctx-per-slot", "4096"]
-    if cluster:
-        cmd.append("--cluster")
+    cmd = [str(HAYABUSA_BIN), MODEL, "--backend", "llama",
+           "--slots", str(slots), "--ctx-per-slot", "4096"]
+    if peers:
+        cmd += ["--peers", peers]
     proc = subprocess.Popen(
         cmd, env=env,
-        stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-        text=True
+        stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True
     )
     return proc
 
@@ -208,7 +186,7 @@ async def call_api(
 # ── Benchmark runner ───────────────────────────────────────────────
 
 async def run_bench(
-    port: int, pids: list[int], target_name: str,
+    port: int, target_name: str,
     concurrency: int, num_samples: int,
 ) -> BenchResult:
     url = f"http://localhost:{port}/v1/chat/completions"
@@ -223,40 +201,25 @@ async def run_bench(
     async with aiohttp.ClientSession() as session:
         sys.stderr.write(f"  [{target_name}] warmup... ")
         sys.stderr.flush()
-        warm_payload = {
-            "model": "local",
-            "messages": [{"role": "user", "content": "Say hi."}],
-            "max_tokens": 8,
-            "temperature": 0,
-        }
+        warm = {"model": "local", "messages": [{"role": "user", "content": "Say hi."}],
+                "max_tokens": 8, "temperature": 0}
         try:
-            async with session.post(
-                url, json=warm_payload,
-                timeout=aiohttp.ClientTimeout(total=120),
-            ) as resp:
+            async with session.post(url, json=warm,
+                                    timeout=aiohttp.ClientTimeout(total=120)) as resp:
                 await resp.read()
         except Exception:
             pass
         sys.stderr.write("done\n")
-
-    # Measure memory
-    total_mem = sum(get_rss_mb(pid) for pid in pids)
 
     # Run
     async with aiohttp.ClientSession() as session:
         sys.stderr.write(f"  [{target_name}] conc={concurrency}, {num_samples} reqs... ")
         sys.stderr.flush()
 
-        requests = [messages] * num_samples
-
         t0 = time.perf_counter()
-        tasks = [call_api(session, url, msgs, semaphore) for msgs in requests]
+        tasks = [call_api(session, url, messages, semaphore) for _ in range(num_samples)]
         results = await asyncio.gather(*tasks)
         wall_time = time.perf_counter() - t0
-
-    # Memory after
-    total_mem_after = sum(get_rss_mb(pid) for pid in pids)
-    peak_mem = max(total_mem, total_mem_after)
 
     bench = BenchResult(
         target=target_name, concurrency=concurrency,
@@ -264,7 +227,6 @@ async def run_bench(
         successful=sum(1 for r in results if r.success),
         failed=sum(1 for r in results if not r.success),
         wall_time_sec=wall_time,
-        memory_rss_mb=peak_mem,
     )
     for r in results:
         if r.success:
@@ -280,8 +242,7 @@ async def run_bench(
     sys.stderr.write(
         f"tok/s={bench.agg_tok_per_sec:.1f}  "
         f"avg={bench.avg_latency:.0f}ms  "
-        f"p95={bench.p95:.0f}ms  "
-        f"mem={peak_mem:.0f}MB\n"
+        f"p95={bench.p95:.0f}ms\n"
     )
     return bench
 
@@ -293,18 +254,22 @@ def print_table(
     cluster_results: dict[int, BenchResult],
 ):
     print()
-    print("=" * 100)
-    print("  Hayabusa Cluster Benchmark — Single Node vs 2-Node Cluster")
-    print(f"  Model: Qwen3.5-9B-Q4_K_M | Output={MAX_TOKENS} tok | Samples={SAMPLES_PER_CONC}/conc")
-    print(f"  Single: {SINGLE_SLOTS} slots | Cluster: 2x{CLUSTER_SLOTS_EACH} slots")
-    print("=" * 100)
+    print("=" * 95)
+    print("  Hayabusa Cluster Benchmark")
+    print(f"  Single: Mac Studio (llama, {SLOTS} slots)")
+    print(f"  Cluster: Mac Studio (llama) + Mac mini (MLX) via --peers")
+    print(f"  Output={MAX_TOKENS} tok | Samples={SAMPLES_PER_CONC}/conc")
+    print("=" * 95)
 
     print()
-    print("  ┌──────┬───────────────────────────────────────┬───────────────────────────────────────┬────────┐")
-    print("  │      │          Single ({} slots)             │       Cluster (2x{} slots)            │        │".format(SINGLE_SLOTS, CLUSTER_SLOTS_EACH))
-    print("  │ Conc ├──────────┬──────────┬────────┬────────┼──────────┬──────────┬────────┬────────┤  倍率  │")
-    print("  │      │ tok/s    │ Avg (ms) │P95 (ms)│Mem(MB) │ tok/s    │ Avg (ms) │P95 (ms)│Mem(MB) │        │")
-    print("  ├──────┼──────────┼──────────┼────────┼────────┼──────────┼──────────┼────────┼────────┼────────┤")
+    hdr = (
+        "  ┌──────┬──────────────────────────────────┬──────────────────────────────────┬────────┐\n"
+        "  │      │        Single (Mac Studio)       │     Cluster (Studio + mini)      │        │\n"
+        "  │ Conc ├──────────┬──────────┬─────────────┼──────────┬──────────┬────────────┤  倍率  │\n"
+        "  │      │ tok/s    │ Avg (ms) │  P95 (ms)   │ tok/s    │ Avg (ms) │ P95 (ms)   │        │\n"
+        "  ├──────┼──────────┼──────────┼─────────────┼──────────┼──────────┼────────────┼────────┤"
+    )
+    print(hdr)
 
     for c in CONCURRENCIES:
         s = single_results.get(c)
@@ -313,11 +278,11 @@ def print_table(
             continue
         ratio = cl.agg_tok_per_sec / s.agg_tok_per_sec if s.agg_tok_per_sec > 0 else 0
         print(
-            f"  │ {c:>4} │ {s.agg_tok_per_sec:>8.1f} │ {s.avg_latency:>8.0f} │{s.p95:>7.0f} │{s.memory_rss_mb:>7.0f} │"
-            f" {cl.agg_tok_per_sec:>8.1f} │ {cl.avg_latency:>8.0f} │{cl.p95:>7.0f} │{cl.memory_rss_mb:>7.0f} │ {ratio:>5.2f}x │"
+            f"  │ {c:>4} │ {s.agg_tok_per_sec:>8.1f} │ {s.avg_latency:>8.0f} │ {s.p95:>11.0f} │"
+            f" {cl.agg_tok_per_sec:>8.1f} │ {cl.avg_latency:>8.0f} │ {cl.p95:>10.0f} │ {ratio:>5.2f}x │"
         )
 
-    print("  └──────┴──────────┴──────────┴────────┴────────┴──────────┴──────────┴────────┴────────┴────────┘")
+    print("  └──────┴──────────┴──────────┴─────────────┴──────────┴──────────┴────────────┴────────┘")
     print()
 
 
@@ -335,27 +300,20 @@ def save_results(
         rows.append({
             "concurrency": c,
             "single": {
-                "slots": SINGLE_SLOTS,
                 "agg_tok_per_sec": round(s.agg_tok_per_sec, 2),
                 "avg_latency_ms": round(s.avg_latency, 1),
                 "p50_latency_ms": round(s.p50, 1),
                 "p95_latency_ms": round(s.p95, 1),
-                "memory_rss_mb": round(s.memory_rss_mb, 0),
-                "successful": s.successful,
-                "failed": s.failed,
+                "successful": s.successful, "failed": s.failed,
                 "wall_time_sec": round(s.wall_time_sec, 3),
                 "total_completion_tokens": s.total_completion_tokens,
             },
             "cluster": {
-                "nodes": 2,
-                "slots_each": CLUSTER_SLOTS_EACH,
                 "agg_tok_per_sec": round(cl.agg_tok_per_sec, 2),
                 "avg_latency_ms": round(cl.avg_latency, 1),
                 "p50_latency_ms": round(cl.p50, 1),
                 "p95_latency_ms": round(cl.p95, 1),
-                "memory_rss_mb": round(cl.memory_rss_mb, 0),
-                "successful": cl.successful,
-                "failed": cl.failed,
+                "successful": cl.successful, "failed": cl.failed,
                 "wall_time_sec": round(cl.wall_time_sec, 3),
                 "total_completion_tokens": cl.total_completion_tokens,
             },
@@ -366,13 +324,13 @@ def save_results(
         "timestamp": time.strftime("%Y-%m-%dT%H:%M:%S"),
         "config": {
             "model": MODEL,
-            "backend": "llama",
+            "single_backend": "llama",
+            "cluster": "Mac Studio (llama) + Mac mini (MLX)",
             "max_output_tokens": MAX_TOKENS,
             "temperature": TEMPERATURE,
             "samples_per_concurrency": SAMPLES_PER_CONC,
             "concurrency_levels": CONCURRENCIES,
-            "single_slots": SINGLE_SLOTS,
-            "cluster_slots_each": CLUSTER_SLOTS_EACH,
+            "slots": SLOTS,
         },
         "results": rows,
     }
@@ -388,114 +346,91 @@ async def main():
     print()
     print("=" * 70)
     print("  Hayabusa Cluster Benchmark")
-    print(f"  Model: {Path(MODEL).name}")
-    print(f"  Single: {SINGLE_SLOTS} slots on port {SINGLE_PORT}")
-    print(f"  Cluster: 2x{CLUSTER_SLOTS_EACH} slots on ports {CLUSTER_PORT_1},{CLUSTER_PORT_2}")
+    print(f"  Single: Mac Studio llama ({SLOTS} slots)")
+    print(f"  Cluster: Mac Studio + Mac mini ({MAC_MINI})")
     print(f"  Output={MAX_TOKENS}tok  Samples={SAMPLES_PER_CONC}/conc")
     print(f"  Concurrency: {CONCURRENCIES}")
     print("=" * 70)
-    print()
+
+    # ── Verify Mac mini is alive ──
+    print("\n  Checking Mac mini...")
+    try:
+        async with aiohttp.ClientSession() as s:
+            async with s.get(f"http://{MAC_MINI}/health",
+                             timeout=aiohttp.ClientTimeout(total=5)) as resp:
+                if resp.status != 200:
+                    print(f"  ERROR: Mac mini unhealthy (status={resp.status})")
+                    sys.exit(1)
+    except Exception as e:
+        print(f"  ERROR: Cannot reach Mac mini at {MAC_MINI}: {e}")
+        sys.exit(1)
+    print(f"  Mac mini ({MAC_MINI}) is healthy.\n")
 
     # ════════════════════════════════════════════════════════════════
-    # Phase 1: Single node benchmark
+    # Phase 1: Single node
     # ════════════════════════════════════════════════════════════════
     print("━" * 50)
-    print("  Phase 1: Single Node")
+    print("  Phase 1: Single Node (Mac Studio only)")
     print("━" * 50)
 
-    print(f"  Starting single server on port {SINGLE_PORT} ({SINGLE_SLOTS} slots)...")
-    single_proc = start_server(MODEL, SINGLE_PORT, SINGLE_SLOTS, cluster=False)
-    print(f"  PID={single_proc.pid}, waiting for ready...")
+    single_proc = start_server(LOCAL_PORT, SLOTS)
+    print(f"  PID={single_proc.pid}, waiting...")
 
-    if not await wait_for_server(SINGLE_PORT):
-        print("ERROR: Single server failed to start")
+    if not await wait_for_server(LOCAL_PORT):
+        print("ERROR: Server failed to start")
         kill_server(single_proc)
         sys.exit(1)
-    print("  Single server ready.\n")
+    print("  Ready.\n")
 
     single_results: dict[int, BenchResult] = {}
     try:
         for conc in CONCURRENCIES:
-            print(f"  ── Concurrency {conc} ──")
-            r = await run_bench(
-                SINGLE_PORT, [single_proc.pid], "Single",
-                conc, SAMPLES_PER_CONC
-            )
+            r = await run_bench(LOCAL_PORT, "Single", conc, SAMPLES_PER_CONC)
             single_results[conc] = r
     finally:
-        print("  Shutting down single server...")
         kill_server(single_proc)
-        # Wait for port to free up
         await asyncio.sleep(3)
 
     # ════════════════════════════════════════════════════════════════
-    # Phase 2: Cluster mode benchmark
+    # Phase 2: Cluster (Mac Studio + Mac mini)
     # ════════════════════════════════════════════════════════════════
     print()
     print("━" * 50)
-    print("  Phase 2: Cluster Mode (2 nodes)")
+    print("  Phase 2: Cluster (Mac Studio + Mac mini)")
     print("━" * 50)
 
-    print(f"  Starting cluster node 1 on port {CLUSTER_PORT_1} ({CLUSTER_SLOTS_EACH} slots)...")
-    cluster_proc_1 = start_server(MODEL, CLUSTER_PORT_1, CLUSTER_SLOTS_EACH, cluster=True)
-    print(f"  Node 1 PID={cluster_proc_1.pid}, waiting for ready...")
+    cluster_proc = start_server(LOCAL_PORT, SLOTS, peers=MAC_MINI)
+    print(f"  PID={cluster_proc.pid}, waiting...")
 
-    if not await wait_for_server(CLUSTER_PORT_1):
-        print("ERROR: Cluster node 1 failed to start")
-        kill_server(cluster_proc_1)
+    if not await wait_for_server(LOCAL_PORT):
+        print("ERROR: Cluster server failed to start")
+        kill_server(cluster_proc)
         sys.exit(1)
-    print("  Cluster node 1 ready.")
 
-    print(f"  Starting cluster node 2 on port {CLUSTER_PORT_2} ({CLUSTER_SLOTS_EACH} slots)...")
-    cluster_proc_2 = start_server(MODEL, CLUSTER_PORT_2, CLUSTER_SLOTS_EACH, cluster=True)
-    print(f"  Node 2 PID={cluster_proc_2.pid}, waiting for ready...")
-
-    if not await wait_for_server(CLUSTER_PORT_2):
-        print("ERROR: Cluster node 2 failed to start")
-        kill_server(cluster_proc_1)
-        kill_server(cluster_proc_2)
-        sys.exit(1)
-    print("  Cluster node 2 ready.")
-
-    # Wait for Bonjour discovery
-    print("  Waiting for Bonjour peer discovery (5 sec)...")
+    # Wait for peer registration
     await asyncio.sleep(5)
 
-    # Check cluster status
+    # Verify cluster
     try:
-        async with aiohttp.ClientSession() as session:
-            async with session.get(
-                f"http://localhost:{CLUSTER_PORT_1}/v1/cluster/status",
-                timeout=aiohttp.ClientTimeout(total=10)
-            ) as resp:
+        async with aiohttp.ClientSession() as s:
+            async with s.get(f"http://localhost:{LOCAL_PORT}/v1/cluster/status",
+                             timeout=aiohttp.ClientTimeout(total=5)) as resp:
                 status = await resp.json()
-                peers = status.get("peers", [])
-                print(f"  Cluster status: {len(peers)} peer(s) discovered")
-                for p in peers:
-                    print(f"    - {p.get('id', '?')}: {p.get('host', '?')}:{p.get('port', '?')}")
-    except Exception as e:
-        print(f"  Warning: Could not check cluster status: {e}")
-
+                nodes = status.get("nodes", [])
+                remote = [n for n in nodes if not n.get("isLocal")]
+                print(f"  Cluster: {len(nodes)} nodes ({len(remote)} remote)")
+    except Exception:
+        pass
     print()
 
     cluster_results: dict[int, BenchResult] = {}
     try:
         for conc in CONCURRENCIES:
-            print(f"  ── Concurrency {conc} ──")
-            r = await run_bench(
-                CLUSTER_PORT_1,
-                [cluster_proc_1.pid, cluster_proc_2.pid],
-                "Cluster",
-                conc, SAMPLES_PER_CONC
-            )
+            r = await run_bench(LOCAL_PORT, "Cluster", conc, SAMPLES_PER_CONC)
             cluster_results[conc] = r
     finally:
-        print("  Shutting down cluster servers...")
-        kill_server(cluster_proc_1)
-        kill_server(cluster_proc_2)
+        kill_server(cluster_proc)
 
-    # ════════════════════════════════════════════════════════════════
-    # Results
     # ════════════════════════════════════════════════════════════════
     print_table(single_results, cluster_results)
     save_results(single_results, cluster_results)
