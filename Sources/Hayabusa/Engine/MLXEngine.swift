@@ -17,6 +17,9 @@ final class MLXEngine: InferenceEngine, @unchecked Sendable {
          layerSkipConfig: LayerSkipConfig? = nil) async throws {
         self.initialSlotCount = slotCount
 
+        // Register Gemma 4 model types (not yet in upstream mlx-swift-lm)
+        Self.registerGemma4ModelTypes()
+
         let configuration = ModelConfiguration(id: modelId)
 
         print("[MLX] Downloading/loading model: \(modelId)")
@@ -132,5 +135,27 @@ final class MLXEngine: InferenceEngine, @unchecked Sendable {
             activeSlots: info.activeSlots,
             pressure: pressure.rawValue
         )
+    }
+
+    // MARK: - Gemma 4 Model Registration
+
+    private static var gemma4Registered = false
+
+    private static func registerGemma4ModelTypes() {
+        guard !gemma4Registered else { return }
+        gemma4Registered = true
+
+        let creator: @Sendable (Data) throws -> any LanguageModel = { data in
+            let config = try JSONDecoder().decode(Gemma4TextConfiguration.self, from: data)
+            return Gemma4TextModel(config)
+        }
+
+        Task {
+            await LLMTypeRegistry.shared.registerModelType("gemma4", creator: creator)
+            await LLMTypeRegistry.shared.registerModelType("gemma4_text", creator: creator)
+        }
+        // Small delay to ensure registration completes before model load
+        Thread.sleep(forTimeInterval: 0.1)
+        print("[MLX] Registered Gemma 4 model types (gemma4, gemma4_text)")
     }
 }

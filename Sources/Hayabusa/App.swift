@@ -184,31 +184,7 @@ struct HayabusaApp {
                 layerSkipConfig = try LayerSkipConfig(threshold: threshold, task: layerSkipTask)
             }
 
-            // Auto-detect unsupported MLX models and suggest llama backend
-            let modelLower = resolvedPath.lowercased()
-            let isGemma4Model = modelLower.contains("gemma-4") || modelLower.contains("gemma4")
-            if backend == "mlx" && isGemma4Model {
-                print("")
-                print("⚠️  Gemma 4 is not yet supported on the MLX backend (mlx-swift-lm pending upstream)")
-                print("   Automatically switching to llama.cpp backend.")
-                print("")
-                print("   For best results, use a GGUF model:")
-                print("   .build/release/Hayabusa models/gemma-4-e4b-it-Q8_0.gguf")
-                print("")
-                print("   Download GGUF from HuggingFace:")
-                print("   python3 -c \"from huggingface_hub import hf_hub_download; hf_hub_download('ggml-org/gemma-4-E4B-it-GGUF', 'gemma-4-e4b-it-Q8_0.gguf', local_dir='models')\"")
-                print("")
-                // If the path looks like an MLX HuggingFace model ID (not a local file), we can't auto-switch
-                if !FileManager.default.fileExists(atPath: resolvedPath) && !resolvedPath.hasSuffix(".gguf") {
-                    print("   Error: Cannot auto-switch to llama backend with HuggingFace model ID.")
-                    print("   Please download the GGUF version and provide the local path.")
-                    Foundation.exit(1)
-                }
-            }
-
-            let effectiveBackend = (backend == "mlx" && isGemma4Model) ? "llama" : backend
-
-            switch effectiveBackend {
+            switch backend {
             case "vllm-mlx":
                 engine = try await VllmMLXBackend(
                     endpoint: vllmEndpoint ?? "http://localhost:8000"
