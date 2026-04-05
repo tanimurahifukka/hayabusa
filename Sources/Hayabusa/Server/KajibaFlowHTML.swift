@@ -206,6 +206,33 @@ svg#lines { position: absolute; top: 0; left: 0; width: 100%; height: 100%; poin
 .entry .local { color: #2ecc71; }
 .entry .escalate { color: #e74c3c; }
 
+/* ── Config Panel ── */
+#config-panel {
+  padding: 4px; font-family: -apple-system, sans-serif; font-size: 12px;
+}
+.cfg-section { margin-bottom: 16px; }
+.cfg-section h3 { font-size: 11px; color: #5dade2; margin-bottom: 8px; letter-spacing: 1px; text-transform: uppercase; }
+.cfg-table { width: 100%; border-collapse: collapse; }
+.cfg-table td { padding: 5px 8px; border-bottom: 1px solid #141418; vertical-align: middle; }
+.cfg-table .label { color: #666; width: 120px; font-size: 11px; }
+.cfg-table .val { color: #ddd; }
+.cfg-table select, .cfg-table input[type=text] {
+  background: #12121a; border: 1px solid #222; border-radius: 4px;
+  color: #ddd; padding: 4px 8px; font-size: 11px; width: 100%; outline: none;
+}
+.cfg-table select:focus, .cfg-table input[type=text]:focus { border-color: #3498db; }
+.cfg-save {
+  background: #2ecc7122; border: 1px solid #2ecc7144; border-radius: 5px;
+  color: #2ecc71; padding: 6px 16px; cursor: pointer; font-size: 11px; margin-top: 8px;
+}
+.cfg-save:hover { background: #2ecc7144; }
+.cfg-badge {
+  display: inline-block; padding: 2px 6px; border-radius: 3px;
+  font-size: 9px; margin-left: 4px;
+}
+.cfg-badge.online { background: #2ecc7122; color: #2ecc71; }
+.cfg-badge.offline { background: #e74c3c22; color: #e74c3c; }
+
 #title { position: absolute; top: 12px; left: 16px; z-index: 100; }
 #title h1 { font-size: 14px; color: #5dade2; letter-spacing: 3px; font-weight: 300; }
 #title .sub { font-size: 9px; color: #333; }
@@ -233,11 +260,13 @@ svg#lines { position: absolute; top: 0; left: 0; width: 100%; height: 100%; poin
 <div id="terminal-area">
   <div id="term-tabs">
     <div class="tab active" data-pane="chat">Chat</div>
+    <div class="tab" data-pane="config">Config</div>
     <div class="tab" data-pane="server">Server Log</div>
-    <div class="tab" data-pane="events">Events (raw)</div>
+    <div class="tab" data-pane="events">Events</div>
   </div>
   <div id="term-panes">
     <div class="term-pane active" id="pane-chat"></div>
+    <div class="term-pane" id="pane-config"><div id="config-panel"></div></div>
     <div class="term-pane" id="pane-server"></div>
     <div class="term-pane" id="pane-events"></div>
   </div>
@@ -546,11 +575,123 @@ const _origHandleEvent = function(ev) {
 };
 handleEvent = _origHandleEvent;
 
+// ── Config Panel ──
+const MODEL_OPTIONS = [
+  'Qwen3.5-9B-Q4_K_M',
+  'mlx-community/Qwen3.5-9B-MLX-4bit',
+  'gemma-4-e4b-it-Q8_0',
+  'mlx-community/gemma-4-e4b-it-4bit',
+  'kajiba-stripe-1.7b',
+  'kajiba-supabase-1.7b',
+  'kajiba-orca-0.6b',
+  'kajiba-swift-1.7b',
+  'kajiba-dawn-1.7b',
+  'kajiba-classify-0.6b',
+];
+
+const ROLES = [
+  { id: 'classify', label: 'Classify (Router)', genre: 'CLASSIFY', default: 'kajiba-classify-0.6b' },
+  { id: 'qwen',     label: 'Qwen3.5 (Generalist)', genre: 'FIX-BUG', default: 'Qwen3.5-9B-Q4_K_M' },
+  { id: 'gemma',    label: 'Gemma 4 (Generalist)', genre: 'IMPL-ALGO', default: 'gemma-4-e4b-it-Q8_0' },
+  { id: 'stripe',   label: 'Payment Specialist', genre: 'IMPL-PAYMENT', default: 'kajiba-stripe-1.7b' },
+  { id: 'supabase', label: 'DB Specialist', genre: 'IMPL-DB', default: 'kajiba-supabase-1.7b' },
+  { id: 'orca',     label: 'Clinical (LOCAL)', genre: 'O-CLINICAL', default: 'kajiba-orca-0.6b' },
+  { id: 'swift',    label: 'Swift/MLX Specialist', genre: 'IMPL-ALGO', default: 'kajiba-swift-1.7b' },
+  { id: 'dawn',     label: 'DAWN Specialist', genre: 'IMPL-API', default: 'kajiba-dawn-1.7b' },
+];
+
+function renderConfig() {
+  const panel = document.getElementById('config-panel');
+
+  // Server status
+  let serverStatus = '<span class="cfg-badge online">ONLINE</span>';
+  fetch('/health').then(r => {
+    if (!r.ok) serverStatus = '<span class="cfg-badge offline">OFFLINE</span>';
+  }).catch(() => {});
+
+  let html = `
+  <div class="cfg-section">
+    <h3>Server</h3>
+    <table class="cfg-table">
+      <tr><td class="label">Status</td><td class="val">${serverStatus}</td></tr>
+      <tr><td class="label">Endpoint</td><td class="val">${location.origin}</td></tr>
+      <tr><td class="label">SSE</td><td class="val"><span class="cfg-badge online">Connected</span></td></tr>
+    </table>
+  </div>
+
+  <div class="cfg-section">
+    <h3>Role → Model Mapping</h3>
+    <table class="cfg-table">
+      <tr><td class="label" style="color:#888;font-weight:600">Role</td><td style="color:#888;font-weight:600">Model</td></tr>`;
+
+  for (const role of ROLES) {
+    const opts = MODEL_OPTIONS.map(m =>
+      `<option value="${m}" ${m === role.default ? 'selected' : ''}>${m}</option>`
+    ).join('');
+    const genreBadge = role.genre === 'O-CLINICAL'
+      ? '<span class="cfg-badge" style="background:#e74c3c22;color:#e74c3c;">LOCAL ONLY</span>'
+      : `<span class="cfg-badge" style="background:#3498db11;color:#555;">${role.genre}</span>`;
+    html += `
+      <tr>
+        <td class="label">${role.label} ${genreBadge}</td>
+        <td><select id="cfg-${role.id}">${opts}</select></td>
+      </tr>`;
+  }
+
+  html += `
+    </table>
+    <button class="cfg-save" onclick="saveConfig()">Save Configuration</button>
+  </div>
+
+  <div class="cfg-section">
+    <h3>Memory Layout</h3>
+    <table class="cfg-table">
+      <tr><td class="label">Classify</td><td class="val">~300 MB</td></tr>
+      <tr><td class="label">Qwen3.5-9B</td><td class="val">~5,000 MB</td></tr>
+      <tr><td class="label">Gemma 4 E4B</td><td class="val">~4,400 MB</td></tr>
+      <tr><td class="label">Specialists (×5)</td><td class="val">~3,000 MB</td></tr>
+      <tr><td class="label" style="color:#5dade2;">Total</td><td class="val" style="color:#5dade2;">~12,700 MB / 96 GB</td></tr>
+    </table>
+  </div>
+
+  <div class="cfg-section">
+    <h3>Quick Actions</h3>
+    <table class="cfg-table">
+      <tr><td><button class="cfg-save" onclick="termWrite('chat','Running benchmark...','info-line')">Run Arena Bench</button></td>
+          <td><button class="cfg-save" onclick="location.reload()">Reload UI</button></td></tr>
+    </table>
+  </div>`;
+
+  panel.innerHTML = html;
+}
+
+function saveConfig() {
+  const cfg = {};
+  for (const role of ROLES) {
+    const sel = document.getElementById(`cfg-${role.id}`);
+    if (sel) cfg[role.id] = { model: sel.value, genre: role.genre };
+  }
+  // ローカルストレージに保存（サーバー再起動時に反映）
+  localStorage.setItem('kajiba_config', JSON.stringify(cfg));
+  termWrite('chat', 'Configuration saved (applies on next server restart)', 'info-line');
+
+  // ノード名を更新
+  for (const role of ROLES) {
+    const el = nodeEls[role.id];
+    if (el) {
+      const detail = el.querySelector('.detail');
+      const sel = document.getElementById(`cfg-${role.id}`);
+      if (detail && sel) detail.textContent = sel.value.split('/').pop();
+    }
+  }
+}
+
 // ── Init ──
 window.addEventListener('load', () => {
   render();
   updateStats();
   connectSSE();
+  renderConfig();
   document.getElementById('prompt-input').focus();
   termWrite('chat', 'KAJIBA Terminal — Type a prompt and press Enter', 'info-line');
   termWrite('server', 'Waiting for server events...', 'info-line');
