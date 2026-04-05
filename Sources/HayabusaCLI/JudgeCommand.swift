@@ -85,15 +85,28 @@ struct JudgeCommand {
     static func parseJudgeResponse(_ raw: String, task: String) -> [String: Any] {
         let trimmed = raw.trimmingCharacters(in: .whitespacesAndNewlines)
 
-        // JSON抽出
-        if let range = trimmed.range(of: "\\{[^}]+\\}", options: .regularExpression),
-           let data = String(trimmed[range]).data(using: .utf8),
+        // まず全体をJSONとしてパース（ネストされたオブジェクトに対応）
+        if let data = trimmed.data(using: .utf8),
            let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
             var result = json
             if result["genre"] == nil {
                 result["genre"] = task.isEmpty ? "UNKNOWN" : task
             }
             return result
+        }
+
+        // 最初の{から最後の}までを抽出してパース
+        if let start = trimmed.firstIndex(of: "{"),
+           let end = trimmed.lastIndex(of: "}") {
+            let jsonStr = String(trimmed[start...end])
+            if let data = jsonStr.data(using: .utf8),
+               let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
+                var result = json
+                if result["genre"] == nil {
+                    result["genre"] = task.isEmpty ? "UNKNOWN" : task
+                }
+                return result
+            }
         }
 
         // パース失敗
