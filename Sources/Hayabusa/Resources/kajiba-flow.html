@@ -498,11 +498,12 @@ function log(msg, type) {
 }
 
 function updateStats() {
-  document.getElementById('s-req').textContent = stats.requests;
-  document.getElementById('s-local').textContent = stats.local;
-  document.getElementById('s-esc').textContent = stats.escalated;
-  document.getElementById('s-tok').textContent = stats.tokensSaved.toLocaleString();
-  document.getElementById('s-cost').textContent = `$${stats.costSaved.toFixed(4)}`;
+  const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+  set('s-req', stats.requests);
+  set('s-local', stats.local);
+  set('s-esc', stats.escalated);
+  set('s-tok', stats.tokensSaved.toLocaleString());
+  set('s-cost', `$${stats.costSaved.toFixed(4)}`);
 }
 
 // ── SSE: リアルタイムイベント受信 ──
@@ -527,6 +528,7 @@ function handleEvent(ev) {
     stats.local++;
     const p = (ev.prompt || '').substring(0, 45);
     log(`→ ${p}...`, 'route');
+    termWrite('server', `[REQ] ${p}`, 'prompt-line');
 
     // 心拍開始: 経路上の全ノード
     setProcessing('claude', true);
@@ -550,6 +552,7 @@ function handleEvent(ev) {
     stats.tokensSaved += tok;
     stats.costSaved += tok * 0.000075;
     log(`✓ ${tok} tok`, 'local');
+    termWrite('server', `[RES] ${tok} tokens`, 'response-line');
 
     // 結果返却パルス
     pulse('qwen', 'classify', '#2ecc71', 300);
@@ -565,6 +568,9 @@ function handleEvent(ev) {
       }, 1000);
     }
   }
+
+  // ターミナルにraw表示
+  termWrite('events', JSON.stringify(ev), ev.type === 'request' ? 'route' : 'local');
   updateStats();
 }
 
@@ -574,8 +580,9 @@ function connectSSE() {
   es.onmessage = (e) => {
     try {
       const ev = JSON.parse(e.data);
+      console.log('[SSE]', ev.type, ev);
       handleEvent(ev);
-    } catch {}
+    } catch (err) { console.error('[SSE parse error]', err, e.data); }
   };
 
   es.onerror = () => {
@@ -657,22 +664,7 @@ document.getElementById('prompt-input').addEventListener('keydown', (e) => {
   if (e.key === 'Enter') sendPrompt();
 });
 
-// SSEイベントをターミナルにも表示
-const origHandleEvent = handleEvent;
-const origHandle = handleEvent;
-const _origHandleEvent = function(ev) {
-  origHandle(ev);
-  // Events pane に raw JSON
-  termWrite('events', JSON.stringify(ev), ev.type === 'request' ? 'route' : 'local');
-  // Server log
-  if (ev.type === 'request') {
-    termWrite('server', `[REQ] ${ev.prompt || ''}`, 'prompt-line');
-  }
-  if (ev.type === 'completion') {
-    termWrite('server', `[RES] ${ev.total_tokens || 0} tokens (${((ev.timestamp || 0) * 1000 % 100000).toFixed(0)}ms)`, 'response-line');
-  }
-};
-handleEvent = _origHandleEvent;
+// ターミナル表示は handleEvent 内に統合済み（上書きパターン廃止）
 
 // ── Config Panel ──
 const MODEL_OPTIONS = [
