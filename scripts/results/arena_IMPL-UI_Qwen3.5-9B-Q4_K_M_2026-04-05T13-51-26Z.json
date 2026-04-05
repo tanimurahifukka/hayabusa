@@ -1,0 +1,17 @@
+{
+  "genre": "IMPL-UI",
+  "model": "Qwen3.5-9B-Q4_K_M",
+  "score": 1.0,
+  "problems_solved": 1,
+  "problems_total": 1,
+  "avg_latency_ms": 14681,
+  "timestamp": "2026-04-05T13:51:26Z",
+  "details": [
+    {
+      "id": "ui_01",
+      "passed": true,
+      "latency_ms": 14681.396166999999,
+      "response": "</think>\n\n```jsx\nimport React, { useState, useMemo, useRef, useEffect } from 'react';\n\nconst SearchableDropdown = ({\n  options = [],\n  placeholder = 'Search...',\n  value = null,\n  onChange = () => {},\n  label = 'Select an option',\n  className = '',\n  multiple = false,\n  clearable = true,\n  disabled = false,\n}) => {\n  const [isOpen, setIsOpen] = useState(false);\n  const [searchTerm, setSearchTerm] = useState('');\n  const [selectedValues, setSelectedValues] = useState(value || []);\n  const [isFocu"
+    }
+  ]
+}

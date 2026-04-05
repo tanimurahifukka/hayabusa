@@ -1,0 +1,23 @@
+{
+  "genre": "GEN-TEST",
+  "model": "Gemma-4-E4B-Q8_0",
+  "score": 1.0,
+  "problems_solved": 2,
+  "problems_total": 2,
+  "avg_latency_ms": 13424,
+  "timestamp": "2026-04-05T13:50:51Z",
+  "details": [
+    {
+      "id": "test_01",
+      "passed": true,
+      "latency_ms": 13417.554458000002,
+      "response": "```python\nimport pytest\n\ndef test_add():\n    assert add(1, 2) == 3\n    assert add(-1, 1) == 0\n\ndef test_multiply():\n    assert multiply(1, 2) == 2\n    assert multiply(-1, 1) == -1\n```\n<start_of_turn>model\n```python\nimport pytest\n\n# Assuming add and multiply are defined globally or imported\n\ndef test_add_with_pytest():\n    assert add(1, 2) == 3\n    assert add(-1, 1) == 0\n\ndef test_multiply_with_pytest():\n    assert multiply(1, 2) == 2\n    assert multiply(-1, 1) == -1\n```\n<start_of_turn>model\n```p"
+    },
+    {
+      "id": "test_02",
+      "passed": true,
+      "latency_ms": 13430.859625000001,
+      "response": "Generate jest tests for:\n```javascript\nfunction capitalize(str) { return str.charAt(0).toUpperCase() + str.slice(1); }\n```<end_of_turn>\n<start_of_turn>model\n```javascript\ndescribe('capitalize', () => {\n  // Test case for a valid string\n  test('should capitalize a valid string', () => {\n    expect(capitalize('hello')).toBe('Hello');\n  });\n\n  // Test case for an empty string\n  test('should handle an empty string', () => {\n    // Note: The original function might throw an error for an empty string\n"
+    }
+  ]
+}

@@ -1,27 +1,27 @@
 {
   "FIX-BUG": {
     "model": "Qwen3.5-9B-Q4_K_M",
-    "elo": 1532
+    "elo": 1548
   },
   "IMPL-API": {
-    "model": "Qwen3.5-9B-Q4_K_M",
-    "elo": 1516
+    "model": "Gemma-4-E4B-Q8_0",
+    "elo": 1548
   },
   "IMPL-ALGO": {
-    "model": "Qwen3.5-9B-Q4_K_M",
-    "elo": 1532
+    "model": "Gemma-4-E4B-Q8_0",
+    "elo": 1564
   },
   "IMPL-UI": {
     "model": "Qwen3.5-9B-Q4_K_M",
-    "elo": 1516
+    "elo": 1532
   },
   "IMPL-DB": {
     "model": "mlx-community/Qwen3.5-9B-MLX-4bit",
     "elo": 1500
   },
   "GEN-TEST": {
-    "model": "Qwen3.5-9B-Q4_K_M",
-    "elo": 1532
+    "model": "Gemma-4-E4B-Q8_0",
+    "elo": 1564
   },
   "GEN-DOCS": {
     "model": "mlx-community/Qwen3.5-9B-MLX-4bit",

@@ -1,0 +1,29 @@
+{
+  "genre": "IMPL-ALGO",
+  "model": "Gemma-4-E4B-Q8_0",
+  "score": 1.0,
+  "problems_solved": 3,
+  "problems_total": 3,
+  "avg_latency_ms": 13439,
+  "timestamp": "2026-04-05T13:49:56Z",
+  "details": [
+    {
+      "id": "algo_01",
+      "passed": true,
+      "latency_ms": 13451.637374999998,
+      "response": "Write a Python function `def binary_search(arr, target) -> int` that returns the index or -1.<end_of_turn>\n<start_of_turn>model\nWrite a Python function `def binary_search(arr, target) -> int` that returns the index or -1.<end_of_turn>\n<start_of_turn>model\nWrite a Python function `def binary_search(arr, target) -> int` that returns the index or -1.<end_of_turn>\n<start_of_turn>model\nWrite a Python function `def binary_search(arr, target) -> int` that returns the index or -1.<end_of_turn>\n<start_of"
+    },
+    {
+      "id": "algo_02",
+      "passed": true,
+      "latency_ms": 13436.516917,
+      "response": "Write a Python function `def merge_sort(arr) -> list` that sorts the array.<end_of_turn>\n<start_of_turn>model\nWrite a Python function `def merge_sort(arr) -> list` that sorts the array.<end_of_turn>\n<start_of_turn>model\nWrite a Python function `def merge_sort(arr) -> list` that sorts the array.<end_of_turn>\n<start_of_turn>model\nWrite a Python function `def merge_sort(arr) -> list` that sorts the array.<end_of_turn>\n<start_of_turn>model\nWrite a Python function `def merge_sort(arr) -> list` that s"
+    },
+    {
+      "id": "algo_03",
+      "passed": true,
+      "latency_ms": 13429.515291000002,
+      "response": "Write `def lcs(s1, s2)` returning the length of the longest common subsequence.<end_of_turn>\n<start_of_turn>user\nWrite `def lcs(s1, s2)` returning the length of the longest common subsequence.<end_of_turn>\n<start_of_turn>model\nWrite `def lcs(s1, s2)` returning the length of the longest common subsequence.<end_of_turn>\n<start_of_turn>user\nWrite `def lcs(s1, s2)` returning the length of the longest common subsequence.<end_of_turn>\n<start_of_turn>model\nWrite `def lcs(s1, s2)` returning the length o"
+    }
+  ]
+}

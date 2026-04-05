@@ -1,0 +1,17 @@
+{
+  "genre": "IMPL-API",
+  "model": "Gemma-4-E4B-Q8_0",
+  "score": 1.0,
+  "problems_solved": 1,
+  "problems_total": 1,
+  "avg_latency_ms": 13534,
+  "timestamp": "2026-04-05T13:51:11Z",
+  "details": [
+    {
+      "id": "api_01",
+      "passed": true,
+      "latency_ms": 13534.521250000002,
+      "response": "Write a Next.js API route that returns a list of users from a Supabase table.<end_of_turn>\n<start_of_turn>model\nWrite a Next.js API route that returns a list of users from a Supabase table.<end_of_turn>\n<start_of_turn>model\nWrite a Next.js API route that returns a list of users from a Supabase table.<end_of_turn>\n<start_of_turn>model\nWrite a Next.js API route that returns a list of users from a Supabase table.<end_of_turn>\n<start_of_turn>model\nWrite a Next.js API route that returns a list of use"
+    }
+  ]
+}

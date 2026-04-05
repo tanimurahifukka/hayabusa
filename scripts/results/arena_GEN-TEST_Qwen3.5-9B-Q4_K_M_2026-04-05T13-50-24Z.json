@@ -1,0 +1,23 @@
+{
+  "genre": "GEN-TEST",
+  "model": "Qwen3.5-9B-Q4_K_M",
+  "score": 1.0,
+  "problems_solved": 2,
+  "problems_total": 2,
+  "avg_latency_ms": 13777,
+  "timestamp": "2026-04-05T13:50:24Z",
+  "details": [
+    {
+      "id": "test_01",
+      "passed": true,
+      "latency_ms": 14694.256625,
+      "response": "</think>\n\nHere are comprehensive pytest test cases for the `add` and `multiply` functions, covering various scenarios including edge cases, type checking, and error handling.\n\n```python\nimport pytest\n\n\nclass TestAdd:\n    \"\"\"Test cases for the add function.\"\"\"\n\n    def test_add_positive_integers(self):\n        \"\"\"Test adding two positive integers.\"\"\"\n        assert add(2, 3) == 5\n\n    def test_add_negative_integers(self):\n        \"\"\"Test adding two negative integers.\"\"\"\n        assert add(-2, -3)"
+    },
+    {
+      "id": "test_02",
+      "passed": true,
+      "latency_ms": 12861.067458000001,
+      "response": "</think>\n\nHere are comprehensive Jest test cases for the `capitalize` function.\n\n```javascript\n// capitalize.test.js\n\nconst capitalize = (str) => str.charAt(0).toUpperCase() + str.slice(1);\n\ndescribe('capitalize', () => {\n  describe('Basic functionality', () => {\n    test('should capitalize the first letter of a string', () => {\n      expect(capitalize('hello')).toBe('Hello');\n    });\n\n    test('should handle uppercase first letter correctly', () => {\n      expect(capitalize('hElLo')).toBe('HElL"
+    }
+  ]
+}

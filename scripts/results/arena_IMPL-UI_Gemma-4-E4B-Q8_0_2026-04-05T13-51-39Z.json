@@ -1,0 +1,17 @@
+{
+  "genre": "IMPL-UI",
+  "model": "Gemma-4-E4B-Q8_0",
+  "score": 0.0,
+  "problems_solved": 0,
+  "problems_total": 1,
+  "avg_latency_ms": 13445,
+  "timestamp": "2026-04-05T13:51:39Z",
+  "details": [
+    {
+      "id": "ui_01",
+      "passed": false,
+      "latency_ms": 13445.33625,
+      "response": "Write a React component that renders a searchable dropdown list.<end_of_turn>\n<start_of_turn>model\nWrite a React component that renders a searchable dropdown list.<end_of_turn>\n<start_of_turn>model\nWrite a React component that renders a searchable dropdown list.<end_of_turn>\n<start_of_turn>model\nWrite a React component that renders a searchable dropdown list.<end_of_turn>\n<start_of_turn>model\nWrite a React component that renders a searchable dropdown list.<end_of_turn>\n<start_of_turn>model\nWrite"
+    }
+  ]
+}

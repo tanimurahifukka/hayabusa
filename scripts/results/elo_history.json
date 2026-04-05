@@ -150,5 +150,85 @@
     "elo": 1532,
     "is_champion": true,
     "timestamp": "2026-04-05T11:54:16Z"
+  },
+  {
+    "genre": "FIX-BUG",
+    "model": "Qwen3.5-9B-Q4_K_M",
+    "score": 1.0,
+    "elo": 1548,
+    "is_champion": true,
+    "timestamp": "2026-04-05T13:48:27Z"
+  },
+  {
+    "genre": "FIX-BUG",
+    "model": "Gemma-4-E4B-Q8_0",
+    "score": 0.2,
+    "elo": 1538,
+    "is_champion": false,
+    "timestamp": "2026-04-05T13:49:09Z"
+  },
+  {
+    "genre": "IMPL-ALGO",
+    "model": "Qwen3.5-9B-Q4_K_M",
+    "score": 1.0,
+    "elo": 1548,
+    "is_champion": true,
+    "timestamp": "2026-04-05T13:49:15Z"
+  },
+  {
+    "genre": "IMPL-ALGO",
+    "model": "Gemma-4-E4B-Q8_0",
+    "score": 1.0,
+    "elo": 1564,
+    "is_champion": true,
+    "timestamp": "2026-04-05T13:49:56Z"
+  },
+  {
+    "genre": "GEN-TEST",
+    "model": "Qwen3.5-9B-Q4_K_M",
+    "score": 1.0,
+    "elo": 1548,
+    "is_champion": true,
+    "timestamp": "2026-04-05T13:50:24Z"
+  },
+  {
+    "genre": "GEN-TEST",
+    "model": "Gemma-4-E4B-Q8_0",
+    "score": 1.0,
+    "elo": 1564,
+    "is_champion": true,
+    "timestamp": "2026-04-05T13:50:51Z"
+  },
+  {
+    "genre": "IMPL-API",
+    "model": "Qwen3.5-9B-Q4_K_M",
+    "score": 1.0,
+    "elo": 1532,
+    "is_champion": true,
+    "timestamp": "2026-04-05T13:50:57Z"
+  },
+  {
+    "genre": "IMPL-API",
+    "model": "Gemma-4-E4B-Q8_0",
+    "score": 1.0,
+    "elo": 1548,
+    "is_champion": true,
+    "timestamp": "2026-04-05T13:51:11Z"
+  },
+  {
+    "genre": "IMPL-UI",
+    "model": "Qwen3.5-9B-Q4_K_M",
+    "score": 1.0,
+    "elo": 1532,
+    "is_champion": true,
+    "timestamp": "2026-04-05T13:51:26Z"
+  },
+  {
+    "genre": "IMPL-UI",
+    "model": "Gemma-4-E4B-Q8_0",
+    "score": 0.0,
+    "elo": 1516,
+    "is_champion": false,
+    "timestamp": "2026-04-05T13:51:39Z"
   }
 ]

@@ -1,0 +1,17 @@
+{
+  "genre": "IMPL-API",
+  "model": "Qwen3.5-9B-Q4_K_M",
+  "score": 1.0,
+  "problems_solved": 1,
+  "problems_total": 1,
+  "avg_latency_ms": 6468,
+  "timestamp": "2026-04-05T13:50:57Z",
+  "details": [
+    {
+      "id": "api_01",
+      "passed": true,
+      "latency_ms": 6468.927416,
+      "response": "```javascript\n// app/api/users/route.ts\nimport { createClient } from '@supabase/supabase-js';\nimport { NextResponse } from 'next/server';\n\n// Initialize Supabase client\nconst supabase = createClient(\n  process.env.NEXT_PUBLIC_SUPABASE_URL!,\n  process.env.SUPABASE_SERVICE_ROLE_KEY!\n);\n\nexport async function GET() {\n  try {\n    // Fetch all users from the 'users' table\n    const { data, error } = await supabase\n      .from('users')\n      .select('*')\n      .order('created_at', { ascending: false }"
+    }
+  ]
+}
