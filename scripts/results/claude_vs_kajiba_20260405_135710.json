@@ -1,0 +1,608 @@
+{
+  "experiment": "claude_vs_kajiba",
+  "timestamp": "20260405_135710",
+  "config": {
+    "tasks": 20,
+    "claude_mode": "estimated",
+    "hayabusa_port": 8080
+  },
+  "summary": {
+    "claude_total_tokens": 3385,
+    "kajiba_cloud_tokens": 1952,
+    "kajiba_local_tokens": 2386,
+    "token_reduction_rate": 0.4233,
+    "claude_cost_usd": 0.211875,
+    "kajiba_cost_usd": 0.13128,
+    "cost_reduction_rate": 0.3804,
+    "claude_avg_latency_ms": 2093,
+    "kajiba_avg_latency_ms": 2704,
+    "local_handled": 16,
+    "escalated": 4
+  },
+  "claude_results": [
+    {
+      "id": "light_01",
+      "weight": "light",
+      "target": "claude_estimated",
+      "input_tokens": 20,
+      "output_tokens": 30,
+      "total_tokens": 50,
+      "latency_ms": 529,
+      "cost_usd": 0.00255,
+      "success": true,
+      "response_preview": "(estimated)"
+    },
+    {
+      "id": "light_02",
+      "weight": "light",
+      "target": "claude_estimated",
+      "input_tokens": 20,
+      "output_tokens": 25,
+      "total_tokens": 45,
+      "latency_ms": 457,
+      "cost_usd": 0.002175,
+      "success": true,
+      "response_preview": "(estimated)"
+    },
+    {
+      "id": "light_03",
+      "weight": "light",
+      "target": "claude_estimated",
+      "input_tokens": 20,
+      "output_tokens": 20,
+      "total_tokens": 40,
+      "latency_ms": 386,
+      "cost_usd": 0.0018,
+      "success": true,
+      "response_preview": "(estimated)"
+    },
+    {
+      "id": "light_04",
+      "weight": "light",
+      "target": "claude_estimated",
+      "input_tokens": 20,
+      "output_tokens": 30,
+      "total_tokens": 50,
+      "latency_ms": 529,
+      "cost_usd": 0.00255,
+      "success": true,
+      "response_preview": "(estimated)"
+    },
+    {
+      "id": "light_05",
+      "weight": "light",
+      "target": "claude_estimated",
+      "input_tokens": 20,
+      "output_tokens": 20,
+      "total_tokens": 40,
+      "latency_ms": 386,
+      "cost_usd": 0.0018,
+      "success": true,
+      "response_preview": "(estimated)"
+    },
+    {
+      "id": "light_06",
+      "weight": "light",
+      "target": "claude_estimated",
+      "input_tokens": 20,
+      "output_tokens": 15,
+      "total_tokens": 35,
+      "latency_ms": 314,
+      "cost_usd": 0.001425,
+      "success": true,
+      "response_preview": "(estimated)"
+    },
+    {
+      "id": "light_07",
+      "weight": "light",
+      "target": "claude_estimated",
+      "input_tokens": 20,
+      "output_tokens": 15,
+      "total_tokens": 35,
+      "latency_ms": 314,
+      "cost_usd": 0.001425,
+      "success": true,
+      "response_preview": "(estimated)"
+    },
+    {
+      "id": "light_08",
+      "weight": "light",
+      "target": "claude_estimated",
+      "input_tokens": 20,
+      "output_tokens": 40,
+      "total_tokens": 60,
+      "latency_ms": 671,
+      "cost_usd": 0.0033,
+      "success": true,
+      "response_preview": "(estimated)"
+    },
+    {
+      "id": "mid_01",
+      "weight": "medium",
+      "target": "claude_estimated",
+      "input_tokens": 30,
+      "output_tokens": 80,
+      "total_tokens": 110,
+      "latency_ms": 1293,
+      "cost_usd": 0.00645,
+      "success": true,
+      "response_preview": "(estimated)"
+    },
+    {
+      "id": "mid_02",
+      "weight": "medium",
+      "target": "claude_estimated",
+      "input_tokens": 72,
+      "output_tokens": 100,
+      "total_tokens": 172,
+      "latency_ms": 1789,
+      "cost_usd": 0.00858,
+      "success": true,
+      "response_preview": "(estimated)"
+    },
+    {
+      "id": "mid_03",
+      "weight": "medium",
+      "target": "claude_estimated",
+      "input_tokens": 27,
+      "output_tokens": 80,
+      "total_tokens": 107,
+      "latency_ms": 1278,
+      "cost_usd": 0.006405,
+      "success": true,
+      "response_preview": "(estimated)"
+    },
+    {
+      "id": "mid_04",
+      "weight": "medium",
+      "target": "claude_estimated",
+      "input_tokens": 30,
+      "output_tokens": 120,
+      "total_tokens": 150,
+      "latency_ms": 1864,
+      "cost_usd": 0.00945,
+      "success": true,
+      "response_preview": "(estimated)"
+    },
+    {
+      "id": "mid_05",
+      "weight": "medium",
+      "target": "claude_estimated",
+      "input_tokens": 30,
+      "output_tokens": 100,
+      "total_tokens": 130,
+      "latency_ms": 1579,
+      "cost_usd": 0.00795,
+      "success": true,
+      "response_preview": "(estimated)"
+    },
+    {
+      "id": "mid_06",
+      "weight": "medium",
+      "target": "claude_estimated",
+      "input_tokens": 31,
+      "output_tokens": 150,
+      "total_tokens": 181,
+      "latency_ms": 2298,
+      "cost_usd": 0.011715,
+      "success": true,
+      "response_preview": "(estimated)"
+    },
+    {
+      "id": "mid_07",
+      "weight": "medium",
+      "target": "claude_estimated",
+      "input_tokens": 38,
+      "output_tokens": 80,
+      "total_tokens": 118,
+      "latency_ms": 1333,
+      "cost_usd": 0.00657,
+      "success": true,
+      "response_preview": "(estimated)"
+    },
+    {
+      "id": "mid_08",
+      "weight": "medium",
+      "target": "claude_estimated",
+      "input_tokens": 30,
+      "output_tokens": 80,
+      "total_tokens": 110,
+      "latency_ms": 1293,
+      "cost_usd": 0.00645,
+      "success": true,
+      "response_preview": "(estimated)"
+    },
+    {
+      "id": "heavy_01",
+      "weight": "heavy",
+      "target": "claude_estimated",
+      "input_tokens": 62,
+      "output_tokens": 400,
+      "total_tokens": 462,
+      "latency_ms": 6024,
+      "cost_usd": 0.03093,
+      "success": true,
+      "response_preview": "(estimated)"
+    },
+    {
+      "id": "heavy_02",
+      "weight": "heavy",
+      "target": "claude_estimated",
+      "input_tokens": 49,
+      "output_tokens": 500,
+      "total_tokens": 549,
+      "latency_ms": 7388,
+      "cost_usd": 0.038235,
+      "success": true,
+      "response_preview": "(estimated)"
+    },
+    {
+      "id": "heavy_03",
+      "weight": "heavy",
+      "target": "claude_estimated",
+      "input_tokens": 70,
+      "output_tokens": 350,
+      "total_tokens": 420,
+      "latency_ms": 5350,
+      "cost_usd": 0.0273,
+      "success": true,
+      "response_preview": "(estimated)"
+    },
+    {
+      "id": "heavy_04",
+      "weight": "heavy",
+      "target": "claude_estimated",
+      "input_tokens": 71,
+      "output_tokens": 450,
+      "total_tokens": 521,
+      "latency_ms": 6784,
+      "cost_usd": 0.034815,
+      "success": true,
+      "response_preview": "(estimated)"
+    }
+  ],
+  "kajiba_results": [
+    {
+      "id": "light_01",
+      "weight": "light",
+      "target": "kajiba_local",
+      "input_tokens": 30,
+      "output_tokens": 38,
+      "total_tokens": 68,
+      "latency_ms": 780.9297499999999,
+      "cost_usd": 0.0,
+      "success": true,
+      "response_preview": "HTTP status 429 means \"Too Many Requests.\" It indicates that the user has sent too many requests in a given amount of time, and the server is rate-limiting them."
+    },
+    {
+      "id": "light_02",
+      "weight": "light",
+      "target": "kajiba_local",
+      "input_tokens": 30,
+      "output_tokens": 57,
+      "total_tokens": 87,
+      "latency_ms": 978.2652499999998,
+      "cost_usd": 0.0,
+      "success": true,
+      "response_preview": "`Number()` 関数または `parseInt()` を使用します。\n\n例：\n```typescript\nconst str = \"123\";\nconst num1 = Number(str); // 123\nconst num2 = parseInt(str); // 123\n```"
+    },
+    {
+      "id": "light_03",
+      "weight": "light",
+      "target": "kajiba_local",
+      "input_tokens": 33,
+      "output_tokens": 7,
+      "total_tokens": 40,
+      "latency_ms": 290.14083300000016,
+      "cost_usd": 0.0,
+      "success": true,
+      "response_preview": "`git commit --amend`"
+    },
+    {
+      "id": "light_04",
+      "weight": "light",
+      "target": "kajiba_local",
+      "input_tokens": 34,
+      "output_tokens": 21,
+      "total_tokens": 55,
+      "latency_ms": 491.0077909999999,
+      "cost_usd": 0.0,
+      "success": true,
+      "response_preview": "```css\ndisplay: flex;\njustify-content: center;\nalign-items: center;\n```"
+    },
+    {
+      "id": "light_05",
+      "weight": "light",
+      "target": "kajiba_local",
+      "input_tokens": 33,
+      "output_tokens": 6,
+      "total_tokens": 39,
+      "latency_ms": 277.6910419999998,
+      "cost_usd": 0.0,
+      "success": true,
+      "response_preview": "`list(set(lst))`"
+    },
+    {
+      "id": "light_06",
+      "weight": "light",
+      "target": "kajiba_local",
+      "input_tokens": 31,
+      "output_tokens": 128,
+      "total_tokens": 159,
+      "latency_ms": 1987.7938330000004,
+      "cost_usd": 0.0,
+      "success": true,
+      "response_preview": "このタスクは、**「技術的なトラブルシューティング（デバッグ）」**および**「セキュリティ設定の確認」**に分類されます。\n\n具体的には、以下のカテゴリに属します：\n\n1.  **Web 開発 / API 連携**\n    *   Stripe という決済サービスと自社のシステム（Web アプリやサーバー）を連携させる際の設定に関する問題です。\n2.  **セキュリティ / 認証**\n    *"
+    },
+    {
+      "id": "light_07",
+      "weight": "light",
+      "target": "kajiba_local",
+      "input_tokens": 33,
+      "output_tokens": 128,
+      "total_tokens": 161,
+      "latency_ms": 2013.4038749999997,
+      "cost_usd": 0.0,
+      "success": true,
+      "response_preview": "このタスクは、**「技術的トラブルシューティング（Troubleshooting）」**および**「パフォーマンス最適化（Performance Optimization）」**に分類されます。\n\n具体的には、以下の要素を含んでいます：\n\n1.  **問題の特定（Issue Identification）**：「ビルドが遅い」という具体的なボトルネックの認識。\n2.  **原因分析（Root Ca"
+    },
+    {
+      "id": "light_08",
+      "weight": "light",
+      "target": "kajiba_local",
+      "input_tokens": 30,
+      "output_tokens": 53,
+      "total_tokens": 83,
+      "latency_ms": 913.8716660000003,
+      "cost_usd": 0.0,
+      "success": true,
+      "response_preview": "```jsx\nuseEffect(() => {\n  const timer = setInterval(() => {\n    console.log('tick');\n  }, 1000);\n\n  return () => clearInterval(timer); // クリーンアップ関数\n}, []);\n```"
+    },
+    {
+      "id": "mid_01",
+      "weight": "medium",
+      "target": "kajiba_local",
+      "input_tokens": 39,
+      "output_tokens": 122,
+      "total_tokens": 161,
+      "latency_ms": 1932.9327079999991,
+      "cost_usd": 0.0,
+      "success": true,
+      "response_preview": "```python\nimport re\n\ndef is_valid_email(email: str) -> bool:\n    \"\"\"\n    Check if a string is a valid email address using regex.\n    \n    Args:\n        email (str): The email address to validate.\n    "
+    },
+    {
+      "id": "mid_02",
+      "weight": "medium",
+      "target": "kajiba_local",
+      "input_tokens": 99,
+      "output_tokens": 93,
+      "total_tokens": 192,
+      "latency_ms": 1615.2294169999982,
+      "cost_usd": 0.0,
+      "success": true,
+      "response_preview": "```python\ndef binary_search(arr, target):\n    low, high = 0, len(arr) - 1\n    while low <= high:\n        mid = (low + high) // 2\n        if arr[mid] == target:\n            return mid\n        elif arr["
+    },
+    {
+      "id": "mid_03",
+      "weight": "medium",
+      "target": "kajiba_local",
+      "input_tokens": 36,
+      "output_tokens": 108,
+      "total_tokens": 144,
+      "latency_ms": 1744.0684990000009,
+      "cost_usd": 0.0,
+      "success": true,
+      "response_preview": "```typescript\nfunction debounce<T extends (...args: any[]) => void>(\n  callback: T,\n  delay: number\n): (...args: Parameters<T>) => void {\n  let timeoutId: ReturnType<typeof setTimeout> | null = null;\n"
+    },
+    {
+      "id": "mid_04",
+      "weight": "medium",
+      "target": "kajiba_local",
+      "input_tokens": 49,
+      "output_tokens": 240,
+      "total_tokens": 289,
+      "latency_ms": 3628.4867930000005,
+      "cost_usd": 0.0,
+      "success": true,
+      "response_preview": "</think>\n\n```python\nimport pytest\n\n\nclass TestFibonacci:\n    \"\"\"Test cases for the fibonacci function.\"\"\"\n\n    def test_fibonacci_zero(self):\n        \"\"\"Test fibonacci(0) returns 0.\"\"\"\n        assert "
+    },
+    {
+      "id": "mid_05",
+      "weight": "medium",
+      "target": "kajiba_local",
+      "input_tokens": 42,
+      "output_tokens": 200,
+      "total_tokens": 242,
+      "latency_ms": 3052.1527089999945,
+      "cost_usd": 0.0,
+      "success": true,
+      "response_preview": "Here's a Next.js API route for `/api/users` that fetches users from Supabase and returns JSON:\n\n```jsx\n// app/api/users/route.ts\nimport { createClient } from '@supabase/supabase-js'\nimport { NextRespo"
+    },
+    {
+      "id": "mid_06",
+      "weight": "medium",
+      "target": "kajiba_local",
+      "input_tokens": 37,
+      "output_tokens": 300,
+      "total_tokens": 337,
+      "latency_ms": 4477.684624999998,
+      "cost_usd": 0.0,
+      "success": true,
+      "response_preview": "</think>\n\nHere is a robust, accessible, and reusable React component for a searchable dropdown.\n\nIt uses **React Hooks** (`useState`, `useEffect`, `useRef`) and includes features like:\n*   Real-time f"
+    },
+    {
+      "id": "mid_07",
+      "weight": "medium",
+      "target": "kajiba_local",
+      "input_tokens": 52,
+      "output_tokens": 76,
+      "total_tokens": 128,
+      "latency_ms": 1316.6606660000007,
+      "cost_usd": 0.0,
+      "success": true,
+      "response_preview": "```python\ndef get_user(db, name):\n    return db.execute(\"SELECT * FROM users WHERE name = ?\", (name,))\n```\n\nThis fixes the SQL injection vulnerability by using parameterized queries (prepared statemen"
+    },
+    {
+      "id": "mid_08",
+      "weight": "medium",
+      "target": "kajiba_local",
+      "input_tokens": 41,
+      "output_tokens": 160,
+      "total_tokens": 201,
+      "latency_ms": 2465.020750000001,
+      "cost_usd": 0.0,
+      "success": true,
+      "response_preview": "</think>\n\n```python\ndef merge_sorted_lists(list1, list2):\n    \"\"\"\n    Merges two sorted lists into one sorted list in O(n + m) time.\n\n    Args:\n        list1 (list): First sorted list.\n        list2 ("
+    },
+    {
+      "id": "heavy_01",
+      "weight": "heavy",
+      "target": "kajiba_escalated",
+      "input_tokens": 62,
+      "output_tokens": 400,
+      "total_tokens": 462,
+      "latency_ms": 6168.322792000001,
+      "cost_usd": 0.03093,
+      "success": true,
+      "response_preview": "(estimated)"
+    },
+    {
+      "id": "heavy_02",
+      "weight": "heavy",
+      "target": "kajiba_escalated",
+      "input_tokens": 49,
+      "output_tokens": 500,
+      "total_tokens": 549,
+      "latency_ms": 7529.9188749999985,
+      "cost_usd": 0.038235,
+      "success": true,
+      "response_preview": "(estimated)"
+    },
+    {
+      "id": "heavy_03",
+      "weight": "heavy",
+      "target": "kajiba_escalated",
+      "input_tokens": 70,
+      "output_tokens": 350,
+      "total_tokens": 420,
+      "latency_ms": 5492.818333000001,
+      "cost_usd": 0.0273,
+      "success": true,
+      "response_preview": "(estimated)"
+    },
+    {
+      "id": "heavy_04",
+      "weight": "heavy",
+      "target": "kajiba_escalated",
+      "input_tokens": 71,
+      "output_tokens": 450,
+      "total_tokens": 521,
+      "latency_ms": 6927.523708,
+      "cost_usd": 0.034815,
+      "success": true,
+      "response_preview": "(estimated)"
+    }
+  ],
+  "routing_log": [
+    {
+      "id": "light_01",
+      "weight": "light",
+      "route": "local"
+    },
+    {
+      "id": "light_02",
+      "weight": "light",
+      "route": "local"
+    },
+    {
+      "id": "light_03",
+      "weight": "light",
+      "route": "local"
+    },
+    {
+      "id": "light_04",
+      "weight": "light",
+      "route": "local"
+    },
+    {
+      "id": "light_05",
+      "weight": "light",
+      "route": "local"
+    },
+    {
+      "id": "light_06",
+      "weight": "light",
+      "route": "local"
+    },
+    {
+      "id": "light_07",
+      "weight": "light",
+      "route": "local"
+    },
+    {
+      "id": "light_08",
+      "weight": "light",
+      "route": "local"
+    },
+    {
+      "id": "mid_01",
+      "weight": "medium",
+      "route": "local"
+    },
+    {
+      "id": "mid_02",
+      "weight": "medium",
+      "route": "local"
+    },
+    {
+      "id": "mid_03",
+      "weight": "medium",
+      "route": "local"
+    },
+    {
+      "id": "mid_04",
+      "weight": "medium",
+      "route": "local"
+    },
+    {
+      "id": "mid_05",
+      "weight": "medium",
+      "route": "local"
+    },
+    {
+      "id": "mid_06",
+      "weight": "medium",
+      "route": "local"
+    },
+    {
+      "id": "mid_07",
+      "weight": "medium",
+      "route": "local"
+    },
+    {
+      "id": "mid_08",
+      "weight": "medium",
+      "route": "local"
+    },
+    {
+      "id": "heavy_01",
+      "weight": "heavy",
+      "route": "escalated"
+    },
+    {
+      "id": "heavy_02",
+      "weight": "heavy",
+      "route": "escalated"
+    },
+    {
+      "id": "heavy_03",
+      "weight": "heavy",
+      "route": "escalated"
+    },
+    {
+      "id": "heavy_04",
+      "weight": "heavy",
+      "route": "escalated"
+    }
+  ]
+}
