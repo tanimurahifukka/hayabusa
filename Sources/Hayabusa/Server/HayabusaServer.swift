@@ -41,9 +41,11 @@ struct HayabusaServer {
             "{\"status\":\"ok\"}"
         }
 
+        // ── Flow Activity Log（リクエスト履歴を保持） ──
+        let flowLog = FlowActivityLog()
+
         // GET /flow — KAJIBA Flow UI
         router.get("flow") { _, _ -> Response in
-            // HTMLを直接返す
             let html = KajibaFlowHTML.content
             return Response(
                 status: .ok,
@@ -52,11 +54,26 @@ struct HayabusaServer {
             )
         }
 
+        // GET /flow/events — UIがポーリングして実際のリクエスト履歴を取得
+        router.get("flow/events") { request, _ -> String in
+            // ?since=<timestamp> で前回取得以降のイベントだけ返す
+            let since = request.uri.queryParameters.get("since")
+                .flatMap { Double($0) } ?? 0
+            let events = flowLog.eventsSince(since)
+            let data = try JSONSerialization.data(withJSONObject: events, options: [])
+            return String(data: data, encoding: .utf8) ?? "[]"
+        }
+
         // POST /v1/chat/completions
         router.post("v1/chat/completions") { request, context in
             let chatRequest = try await context.requestDecoder.decode(
                 ChatRequest.self, from: request, context: context
             )
+
+            // リクエスト開始をログ
+            let requestId = UUID().uuidString.prefix(8)
+            let prompt = chatRequest.messages.last?.content ?? ""
+            flowLog.logRequest(id: String(requestId), prompt: String(prompt.prefix(80)))
 
             let result = try await engine.generate(
                 messages: chatRequest.messages,
@@ -65,8 +82,15 @@ struct HayabusaServer {
                 priority: SlotPriority(string: chatRequest.priority)
             )
 
+            // 完了をログ
+            flowLog.logCompletion(
+                id: String(requestId),
+                promptTokens: result.promptTokens,
+                completionTokens: result.completionTokens
+            )
+
             let response = ChatResponse(
-                id: "hayabusa-\(UUID().uuidString.prefix(8))",
+                id: "hayabusa-\(requestId)",
                 model: chatRequest.model ?? "local",
                 content: result.text,
                 promptTokens: result.promptTokens,

@@ -549,13 +549,59 @@ const DEMO_TASKS = [
   { prompt: "Compare WebSocket vs SSE for chat app", genre: "HEAVY", route: "escalate", target: "claude", latency: 5000, tokens: 0 },
 ];
 
-// ── Live polling (if server is running) ──
-async function pollServer() {
+// ── Live mode: /flow/events をポーリングして実際の通信を可視化 ──
+let lastEventTime = 0;
+let pendingRequests = {};  // id → prompt
+
+async function pollEvents() {
   try {
-    const resp = await fetch('http://localhost:8080/health');
-    if (resp.ok) {
-      const statusEl = nodeElements['hayabusa']?.querySelector('.status');
-      if (statusEl) { statusEl.className = 'status status-online'; statusEl.textContent = 'ONLINE'; }
+    const resp = await fetch(`/flow/events?since=${lastEventTime}`);
+    if (!resp.ok) return;
+    const events = await resp.json();
+
+    for (const ev of events) {
+      lastEventTime = Math.max(lastEventTime, ev.timestamp || 0);
+
+      if (ev.type === 'request') {
+        // リクエスト開始: Claude → Hayabusa → Qwen パルス
+        pendingRequests[ev.id] = ev;
+        stats.requests++;
+        stats.local++;
+
+        const prompt = ev.prompt || '';
+        addLog(`→ ${prompt.substring(0, 50)}...`, 'route');
+
+        // パルスアニメーション
+        sendPulse('claude', 'hayabusa', '#e94560', 500);
+        setTimeout(() => {
+          sendPulse('hayabusa', 'qwen', '#00d4ff', 400);
+        }, 300);
+      }
+
+      if (ev.type === 'completion') {
+        // 完了: Qwen → Hayabusa → Claude パルス（結果返却）
+        const tokens = ev.total_tokens || 0;
+        stats.tokensSaved += tokens;
+        stats.costSaved += tokens * 0.000075;
+
+        addLog(`✓ 完了 ${tokens}tok`, 'local');
+
+        sendPulse('qwen', 'hayabusa', '#00ff88', 400);
+        setTimeout(() => {
+          sendPulse('hayabusa', 'claude', '#00d4ff', 500);
+        }, 300);
+
+        delete pendingRequests[ev.id];
+      }
+
+      updateStats();
+    }
+
+    // HAYABUSAノードのステータス更新
+    const statusEl = nodeElements['hayabusa']?.querySelector('.status');
+    if (statusEl) {
+      statusEl.className = 'status status-online';
+      statusEl.textContent = Object.keys(pendingRequests).length > 0 ? 'PROCESSING' : 'ONLINE';
     }
   } catch {
     const statusEl = nodeElements['hayabusa']?.querySelector('.status');
@@ -568,18 +614,10 @@ window.addEventListener('load', () => {
   renderNodes();
   renderConnections();
   updateStats();
-  pollServer();
-  setInterval(pollServer, 10000);
 
-  // Demo: continuous flow
-  let taskIdx = 0;
-  async function nextTask() {
-    const task = DEMO_TASKS[taskIdx % DEMO_TASKS.length];
-    taskIdx++;
-    await simulateFlow(task);
-    setTimeout(nextTask, 2000 + Math.random() * 3000);
-  }
-  setTimeout(nextTask, 1000);
+  // ライブポーリング（1秒間隔）
+  pollEvents();
+  setInterval(pollEvents, 1000);
 });
 
 // Resize handler
