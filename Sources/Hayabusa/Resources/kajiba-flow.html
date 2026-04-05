@@ -364,20 +364,28 @@ async function simulateFlow(task) {
   sendPulse('claude', 'hayabusa', '#e94560', 600);
   await delay(300);
 
-  // 2. Hayabusa → Classify
+  // 2. Hayabusa → Classify（判定中: オレンジ）
   sendPulse('hayabusa', 'classify', '#ff9f43', 400);
   await delay(500);
 
-  // 3. Classify → Hayabusa (result)
-  sendPulse('classify', 'hayabusa', '#ff9f43', 400);
-  await delay(300);
-
-  // 4. Route to specialist or escalate
+  // 3. Classify結果 → 色が変わる
   if (task.route === 'escalate') {
+    // Classify → Hayabusa（エスカレーション: 赤）
+    sendPulse('classify', 'hayabusa', '#e94560', 400);
+    addLog(`⚡ Classify → ${task.genre} (ESCALATE)`, 'escalate');
+    await delay(400);
+
+    // Hayabusa → Claude（赤パルス）
     sendPulse('hayabusa', 'claude', '#e94560', 600);
     stats.escalated++;
     addLog(`⬆ Escalated to Claude (${task.genre})`, 'escalate');
   } else {
+    // Classify → Hayabusa（ローカル決定: 緑）
+    sendPulse('classify', 'hayabusa', '#00ff88', 400);
+    addLog(`⚡ Classify → ${task.genre} (LOCAL)`, 'local');
+    await delay(300);
+
+    // Hayabusa → Specialist（緑パルス）
     const target = task.target || 'qwen';
     sendPulse('hayabusa', target, '#00ff88', 500);
     stats.local++;
@@ -386,9 +394,10 @@ async function simulateFlow(task) {
     addLog(`✓ Local → ${target} (${task.genre}, ${task.latency}ms)`, 'local');
 
     await delay(600);
-    // Response back
+    // Specialist → Hayabusa（結果返却: 緑）
     sendPulse(target, 'hayabusa', '#00ff88', 400);
     await delay(400);
+    // Hayabusa → Claude（最終結果: シアン）
     sendPulse('hayabusa', 'claude', '#00d4ff', 500);
   }
 

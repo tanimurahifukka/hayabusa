@@ -2,10 +2,10 @@
 struct KajibaFlowHTML {
     static let content = """
 <!DOCTYPE html>
-<html lang=\"ja\">
+<html lang="ja">
 <head>
-<meta charset=\"UTF-8\">
-<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>KAJIBA Flow — Specialist AI Forge</title>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -196,26 +196,26 @@ svg#lines {
 </head>
 <body>
 
-<div id=\"title\">
+<div id="title">
   <h1>KAJIBA FLOW</h1>
-  <div class=\"sub\">Specialist AI Forge — Real-time Orchestration</div>
+  <div class="sub">Specialist AI Forge — Real-time Orchestration</div>
 </div>
 
-<div id=\"canvas\">
-  <svg id=\"lines\"></svg>
+<div id="canvas">
+  <svg id="lines"></svg>
 </div>
 
-<div id=\"log\">
-  <div style=\"color:#666; margin-bottom:4px;\">Activity Log</div>
+<div id="log">
+  <div style="color:#666; margin-bottom:4px;">Activity Log</div>
 </div>
 
-<div id=\"info\">
-  <div class=\"stat\"><div class=\"value\" id=\"stat-requests\">0</div><div class=\"label\">Requests</div></div>
-  <div class=\"stat\"><div class=\"value\" id=\"stat-local\">0</div><div class=\"label\">Local ($0)</div></div>
-  <div class=\"stat\"><div class=\"value\" id=\"stat-escalated\">0</div><div class=\"label\">Escalated</div></div>
-  <div class=\"stat\"><div class=\"value\" id=\"stat-tokens\" style=\"color:#00ff88\">0</div><div class=\"label\">Tokens Saved</div></div>
-  <div class=\"stat\"><div class=\"value\" id=\"stat-cost\" style=\"color:#ff9f43\">$0.00</div><div class=\"label\">Cost Saved</div></div>
-  <div class=\"stat\"><div class=\"value\" id=\"stat-latency\">0ms</div><div class=\"label\">Avg Latency</div></div>
+<div id="info">
+  <div class="stat"><div class="value" id="stat-requests">0</div><div class="label">Requests</div></div>
+  <div class="stat"><div class="value" id="stat-local">0</div><div class="label">Local ($0)</div></div>
+  <div class="stat"><div class="value" id="stat-escalated">0</div><div class="label">Escalated</div></div>
+  <div class="stat"><div class="value" id="stat-tokens" style="color:#00ff88">0</div><div class="label">Tokens Saved</div></div>
+  <div class="stat"><div class="value" id="stat-cost" style="color:#ff9f43">$0.00</div><div class="label">Cost Saved</div></div>
+  <div class="stat"><div class="value" id="stat-latency">0ms</div><div class="label">Avg Latency</div></div>
 </div>
 
 <script>
@@ -262,9 +262,9 @@ function renderNodes() {
     el.className = `node node-${n.type}`;
     el.id = `node-${n.id}`;
     el.innerHTML = `
-      <div class=\"name\">${n.name}</div>
-      <div class=\"detail\">${n.detail}</div>
-      <div class=\"status status-online\">READY</div>
+      <div class="name">${n.name}</div>
+      <div class="detail">${n.detail}</div>
+      <div class="status status-online">READY</div>
     `;
     el.style.left = `${n.x * W - 60}px`;
     el.style.top = `${n.y * H - 30}px`;
@@ -339,7 +339,7 @@ function sendPulse(fromId, toId, color = '#00d4ff', duration = 800) {
   svg.appendChild(circle);
 
   // Highlight connection line
-  const line = svg.querySelector(`line[data-from=\"${fromId}\"][data-to=\"${toId}\"]`);
+  const line = svg.querySelector(`line[data-from="${fromId}"][data-to="${toId}"]`);
   if (line) {
     line.style.stroke = color + 'aa';
     line.style.strokeWidth = '2.5';
@@ -367,20 +367,28 @@ async function simulateFlow(task) {
   sendPulse('claude', 'hayabusa', '#e94560', 600);
   await delay(300);
 
-  // 2. Hayabusa → Classify
+  // 2. Hayabusa → Classify（判定中: オレンジ）
   sendPulse('hayabusa', 'classify', '#ff9f43', 400);
   await delay(500);
 
-  // 3. Classify → Hayabusa (result)
-  sendPulse('classify', 'hayabusa', '#ff9f43', 400);
-  await delay(300);
-
-  // 4. Route to specialist or escalate
+  // 3. Classify結果 → 色が変わる
   if (task.route === 'escalate') {
+    // Classify → Hayabusa（エスカレーション: 赤）
+    sendPulse('classify', 'hayabusa', '#e94560', 400);
+    addLog(`⚡ Classify → ${task.genre} (ESCALATE)`, 'escalate');
+    await delay(400);
+
+    // Hayabusa → Claude（赤パルス）
     sendPulse('hayabusa', 'claude', '#e94560', 600);
     stats.escalated++;
     addLog(`⬆ Escalated to Claude (${task.genre})`, 'escalate');
   } else {
+    // Classify → Hayabusa（ローカル決定: 緑）
+    sendPulse('classify', 'hayabusa', '#00ff88', 400);
+    addLog(`⚡ Classify → ${task.genre} (LOCAL)`, 'local');
+    await delay(300);
+
+    // Hayabusa → Specialist（緑パルス）
     const target = task.target || 'qwen';
     sendPulse('hayabusa', target, '#00ff88', 500);
     stats.local++;
@@ -389,9 +397,10 @@ async function simulateFlow(task) {
     addLog(`✓ Local → ${target} (${task.genre}, ${task.latency}ms)`, 'local');
 
     await delay(600);
-    // Response back
+    // Specialist → Hayabusa（結果返却: 緑）
     sendPulse(target, 'hayabusa', '#00ff88', 400);
     await delay(400);
+    // Hayabusa → Claude（最終結果: シアン）
     sendPulse('hayabusa', 'claude', '#00d4ff', 500);
   }
 
@@ -405,7 +414,7 @@ function addLog(msg, type) {
   const time = new Date().toLocaleTimeString('ja-JP');
   const entry = document.createElement('div');
   entry.className = 'entry';
-  entry.innerHTML = `<span class=\"time\">${time}</span> <span class=\"${type}\">${msg}</span>`;
+  entry.innerHTML = `<span class="time">${time}</span> <span class="${type}">${msg}</span>`;
   log.appendChild(entry);
   log.scrollTop = log.scrollHeight;
   if (log.children.length > 50) log.children[1].remove();
@@ -424,18 +433,18 @@ function updateStats() {
 
 // ── Demo tasks ──
 const DEMO_TASKS = [
-  { prompt: \"TypeError: Cannot read properties of undefined\", genre: \"FIX-BUG\", route: \"local\", target: \"qwen\", latency: 700, tokens: 150 },
-  { prompt: \"Write binary search in Python\", genre: \"IMPL-ALGO\", route: \"local\", target: \"gemma\", latency: 1400, tokens: 200 },
-  { prompt: \"Stripe webhook signature verification error\", genre: \"IMPL-PAYMENT\", route: \"local\", target: \"stripe\", latency: 800, tokens: 180 },
-  { prompt: \"Supabase RLS policy not working\", genre: \"IMPL-DB\", route: \"local\", target: \"supabase\", latency: 900, tokens: 160 },
-  { prompt: \"Design microservice architecture for 10K users\", genre: \"HEAVY\", route: \"escalate\", target: \"claude\", latency: 3000, tokens: 0 },
-  { prompt: \"Generate pytest for fibonacci function\", genre: \"GEN-TEST\", route: \"local\", target: \"gemma\", latency: 2000, tokens: 300 },
-  { prompt: \"患者の保険請求でレセプトエラー\", genre: \"O-CLINICAL\", route: \"escalate\", target: \"claude\", latency: 0, tokens: 0 },
-  { prompt: \"SwiftUI NavigationStack migration\", genre: \"IMPL-ALGO\", route: \"local\", target: \"swift\", latency: 1200, tokens: 170 },
-  { prompt: \"DAWN予約システムのAPI設計\", genre: \"IMPL-API\", route: \"local\", target: \"dawn\", latency: 1100, tokens: 190 },
-  { prompt: \"React useEffect cleanup leak\", genre: \"FIX-BUG\", route: \"local\", target: \"qwen\", latency: 600, tokens: 120 },
-  { prompt: \"Compare WebSocket vs SSE for chat app\", genre: \"HEAVY\", route: \"escalate\", target: \"claude\", latency: 5000, tokens: 0 },
-  { prompt: \"Debounce function in TypeScript\", genre: \"IMPL-ALGO\", route: \"local\", target: \"gemma\", latency: 800, tokens: 160 },
+  { prompt: "TypeError: Cannot read properties of undefined", genre: "FIX-BUG", route: "local", target: "qwen", latency: 700, tokens: 150 },
+  { prompt: "Write binary search in Python", genre: "IMPL-ALGO", route: "local", target: "gemma", latency: 1400, tokens: 200 },
+  { prompt: "Stripe webhook signature verification error", genre: "IMPL-PAYMENT", route: "local", target: "stripe", latency: 800, tokens: 180 },
+  { prompt: "Supabase RLS policy not working", genre: "IMPL-DB", route: "local", target: "supabase", latency: 900, tokens: 160 },
+  { prompt: "Design microservice architecture for 10K users", genre: "HEAVY", route: "escalate", target: "claude", latency: 3000, tokens: 0 },
+  { prompt: "Generate pytest for fibonacci function", genre: "GEN-TEST", route: "local", target: "gemma", latency: 2000, tokens: 300 },
+  { prompt: "患者の保険請求でレセプトエラー", genre: "O-CLINICAL", route: "escalate", target: "claude", latency: 0, tokens: 0 },
+  { prompt: "SwiftUI NavigationStack migration", genre: "IMPL-ALGO", route: "local", target: "swift", latency: 1200, tokens: 170 },
+  { prompt: "DAWN予約システムのAPI設計", genre: "IMPL-API", route: "local", target: "dawn", latency: 1100, tokens: 190 },
+  { prompt: "React useEffect cleanup leak", genre: "FIX-BUG", route: "local", target: "qwen", latency: 600, tokens: 120 },
+  { prompt: "Compare WebSocket vs SSE for chat app", genre: "HEAVY", route: "escalate", target: "claude", latency: 5000, tokens: 0 },
+  { prompt: "Debounce function in TypeScript", genre: "IMPL-ALGO", route: "local", target: "gemma", latency: 800, tokens: 160 },
 ];
 
 // ── Live polling (if server is running) ──
