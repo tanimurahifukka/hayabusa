@@ -248,46 +248,39 @@ svg#lines {
 
 <script>
 // ── Node definitions ──
-// ── Waterfall Layout ──
+// ── Waterfall Layout（HAYABUSAノードなし — システム自体がHAYABUSA） ──
 // Level 0: Claude (cloud)
-// Level 1: HAYABUSA (orchestrator)
-// Level 2: Classify / Qwen3.5 (generalist) / Gemma4 (generalist)
-// Level 3: Specialists under their parent generalist
+// Level 1: Classify / Qwen3.5 / Gemma4
+// Level 2: Specialists
 const NODES = [
-  // Level 0 — Cloud
+  // Cloud
   { id: 'claude',    name: 'Claude Code',     detail: 'Opus 4.6 (Cloud)',        type: 'claude',     x: 0.06, y: 0.40 },
-  // Level 1 — Orchestrator
-  { id: 'hayabusa',  name: 'HAYABUSA',        detail: 'Router / Orchestrator',   type: 'hayabusa',   x: 0.24, y: 0.40 },
-  // Level 2 — Classify + Generalists
-  { id: 'classify',  name: 'Classify',        detail: 'Qwen3-0.6B (300MB)',      type: 'classify',   x: 0.24, y: 0.10 },
-  { id: 'qwen',      name: 'Qwen3.5-9B',     detail: 'FIX / UI / API (5GB)',    type: 'generalist', x: 0.44, y: 0.22 },
-  { id: 'gemma',     name: 'Gemma 4 E4B',    detail: 'ALGO / TEST (7.5GB)',     type: 'generalist', x: 0.44, y: 0.58 },
-  // Level 3 — Specialists (under Qwen)
-  { id: 'stripe',    name: 'kajiba-stripe',   detail: 'PAYMENT (1.7B)',          type: 'specialist', x: 0.66, y: 0.08 },
-  { id: 'supabase',  name: 'kajiba-supabase', detail: 'DB / RLS (1.7B)',        type: 'specialist', x: 0.66, y: 0.22 },
-  { id: 'orca',      name: 'kajiba-orca',     detail: 'O-CLINICAL (0.6B)',       type: 'specialist', x: 0.66, y: 0.36 },
-  // Level 3 — Specialists (under Gemma)
-  { id: 'swift',     name: 'kajiba-swift',    detail: 'Swift/MLX (1.7B)',        type: 'specialist', x: 0.66, y: 0.52 },
-  { id: 'dawn',      name: 'kajiba-dawn',     detail: 'DAWN系 (1.7B)',           type: 'specialist', x: 0.66, y: 0.66 },
+  // Classify（Claudeから直接）
+  { id: 'classify',  name: 'Classify',        detail: 'Qwen3-0.6B (300MB)',      type: 'classify',   x: 0.28, y: 0.10 },
+  // Generalists
+  { id: 'qwen',      name: 'Qwen3.5-9B',     detail: 'FIX / UI / API (5GB)',    type: 'generalist', x: 0.35, y: 0.30 },
+  { id: 'gemma',     name: 'Gemma 4 E4B',    detail: 'ALGO / TEST (7.5GB)',     type: 'generalist', x: 0.35, y: 0.60 },
+  // Specialists (under Qwen)
+  { id: 'stripe',    name: 'kajiba-stripe',   detail: 'PAYMENT (1.7B)',          type: 'specialist', x: 0.60, y: 0.12 },
+  { id: 'supabase',  name: 'kajiba-supabase', detail: 'DB / RLS (1.7B)',        type: 'specialist', x: 0.60, y: 0.28 },
+  { id: 'orca',      name: 'kajiba-orca',     detail: 'O-CLINICAL (0.6B)',       type: 'specialist', x: 0.60, y: 0.44 },
+  // Specialists (under Gemma)
+  { id: 'swift',     name: 'kajiba-swift',    detail: 'Swift/MLX (1.7B)',        type: 'specialist', x: 0.60, y: 0.58 },
+  { id: 'dawn',      name: 'kajiba-dawn',     detail: 'DAWN系 (1.7B)',           type: 'specialist', x: 0.60, y: 0.72 },
 ];
 
-// ── Waterfall Connections ──
-// 親子関係でツリー構造を表現
+// ── Connections（HAYABUSAなし — Claudeから直接ツリー） ──
 const CONNECTIONS = [
-  // Level 0→1: Claude ↔ Hayabusa
-  { from: 'claude',   to: 'hayabusa',  color: '#e94560' },
-  { from: 'hayabusa', to: 'claude',    color: '#e94560' },
-  // Level 1→2: Hayabusa → Classify
-  { from: 'hayabusa', to: 'classify',  color: '#ff9f43' },
-  { from: 'classify', to: 'hayabusa',  color: '#ff9f43' },
-  // Level 1→2: Hayabusa → Generalists
-  { from: 'hayabusa', to: 'qwen',      color: '#00d4ff' },
-  { from: 'hayabusa', to: 'gemma',     color: '#00d4ff' },
-  // Level 2→3: Qwen → Specialists
+  // Claude → Classify
+  { from: 'claude',   to: 'classify',  color: '#ff9f43' },
+  // Claude → Generalists
+  { from: 'claude',   to: 'qwen',      color: '#00d4ff' },
+  { from: 'claude',   to: 'gemma',     color: '#00d4ff' },
+  // Qwen → Specialists
   { from: 'qwen',     to: 'stripe',    color: '#00ff88' },
   { from: 'qwen',     to: 'supabase',  color: '#00ff88' },
   { from: 'qwen',     to: 'orca',      color: '#00ff88' },
-  // Level 2→3: Gemma → Specialists
+  // Gemma → Specialists
   { from: 'gemma',    to: 'swift',     color: '#00ff88' },
   { from: 'gemma',    to: 'dawn',      color: '#00ff88' },
 ];
@@ -304,7 +297,7 @@ function renderNodes() {
 
   // コアノード（Claude, Hayabusa, Classify）は常に表示
   // スペシャリストは呼び出されるまで非表示（dormant）
-  const coreNodes = new Set(['claude', 'hayabusa', 'classify', 'qwen', 'gemma']);
+  const coreNodes = new Set(['claude', 'classify', 'qwen', 'gemma']);
 
   NODES.forEach(n => {
     const el = document.createElement('div');
@@ -345,7 +338,7 @@ function renderConnections() {
     line.setAttribute('data-to', conn.to);
     line.style.stroke = conn.color + '33';
     // スペシャリスト接続は非表示
-    const coreNodes = new Set(['claude', 'hayabusa', 'classify', 'qwen', 'gemma']);
+    const coreNodes = new Set(['claude', 'classify', 'qwen', 'gemma']);
     if (!coreNodes.has(conn.from) || !coreNodes.has(conn.to)) {
       if (!coreNodes.has(conn.to) && conn.to !== 'claude') {
         line.classList.add('dormant');
@@ -563,7 +556,7 @@ async function pollEvents() {
       lastEventTime = Math.max(lastEventTime, ev.timestamp || 0);
 
       if (ev.type === 'request') {
-        // リクエスト開始: Claude → Hayabusa → Qwen パルス
+        // リクエスト開始: Claude → Classify → Qwen
         pendingRequests[ev.id] = ev;
         stats.requests++;
         stats.local++;
@@ -571,37 +564,27 @@ async function pollEvents() {
         const prompt = ev.prompt || '';
         addLog(`→ ${prompt.substring(0, 50)}...`, 'route');
 
-        // パルスアニメーション
-        sendPulse('claude', 'hayabusa', '#e94560', 500);
+        // Classify パルス
+        sendPulse('claude', 'classify', '#ff9f43', 400);
         setTimeout(() => {
-          sendPulse('hayabusa', 'qwen', '#00d4ff', 400);
-        }, 300);
+          sendPulse('claude', 'qwen', '#00d4ff', 500);
+        }, 500);
       }
 
       if (ev.type === 'completion') {
-        // 完了: Qwen → Hayabusa → Claude パルス（結果返却）
+        // 完了: Qwen → Claude（結果返却）
         const tokens = ev.total_tokens || 0;
         stats.tokensSaved += tokens;
         stats.costSaved += tokens * 0.000075;
 
         addLog(`✓ 完了 ${tokens}tok`, 'local');
 
-        sendPulse('qwen', 'hayabusa', '#00ff88', 400);
-        setTimeout(() => {
-          sendPulse('hayabusa', 'claude', '#00d4ff', 500);
-        }, 300);
+        sendPulse('qwen', 'claude', '#00ff88', 500);
 
         delete pendingRequests[ev.id];
       }
 
       updateStats();
-    }
-
-    // HAYABUSAノードのステータス更新
-    const statusEl = nodeElements['hayabusa']?.querySelector('.status');
-    if (statusEl) {
-      statusEl.className = 'status status-online';
-      statusEl.textContent = Object.keys(pendingRequests).length > 0 ? 'PROCESSING' : 'ONLINE';
     }
   } catch {
     const statusEl = nodeElements['hayabusa']?.querySelector('.status');
