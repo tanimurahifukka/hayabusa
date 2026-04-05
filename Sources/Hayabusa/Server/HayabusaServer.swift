@@ -124,6 +124,13 @@ struct HayabusaServer {
             return jsonString
         }
 
+        // GET /flow/ping — Claude Codeの活動を通知（UIで心拍させる）
+        router.get("flow/ping") { request, _ -> String in
+            let source = request.uri.queryParameters.get("source") ?? "claude"
+            flowLog.logPing(source: source)
+            return "{\"ok\":true}"
+        }
+
         // ── Project Mode: ファイルAPI ──
 
         // GET /flow/files?path=... — ディレクトリ一覧

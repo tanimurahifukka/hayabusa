@@ -431,23 +431,17 @@ function pulse(fromId, toId, color, dur = 700) {
       document.querySelectorAll(`path[data-from="${id}"], path[data-to="${id}"]`).forEach(p => p.classList.remove('dormant'));
     }
 
-    // idle/awakened → alive + processing（心拍開始）
-    el.classList.remove('idle', 'awakened');
-    el.classList.add('alive', 'processing');
+    // dormant → awakened
+    el.classList.remove('idle');
+    el.classList.add('alive');
 
-    // 心拍停止タイマー: 処理完了後に心拍を止める
-    clearTimeout(el._procTimer);
-    el._procTimer = setTimeout(() => {
-      el.classList.remove('processing');
-    }, 2000);
-
-    // idle化タイマー: coreNodes以外は3秒後に灰色
+    // idle化タイマー: coreNodes以外は5秒後に灰色
     if (!coreNodes.has(id)) {
       clearTimeout(el._idleTimer);
       el._idleTimer = setTimeout(() => {
         el.classList.remove('alive', 'processing');
         el.classList.add('idle');
-      }, 4000);
+      }, 5000);
     }
   });
 
@@ -513,6 +507,18 @@ function updateStats() {
 // ── SSE: リアルタイムイベント受信 ──
 let pending = {};
 
+// ── 心拍制御: リクエスト中ずっと心拍させる ──
+function setProcessing(nodeId, on) {
+  const el = nodeEls[nodeId];
+  if (!el) return;
+  if (on) {
+    el.classList.remove('dormant', 'idle');
+    el.classList.add('alive', 'processing');
+  } else {
+    el.classList.remove('processing');
+  }
+}
+
 function handleEvent(ev) {
   if (ev.type === 'request') {
     pending[ev.id] = ev;
@@ -521,9 +527,21 @@ function handleEvent(ev) {
     const p = (ev.prompt || '').substring(0, 45);
     log(`→ ${p}...`, 'route');
 
-    // リクエスト到着パルス（即座に表示）
+    // 心拍開始: 経路上の全ノード
+    setProcessing('claude', true);
+    setProcessing('classify', true);
+    setProcessing('qwen', true);
+
+    // パルスアニメーション
     pulse('claude', 'classify', '#e67e22', 400);
     setTimeout(() => pulse('classify', 'qwen', '#3498db', 350), 450);
+  }
+
+  if (ev.type === 'ping') {
+    // Claude Codeの活動検知 → 心拍
+    setProcessing('claude', true);
+    clearTimeout(window._claudePingTimer);
+    window._claudePingTimer = setTimeout(() => setProcessing('claude', false), 3000);
   }
 
   if (ev.type === 'completion') {
@@ -532,10 +550,19 @@ function handleEvent(ev) {
     stats.costSaved += tok * 0.000075;
     log(`✓ ${tok} tok`, 'local');
 
-    // 結果返却パルス（即座に表示）
+    // 結果返却パルス
     pulse('qwen', 'classify', '#2ecc71', 300);
     setTimeout(() => pulse('classify', 'claude', '#2ecc71', 350), 350);
     delete pending[ev.id];
+
+    // 全リクエスト完了 → 心拍停止
+    if (Object.keys(pending).length === 0) {
+      setTimeout(() => {
+        setProcessing('claude', false);
+        setProcessing('classify', false);
+        setProcessing('qwen', false);
+      }, 1000);
+    }
   }
   updateStats();
 }

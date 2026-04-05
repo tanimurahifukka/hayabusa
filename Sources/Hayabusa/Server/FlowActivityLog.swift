@@ -64,6 +64,16 @@ final class FlowActivityLog: @unchecked Sendable {
         broadcast(event)
     }
 
+    /// Claude Codeの活動ping
+    func logPing(source: String) {
+        let event: [String: Any] = [
+            "type": "ping",
+            "source": source,
+            "timestamp": Date().timeIntervalSince1970,
+        ]
+        broadcast(event)
+    }
+
     /// ポーリング用（フォールバック）
     func eventsSince(_ since: Double) -> [[String: Any]] {
         lock.withLock {
