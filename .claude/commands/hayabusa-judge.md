@@ -3,7 +3,7 @@
 以下のコマンドを実行してください:
 
 ```bash
-/Users/tanimura/Desktop/hayabusa/.build/arm64-apple-macosx/release/HayabusaCLI judge --a "$ARGUMENTS"
+hayabusa judge --a "$ARGUMENTS"
 ```
 
 引数の形式: --a "回答A" --b "回答B" --task "タスク説明"

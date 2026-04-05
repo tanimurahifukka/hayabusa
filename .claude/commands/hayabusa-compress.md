@@ -3,7 +3,7 @@
 以下のコマンドを実行して、結果をユーザーに報告してください:
 
 ```bash
-/Users/tanimura/Desktop/hayabusa/.build/arm64-apple-macosx/release/HayabusaCLI compress "$ARGUMENTS"
+hayabusa compress "$ARGUMENTS"
 ```
 
 出力JSON:

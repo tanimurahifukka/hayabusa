@@ -49,12 +49,38 @@ struct ServerCommand {
             return
         }
 
-        // 引数を構築（サーバー起動用のargsをそのまま渡す）
-        var launchArgs = args
-        if launchArgs.isEmpty {
-            fputs("Error: モデルパスを指定してください。\n", stderr)
-            fputs("例: hayabusa server start models/Qwen3.5-9B-Q4_K_M.gguf\n", stderr)
-            return
+        // 引数を構築（指定なしならconfig.jsonからデフォルトモデルを読む）
+        let launchArgs: [String]
+        if args.isEmpty {
+            if let config = loadConfig() {
+                let model = config["default_model"] as? String ?? ""
+                let backend = config["default_backend"] as? String ?? "llama"
+                let kv = config["kv_quantize"] as? String ?? "off"
+                let projectDir = config["project_dir"] as? String ?? ""
+
+                var resolved = model
+                if !FileManager.default.fileExists(atPath: resolved) && !projectDir.isEmpty {
+                    resolved = projectDir + "/" + model
+                }
+
+                guard FileManager.default.fileExists(atPath: resolved) else {
+                    fputs("Error: モデルが見つかりません: \(resolved)\n", stderr)
+                    fputs("~/.hayabusa/config.json の default_model を確認してください。\n", stderr)
+                    return
+                }
+
+                var a = [resolved, "--backend", backend]
+                if kv != "off" { a += ["--kv-quantize", kv] }
+                launchArgs = a
+                print("Config: \(resolved) (backend=\(backend), kv=\(kv))")
+            } else {
+                fputs("Error: モデルパスを指定するか、~/.hayabusa/config.json を作成してください。\n", stderr)
+                fputs("  hayabusa server start models/model.gguf\n", stderr)
+                fputs("  または: bash scripts/setup.sh\n", stderr)
+                return
+            }
+        } else {
+            launchArgs = args
         }
 
         // バックグラウンドでプロセスを起動
@@ -224,6 +250,15 @@ struct ServerCommand {
 
     static func isProcessRunning(_ pid: Int32) -> Bool {
         kill(pid, 0) == 0
+    }
+
+    static func loadConfig() -> [String: Any]? {
+        let configPath = NSHomeDirectory() + "/.hayabusa/config.json"
+        guard let data = FileManager.default.contents(atPath: configPath),
+              let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+            return nil
+        }
+        return json
     }
 
     static func printUsage() {

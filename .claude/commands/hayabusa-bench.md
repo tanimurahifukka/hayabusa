@@ -3,7 +3,7 @@
 以下のコマンドを実行してください:
 
 ```bash
-/Users/tanimura/Desktop/hayabusa/.build/arm64-apple-macosx/release/HayabusaCLI bench $ARGUMENTS
+hayabusa bench $ARGUMENTS
 ```
 
 引数の形式: --genre FIX-BUG --model local
