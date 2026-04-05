@@ -46,8 +46,13 @@ svg#lines { position: absolute; top: 0; left: 0; width: 100%; height: 100%; poin
   50% { box-shadow: 0 0 22px var(--glow), inset 0 0 8px var(--glow-inner); }
 }
 
-/* ── 心拍エフェクト（稼働中） ── */
+/* ── 通常稼働（静かに待機） ── */
 .node.alive {
+  border-width: 1.5px;
+}
+
+/* ── 心拍エフェクト（処理中のみ） ── */
+.node.processing {
   border-width: 2.5px;
   animation: heartbeat 1.2s ease-in-out infinite;
 }
@@ -62,6 +67,9 @@ svg#lines { position: absolute; top: 0; left: 0; width: 100%; height: 100%; poin
 }
 
 .node.alive .indicator {
+  /* 待機中は静かに光るだけ */
+}
+.node.processing .indicator {
   animation: dot-beat 1.2s ease-in-out infinite;
 }
 @keyframes dot-beat {
@@ -386,17 +394,23 @@ function pulse(fromId, toId, color, dur = 700) {
       document.querySelectorAll(`path[data-from="${id}"], path[data-to="${id}"]`).forEach(p => p.classList.remove('dormant'));
     }
 
-    // idle/awakened → alive（点灯）
+    // idle/awakened → alive + processing（心拍開始）
     el.classList.remove('idle', 'awakened');
-    el.classList.add('alive');
+    el.classList.add('alive', 'processing');
 
-    // タイマーリセット: 3秒後にidle（灰色）に戻す（coreNodes以外）
+    // 心拍停止タイマー: 処理完了後に心拍を止める
+    clearTimeout(el._procTimer);
+    el._procTimer = setTimeout(() => {
+      el.classList.remove('processing');
+    }, 2000);
+
+    // idle化タイマー: coreNodes以外は3秒後に灰色
     if (!coreNodes.has(id)) {
       clearTimeout(el._idleTimer);
       el._idleTimer = setTimeout(() => {
-        el.classList.remove('alive');
+        el.classList.remove('alive', 'processing');
         el.classList.add('idle');
-      }, 3000);
+      }, 4000);
     }
   });
 
