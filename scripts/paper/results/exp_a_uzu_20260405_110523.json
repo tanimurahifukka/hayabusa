@@ -1,0 +1,77 @@
+{
+  "experiment": "exp_a_uzu_cluster",
+  "timestamp": "20260405_110523",
+  "config": {
+    "requests_per_condition": 50,
+    "warmup": 5,
+    "max_tokens": 128,
+    "concurrencies": [
+      1,
+      4,
+      8,
+      16
+    ]
+  },
+  "conditions": [
+    {
+      "target": "single",
+      "concurrency": 1,
+      "total_requests": 50,
+      "successful": 50,
+      "failed": 0,
+      "avg_latency_ms": 50638.81,
+      "p50_latency_ms": 50650.12,
+      "p95_latency_ms": 94397.59,
+      "p99_latency_ms": 98290.02,
+      "throughput_tok_s": 0.0,
+      "req_per_sec": 0.5,
+      "memory_rss_mb": 31.45,
+      "wall_time_sec": 99.26
+    },
+    {
+      "target": "single",
+      "concurrency": 4,
+      "total_requests": 50,
+      "successful": 50,
+      "failed": 0,
+      "avg_latency_ms": 46303.45,
+      "p50_latency_ms": 47903.96,
+      "p95_latency_ms": 82622.91,
+      "p99_latency_ms": 85694.4,
+      "throughput_tok_s": 0.0,
+      "req_per_sec": 0.58,
+      "memory_rss_mb": 31.45,
+      "wall_time_sec": 85.7
+    },
+    {
+      "target": "single",
+      "concurrency": 8,
+      "total_requests": 50,
+      "successful": 50,
+      "failed": 0,
+      "avg_latency_ms": 47002.15,
+      "p50_latency_ms": 48558.28,
+      "p95_latency_ms": 83606.25,
+      "p99_latency_ms": 87337.31,
+      "throughput_tok_s": 0.0,
+      "req_per_sec": 0.57,
+      "memory_rss_mb": 31.55,
+      "wall_time_sec": 87.35
+    },
+    {
+      "target": "single",
+      "concurrency": 16,
+      "total_requests": 50,
+      "successful": 50,
+      "failed": 0,
+      "avg_latency_ms": 46939.39,
+      "p50_latency_ms": 48527.35,
+      "p95_latency_ms": 83556.02,
+      "p99_latency_ms": 87288.96,
+      "throughput_tok_s": 0.0,
+      "req_per_sec": 0.57,
+      "memory_rss_mb": 31.78,
+      "wall_time_sec": 87.3
+    }
+  ]
+}

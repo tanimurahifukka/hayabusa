@@ -1,0 +1,443 @@
+{
+  "experiment": "exp_b_specialist_accuracy",
+  "timestamp": "20260405_111726",
+  "config": {
+    "domain": "supabase",
+    "specialist_url": "http://localhost:8080",
+    "generalist_url": "http://localhost:8080",
+    "max_tokens": 512
+  },
+  "summary": {
+    "domain": "supabase",
+    "num_problems": 10,
+    "specialist": {
+      "avg_score": 0.02,
+      "stdev": 0.0632,
+      "min_score": 0.0,
+      "max_score": 0.2
+    },
+    "generalist": {
+      "avg_score": 0.02,
+      "stdev": 0.0632,
+      "min_score": 0.0,
+      "max_score": 0.2
+    },
+    "specialist_win_rate": 0.0,
+    "generalist_win_rate": 0.0,
+    "tie_rate": 1.0
+  },
+  "results": [
+    {
+      "id": "supabase_01",
+      "prompt": "How do I set up Row Level Security (RLS) policies in Supabase for a multi-tenant app?",
+      "expected_keywords": [
+        "RLS",
+        "policy",
+        "auth.uid",
+        "CREATE POLICY",
+        "tenant"
+      ],
+      "specialist": {
+        "response": "[ERROR: 200, message='Attempt to decode JSON with unexpected mimetype: text/plain; charset=utf-8', url='http://localhost:8080/v1/chat/completions']",
+        "latency_ms": 7435.76,
+        "score": 0.0,
+        "matched": 0,
+        "total": 5,
+        "matches": [],
+        "misses": [
+          "RLS",
+          "policy",
+          "auth.uid",
+          "CREATE POLICY",
+          "tenant"
+        ]
+      },
+      "generalist": {
+        "response": "[ERROR: 200, message='Attempt to decode JSON with unexpected mimetype: text/plain; charset=utf-8', url='http://localhost:8080/v1/chat/completions']",
+        "latency_ms": 7432.01,
+        "score": 0.0,
+        "matched": 0,
+        "total": 5,
+        "matches": [],
+        "misses": [
+          "RLS",
+          "policy",
+          "auth.uid",
+          "CREATE POLICY",
+          "tenant"
+        ]
+      }
+    },
+    {
+      "id": "supabase_02",
+      "prompt": "Explain how Supabase Realtime subscriptions work. How do I listen to INSERT events on a table?",
+      "expected_keywords": [
+        "Realtime",
+        "subscribe",
+        "INSERT",
+        "channel",
+        "postgres_changes"
+      ],
+      "specialist": {
+        "response": "[ERROR: 200, message='Attempt to decode JSON with unexpected mimetype: text/plain; charset=utf-8', url='http://localhost:8080/v1/chat/completions']",
+        "latency_ms": 7396.24,
+        "score": 0.0,
+        "matched": 0,
+        "total": 5,
+        "matches": [],
+        "misses": [
+          "Realtime",
+          "subscribe",
+          "INSERT",
+          "channel",
+          "postgres_changes"
+        ]
+      },
+      "generalist": {
+        "response": "[ERROR: 200, message='Attempt to decode JSON with unexpected mimetype: text/plain; charset=utf-8', url='http://localhost:8080/v1/chat/completions']",
+        "latency_ms": 7406.03,
+        "score": 0.0,
+        "matched": 0,
+        "total": 5,
+        "matches": [],
+        "misses": [
+          "Realtime",
+          "subscribe",
+          "INSERT",
+          "channel",
+          "postgres_changes"
+        ]
+      }
+    },
+    {
+      "id": "supabase_03",
+      "prompt": "How do I use Supabase Edge Functions? What runtime do they use and how do I deploy?",
+      "expected_keywords": [
+        "Edge Function",
+        "Deno",
+        "deploy",
+        "supabase functions",
+        "serve"
+      ],
+      "specialist": {
+        "response": "[ERROR: 200, message='Attempt to decode JSON with unexpected mimetype: text/plain; charset=utf-8', url='http://localhost:8080/v1/chat/completions']",
+        "latency_ms": 7405.95,
+        "score": 0.0,
+        "matched": 0,
+        "total": 5,
+        "matches": [],
+        "misses": [
+          "Edge Function",
+          "Deno",
+          "deploy",
+          "supabase functions",
+          "serve"
+        ]
+      },
+      "generalist": {
+        "response": "[ERROR: 200, message='Attempt to decode JSON with unexpected mimetype: text/plain; charset=utf-8', url='http://localhost:8080/v1/chat/completions']",
+        "latency_ms": 7376.91,
+        "score": 0.0,
+        "matched": 0,
+        "total": 5,
+        "matches": [],
+        "misses": [
+          "Edge Function",
+          "Deno",
+          "deploy",
+          "supabase functions",
+          "serve"
+        ]
+      }
+    },
+    {
+      "id": "supabase_04",
+      "prompt": "How does Supabase Auth handle JWT tokens? What's the difference between access and refresh tokens?",
+      "expected_keywords": [
+        "JWT",
+        "access_token",
+        "refresh_token",
+        "auth",
+        "session"
+      ],
+      "specialist": {
+        "response": "[ERROR: 200, message='Attempt to decode JSON with unexpected mimetype: text/plain; charset=utf-8', url='http://localhost:8080/v1/chat/completions']",
+        "latency_ms": 7366.26,
+        "score": 0.0,
+        "matched": 0,
+        "total": 5,
+        "matches": [],
+        "misses": [
+          "JWT",
+          "access_token",
+          "refresh_token",
+          "auth",
+          "session"
+        ]
+      },
+      "generalist": {
+        "response": "[ERROR: 200, message='Attempt to decode JSON with unexpected mimetype: text/plain; charset=utf-8', url='http://localhost:8080/v1/chat/completions']",
+        "latency_ms": 7400.17,
+        "score": 0.0,
+        "matched": 0,
+        "total": 5,
+        "matches": [],
+        "misses": [
+          "JWT",
+          "access_token",
+          "refresh_token",
+          "auth",
+          "session"
+        ]
+      }
+    },
+    {
+      "id": "supabase_05",
+      "prompt": "How do I use Supabase Storage with signed URLs? What are the bucket policies?",
+      "expected_keywords": [
+        "Storage",
+        "bucket",
+        "signed",
+        "URL",
+        "upload"
+      ],
+      "specialist": {
+        "response": "[ERROR: 200, message='Attempt to decode JSON with unexpected mimetype: text/plain; charset=utf-8', url='http://localhost:8080/v1/chat/completions']",
+        "latency_ms": 7379.67,
+        "score": 0.2,
+        "matched": 1,
+        "total": 5,
+        "matches": [
+          "URL"
+        ],
+        "misses": [
+          "Storage",
+          "bucket",
+          "signed",
+          "upload"
+        ]
+      },
+      "generalist": {
+        "response": "[ERROR: 200, message='Attempt to decode JSON with unexpected mimetype: text/plain; charset=utf-8', url='http://localhost:8080/v1/chat/completions']",
+        "latency_ms": 7373.67,
+        "score": 0.2,
+        "matched": 1,
+        "total": 5,
+        "matches": [
+          "URL"
+        ],
+        "misses": [
+          "Storage",
+          "bucket",
+          "signed",
+          "upload"
+        ]
+      }
+    },
+    {
+      "id": "supabase_06",
+      "prompt": "Explain pgvector integration in Supabase. How do I store and query embeddings?",
+      "expected_keywords": [
+        "pgvector",
+        "embedding",
+        "vector",
+        "similarity",
+        "ivfflat"
+      ],
+      "specialist": {
+        "response": "[ERROR: 200, message='Attempt to decode JSON with unexpected mimetype: text/plain; charset=utf-8', url='http://localhost:8080/v1/chat/completions']",
+        "latency_ms": 7392.32,
+        "score": 0.0,
+        "matched": 0,
+        "total": 5,
+        "matches": [],
+        "misses": [
+          "pgvector",
+          "embedding",
+          "vector",
+          "similarity",
+          "ivfflat"
+        ]
+      },
+      "generalist": {
+        "response": "[ERROR: 200, message='Attempt to decode JSON with unexpected mimetype: text/plain; charset=utf-8', url='http://localhost:8080/v1/chat/completions']",
+        "latency_ms": 7376.77,
+        "score": 0.0,
+        "matched": 0,
+        "total": 5,
+        "matches": [],
+        "misses": [
+          "pgvector",
+          "embedding",
+          "vector",
+          "similarity",
+          "ivfflat"
+        ]
+      }
+    },
+    {
+      "id": "supabase_07",
+      "prompt": "How do I perform a join query using the Supabase JavaScript client? Show a foreign key example.",
+      "expected_keywords": [
+        "select",
+        "foreign",
+        "join",
+        "supabase",
+        "from"
+      ],
+      "specialist": {
+        "response": "[ERROR: 200, message='Attempt to decode JSON with unexpected mimetype: text/plain; charset=utf-8', url='http://localhost:8080/v1/chat/completions']",
+        "latency_ms": 7371.99,
+        "score": 0.0,
+        "matched": 0,
+        "total": 5,
+        "matches": [],
+        "misses": [
+          "select",
+          "foreign",
+          "join",
+          "supabase",
+          "from"
+        ]
+      },
+      "generalist": {
+        "response": "[ERROR: 200, message='Attempt to decode JSON with unexpected mimetype: text/plain; charset=utf-8', url='http://localhost:8080/v1/chat/completions']",
+        "latency_ms": 7361.85,
+        "score": 0.0,
+        "matched": 0,
+        "total": 5,
+        "matches": [],
+        "misses": [
+          "select",
+          "foreign",
+          "join",
+          "supabase",
+          "from"
+        ]
+      }
+    },
+    {
+      "id": "supabase_08",
+      "prompt": "What are Supabase Database Functions and how do I call them via RPC from the client?",
+      "expected_keywords": [
+        "rpc",
+        "function",
+        "plpgsql",
+        "call",
+        "invoke"
+      ],
+      "specialist": {
+        "response": "[ERROR: 200, message='Attempt to decode JSON with unexpected mimetype: text/plain; charset=utf-8', url='http://localhost:8080/v1/chat/completions']",
+        "latency_ms": 7382.84,
+        "score": 0.0,
+        "matched": 0,
+        "total": 5,
+        "matches": [],
+        "misses": [
+          "rpc",
+          "function",
+          "plpgsql",
+          "call",
+          "invoke"
+        ]
+      },
+      "generalist": {
+        "response": "[ERROR: 200, message='Attempt to decode JSON with unexpected mimetype: text/plain; charset=utf-8', url='http://localhost:8080/v1/chat/completions']",
+        "latency_ms": 7376.17,
+        "score": 0.0,
+        "matched": 0,
+        "total": 5,
+        "matches": [],
+        "misses": [
+          "rpc",
+          "function",
+          "plpgsql",
+          "call",
+          "invoke"
+        ]
+      }
+    },
+    {
+      "id": "supabase_09",
+      "prompt": "How do I set up Supabase Auth with OAuth providers like Google and GitHub?",
+      "expected_keywords": [
+        "OAuth",
+        "provider",
+        "Google",
+        "GitHub",
+        "signInWith"
+      ],
+      "specialist": {
+        "response": "[ERROR: 200, message='Attempt to decode JSON with unexpected mimetype: text/plain; charset=utf-8', url='http://localhost:8080/v1/chat/completions']",
+        "latency_ms": 7375.38,
+        "score": 0.0,
+        "matched": 0,
+        "total": 5,
+        "matches": [],
+        "misses": [
+          "OAuth",
+          "provider",
+          "Google",
+          "GitHub",
+          "signInWith"
+        ]
+      },
+      "generalist": {
+        "response": "[ERROR: 200, message='Attempt to decode JSON with unexpected mimetype: text/plain; charset=utf-8', url='http://localhost:8080/v1/chat/completions']",
+        "latency_ms": 7389.85,
+        "score": 0.0,
+        "matched": 0,
+        "total": 5,
+        "matches": [],
+        "misses": [
+          "OAuth",
+          "provider",
+          "Google",
+          "GitHub",
+          "signInWith"
+        ]
+      }
+    },
+    {
+      "id": "supabase_10",
+      "prompt": "Explain Supabase migrations workflow. How do I manage schema changes in production?",
+      "expected_keywords": [
+        "migration",
+        "schema",
+        "supabase db",
+        "diff",
+        "push"
+      ],
+      "specialist": {
+        "response": "[ERROR: 200, message='Attempt to decode JSON with unexpected mimetype: text/plain; charset=utf-8', url='http://localhost:8080/v1/chat/completions']",
+        "latency_ms": 7386.27,
+        "score": 0.0,
+        "matched": 0,
+        "total": 5,
+        "matches": [],
+        "misses": [
+          "migration",
+          "schema",
+          "supabase db",
+          "diff",
+          "push"
+        ]
+      },
+      "generalist": {
+        "response": "[ERROR: 200, message='Attempt to decode JSON with unexpected mimetype: text/plain; charset=utf-8', url='http://localhost:8080/v1/chat/completions']",
+        "latency_ms": 7382.26,
+        "score": 0.0,
+        "matched": 0,
+        "total": 5,
+        "matches": [],
+        "misses": [
+          "migration",
+          "schema",
+          "supabase db",
+          "diff",
+          "push"
+        ]
+      }
+    }
+  ]
+}

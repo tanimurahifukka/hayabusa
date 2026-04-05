@@ -351,7 +351,7 @@ async def main():
         for name, url in [("specialist", args.specialist_url), ("generalist", args.generalist_url)]:
             try:
                 async with session.get(
-                    f"{url}/v1/models",
+                    f"{url}/health",
                     timeout=aiohttp.ClientTimeout(total=5),
                 ) as resp:
                     if resp.status != 200:

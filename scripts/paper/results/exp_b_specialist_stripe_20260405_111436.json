@@ -1,0 +1,440 @@
+{
+  "experiment": "exp_b_specialist_accuracy",
+  "timestamp": "20260405_111436",
+  "config": {
+    "domain": "stripe",
+    "specialist_url": "http://localhost:8080",
+    "generalist_url": "http://localhost:8080",
+    "max_tokens": 512
+  },
+  "summary": {
+    "domain": "stripe",
+    "num_problems": 10,
+    "specialist": {
+      "avg_score": 0.02,
+      "stdev": 0.0632,
+      "min_score": 0.0,
+      "max_score": 0.2
+    },
+    "generalist": {
+      "avg_score": 0.02,
+      "stdev": 0.0632,
+      "min_score": 0.0,
+      "max_score": 0.2
+    },
+    "specialist_win_rate": 0.0,
+    "generalist_win_rate": 0.0,
+    "tie_rate": 1.0
+  },
+  "results": [
+    {
+      "id": "stripe_01",
+      "prompt": "How do I create a PaymentIntent with automatic confirmation and capture in Stripe?",
+      "expected_keywords": [
+        "PaymentIntent",
+        "create",
+        "confirm",
+        "capture",
+        "automatic"
+      ],
+      "specialist": {
+        "response": "[ERROR: 200, message='Attempt to decode JSON with unexpected mimetype: text/plain; charset=utf-8', url='http://localhost:8080/v1/chat/completions']",
+        "latency_ms": 7375.72,
+        "score": 0.0,
+        "matched": 0,
+        "total": 5,
+        "matches": [],
+        "misses": [
+          "PaymentIntent",
+          "create",
+          "confirm",
+          "capture",
+          "automatic"
+        ]
+      },
+      "generalist": {
+        "response": "[ERROR: 200, message='Attempt to decode JSON with unexpected mimetype: text/plain; charset=utf-8', url='http://localhost:8080/v1/chat/completions']",
+        "latency_ms": 7366.56,
+        "score": 0.0,
+        "matched": 0,
+        "total": 5,
+        "matches": [],
+        "misses": [
+          "PaymentIntent",
+          "create",
+          "confirm",
+          "capture",
+          "automatic"
+        ]
+      }
+    },
+    {
+      "id": "stripe_02",
+      "prompt": "Explain how Stripe webhook signature verification works. What header contains the signature?",
+      "expected_keywords": [
+        "Stripe-Signature",
+        "webhook",
+        "verify",
+        "secret",
+        "timestamp"
+      ],
+      "specialist": {
+        "response": "[ERROR: 200, message='Attempt to decode JSON with unexpected mimetype: text/plain; charset=utf-8', url='http://localhost:8080/v1/chat/completions']",
+        "latency_ms": 7370.21,
+        "score": 0.0,
+        "matched": 0,
+        "total": 5,
+        "matches": [],
+        "misses": [
+          "Stripe-Signature",
+          "webhook",
+          "verify",
+          "secret",
+          "timestamp"
+        ]
+      },
+      "generalist": {
+        "response": "[ERROR: 200, message='Attempt to decode JSON with unexpected mimetype: text/plain; charset=utf-8', url='http://localhost:8080/v1/chat/completions']",
+        "latency_ms": 7363.66,
+        "score": 0.0,
+        "matched": 0,
+        "total": 5,
+        "matches": [],
+        "misses": [
+          "Stripe-Signature",
+          "webhook",
+          "verify",
+          "secret",
+          "timestamp"
+        ]
+      }
+    },
+    {
+      "id": "stripe_03",
+      "prompt": "How do I set up Stripe Connect with Standard accounts? What's the OAuth flow?",
+      "expected_keywords": [
+        "Connect",
+        "Standard",
+        "OAuth",
+        "account",
+        "authorize"
+      ],
+      "specialist": {
+        "response": "[ERROR: 200, message='Attempt to decode JSON with unexpected mimetype: text/plain; charset=utf-8', url='http://localhost:8080/v1/chat/completions']",
+        "latency_ms": 7301.61,
+        "score": 0.0,
+        "matched": 0,
+        "total": 5,
+        "matches": [],
+        "misses": [
+          "Connect",
+          "Standard",
+          "OAuth",
+          "account",
+          "authorize"
+        ]
+      },
+      "generalist": {
+        "response": "[ERROR: 200, message='Attempt to decode JSON with unexpected mimetype: text/plain; charset=utf-8', url='http://localhost:8080/v1/chat/completions']",
+        "latency_ms": 7328.49,
+        "score": 0.0,
+        "matched": 0,
+        "total": 5,
+        "matches": [],
+        "misses": [
+          "Connect",
+          "Standard",
+          "OAuth",
+          "account",
+          "authorize"
+        ]
+      }
+    },
+    {
+      "id": "stripe_04",
+      "prompt": "What is the difference between Stripe Checkout and Elements? When should I use each?",
+      "expected_keywords": [
+        "Checkout",
+        "Elements",
+        "hosted",
+        "embedded",
+        "customiz"
+      ],
+      "specialist": {
+        "response": "[ERROR: 200, message='Attempt to decode JSON with unexpected mimetype: text/plain; charset=utf-8', url='http://localhost:8080/v1/chat/completions']",
+        "latency_ms": 7311.82,
+        "score": 0.0,
+        "matched": 0,
+        "total": 5,
+        "matches": [],
+        "misses": [
+          "Checkout",
+          "Elements",
+          "hosted",
+          "embedded",
+          "customiz"
+        ]
+      },
+      "generalist": {
+        "response": "[ERROR: 200, message='Attempt to decode JSON with unexpected mimetype: text/plain; charset=utf-8', url='http://localhost:8080/v1/chat/completions']",
+        "latency_ms": 7317.05,
+        "score": 0.0,
+        "matched": 0,
+        "total": 5,
+        "matches": [],
+        "misses": [
+          "Checkout",
+          "Elements",
+          "hosted",
+          "embedded",
+          "customiz"
+        ]
+      }
+    },
+    {
+      "id": "stripe_05",
+      "prompt": "How do I handle idempotency in Stripe API calls? What header do I use?",
+      "expected_keywords": [
+        "Idempotency-Key",
+        "header",
+        "retry",
+        "idempoten"
+      ],
+      "specialist": {
+        "response": "[ERROR: 200, message='Attempt to decode JSON with unexpected mimetype: text/plain; charset=utf-8', url='http://localhost:8080/v1/chat/completions']",
+        "latency_ms": 6268.2,
+        "score": 0.0,
+        "matched": 0,
+        "total": 4,
+        "matches": [],
+        "misses": [
+          "Idempotency-Key",
+          "header",
+          "retry",
+          "idempoten"
+        ]
+      },
+      "generalist": {
+        "response": "[ERROR: 200, message='Attempt to decode JSON with unexpected mimetype: text/plain; charset=utf-8', url='http://localhost:8080/v1/chat/completions']",
+        "latency_ms": 6278.39,
+        "score": 0.0,
+        "matched": 0,
+        "total": 4,
+        "matches": [],
+        "misses": [
+          "Idempotency-Key",
+          "header",
+          "retry",
+          "idempoten"
+        ]
+      }
+    },
+    {
+      "id": "stripe_06",
+      "prompt": "Explain Stripe's subscription billing cycle. How do proration and invoicing work?",
+      "expected_keywords": [
+        "subscription",
+        "invoice",
+        "proration",
+        "billing",
+        "cycle"
+      ],
+      "specialist": {
+        "response": "[ERROR: 200, message='Attempt to decode JSON with unexpected mimetype: text/plain; charset=utf-8', url='http://localhost:8080/v1/chat/completions']",
+        "latency_ms": 7354.2,
+        "score": 0.0,
+        "matched": 0,
+        "total": 5,
+        "matches": [],
+        "misses": [
+          "subscription",
+          "invoice",
+          "proration",
+          "billing",
+          "cycle"
+        ]
+      },
+      "generalist": {
+        "response": "[ERROR: 200, message='Attempt to decode JSON with unexpected mimetype: text/plain; charset=utf-8', url='http://localhost:8080/v1/chat/completions']",
+        "latency_ms": 7361.39,
+        "score": 0.0,
+        "matched": 0,
+        "total": 5,
+        "matches": [],
+        "misses": [
+          "subscription",
+          "invoice",
+          "proration",
+          "billing",
+          "cycle"
+        ]
+      }
+    },
+    {
+      "id": "stripe_07",
+      "prompt": "How do I implement Stripe SCA (Strong Customer Authentication) for European customers?",
+      "expected_keywords": [
+        "SCA",
+        "3D Secure",
+        "authentication",
+        "PSD2",
+        "PaymentIntent"
+      ],
+      "specialist": {
+        "response": "[ERROR: 200, message='Attempt to decode JSON with unexpected mimetype: text/plain; charset=utf-8', url='http://localhost:8080/v1/chat/completions']",
+        "latency_ms": 7367.77,
+        "score": 0.0,
+        "matched": 0,
+        "total": 5,
+        "matches": [],
+        "misses": [
+          "SCA",
+          "3D Secure",
+          "authentication",
+          "PSD2",
+          "PaymentIntent"
+        ]
+      },
+      "generalist": {
+        "response": "[ERROR: 200, message='Attempt to decode JSON with unexpected mimetype: text/plain; charset=utf-8', url='http://localhost:8080/v1/chat/completions']",
+        "latency_ms": 7320.12,
+        "score": 0.0,
+        "matched": 0,
+        "total": 5,
+        "matches": [],
+        "misses": [
+          "SCA",
+          "3D Secure",
+          "authentication",
+          "PSD2",
+          "PaymentIntent"
+        ]
+      }
+    },
+    {
+      "id": "stripe_08",
+      "prompt": "What are Stripe price objects? How do I create recurring vs one-time prices?",
+      "expected_keywords": [
+        "Price",
+        "recurring",
+        "one_time",
+        "interval",
+        "currency"
+      ],
+      "specialist": {
+        "response": "[ERROR: 200, message='Attempt to decode JSON with unexpected mimetype: text/plain; charset=utf-8', url='http://localhost:8080/v1/chat/completions']",
+        "latency_ms": 7371.2,
+        "score": 0.0,
+        "matched": 0,
+        "total": 5,
+        "matches": [],
+        "misses": [
+          "Price",
+          "recurring",
+          "one_time",
+          "interval",
+          "currency"
+        ]
+      },
+      "generalist": {
+        "response": "[ERROR: 200, message='Attempt to decode JSON with unexpected mimetype: text/plain; charset=utf-8', url='http://localhost:8080/v1/chat/completions']",
+        "latency_ms": 7357.56,
+        "score": 0.0,
+        "matched": 0,
+        "total": 5,
+        "matches": [],
+        "misses": [
+          "Price",
+          "recurring",
+          "one_time",
+          "interval",
+          "currency"
+        ]
+      }
+    },
+    {
+      "id": "stripe_09",
+      "prompt": "How does Stripe Radar work for fraud detection? What are Radar rules?",
+      "expected_keywords": [
+        "Radar",
+        "fraud",
+        "rule",
+        "risk",
+        "score"
+      ],
+      "specialist": {
+        "response": "[ERROR: 200, message='Attempt to decode JSON with unexpected mimetype: text/plain; charset=utf-8', url='http://localhost:8080/v1/chat/completions']",
+        "latency_ms": 7365.16,
+        "score": 0.0,
+        "matched": 0,
+        "total": 5,
+        "matches": [],
+        "misses": [
+          "Radar",
+          "fraud",
+          "rule",
+          "risk",
+          "score"
+        ]
+      },
+      "generalist": {
+        "response": "[ERROR: 200, message='Attempt to decode JSON with unexpected mimetype: text/plain; charset=utf-8', url='http://localhost:8080/v1/chat/completions']",
+        "latency_ms": 7369.43,
+        "score": 0.0,
+        "matched": 0,
+        "total": 5,
+        "matches": [],
+        "misses": [
+          "Radar",
+          "fraud",
+          "rule",
+          "risk",
+          "score"
+        ]
+      }
+    },
+    {
+      "id": "stripe_10",
+      "prompt": "Explain Stripe's payment method lifecycle. What states can a PaymentMethod be in?",
+      "expected_keywords": [
+        "PaymentMethod",
+        "attach",
+        "detach",
+        "customer",
+        "type"
+      ],
+      "specialist": {
+        "response": "[ERROR: 200, message='Attempt to decode JSON with unexpected mimetype: text/plain; charset=utf-8', url='http://localhost:8080/v1/chat/completions']",
+        "latency_ms": 7364.06,
+        "score": 0.2,
+        "matched": 1,
+        "total": 5,
+        "matches": [
+          "type"
+        ],
+        "misses": [
+          "PaymentMethod",
+          "attach",
+          "detach",
+          "customer"
+        ]
+      },
+      "generalist": {
+        "response": "[ERROR: 200, message='Attempt to decode JSON with unexpected mimetype: text/plain; charset=utf-8', url='http://localhost:8080/v1/chat/completions']",
+        "latency_ms": 7367.04,
+        "score": 0.2,
+        "matched": 1,
+        "total": 5,
+        "matches": [
+          "type"
+        ],
+        "misses": [
+          "PaymentMethod",
+          "attach",
+          "detach",
+          "customer"
+        ]
+      }
+    }
+  ]
+}

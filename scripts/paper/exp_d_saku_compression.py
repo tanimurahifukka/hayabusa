@@ -353,7 +353,7 @@ async def main():
     try:
         async with aiohttp.ClientSession() as session:
             async with session.get(
-                f"{args.hayabusa_url}/v1/models",
+                f"{args.hayabusa_url}/health",
                 timeout=aiohttp.ClientTimeout(total=5),
             ) as resp:
                 if resp.status != 200:

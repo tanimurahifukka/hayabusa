@@ -30,13 +30,18 @@
 
 | Target | Conc. | Avg (ms) | P50 (ms) | P95 (ms) | tok/s | req/s |
 |--------|-------|----------|----------|----------|-------|-------|
-| (no data) | - | - | - | - | - | - |
+| single | 1 | 50639 | 50650 | 94398 | 0.0 | 0.50 |
+| single | 4 | 46303 | 47904 | 82623 | 0.0 | 0.58 |
+| single | 8 | 47002 | 48558 | 83606 | 0.0 | 0.57 |
+| single | 16 | 46939 | 48527 | 83556 | 0.0 | 0.57 |
 
 ## Table 4: Specialist vs Generalist Accuracy
 
 | Domain | Specialist Avg | Generalist Avg | Spec. Win Rate | Tie Rate |
 |--------|---------------|----------------|----------------|----------|
-| (no data) | - | - | - | - |
+| stripe | 2.0% | 2.0% | 0.0% | 100.0% |
+| supabase | 2.0% | 2.0% | 0.0% | 100.0% |
+| orca | 0.0% | 0.0% | 0.0% | 100.0% |
 
 ## Table 5: Token Cost Reduction (Claude-only vs KAJIBA)
 
@@ -56,4 +61,11 @@ Routing: 61 local, 39 escalate (61% local)
 
 | Group | Count | Reduction | Similarity | Latency (ms) |
 |-------|-------|-----------|------------|--------------|
-| (no data) | - | - | - | - |
+| **Overall** | 50 | 6.4% | 1.00 | 1449 |
+| code | 13 | 0.0% | 1.00 | 1821 |
+| medical | 13 | 3.1% | 1.00 | 1538 |
+| general | 12 | 15.0% | 1.00 | 919 |
+| technical | 12 | 8.3% | 1.00 | 1480 |
+| short | 34 | 9.4% | 1.00 | 734 |
+| medium | 12 | 0.0% | 1.00 | 2234 |
+| long | 4 | 0.0% | 1.00 | 5174 |

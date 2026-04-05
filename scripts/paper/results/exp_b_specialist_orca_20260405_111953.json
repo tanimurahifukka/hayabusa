@@ -1,0 +1,441 @@
+{
+  "experiment": "exp_b_specialist_accuracy",
+  "timestamp": "20260405_111953",
+  "config": {
+    "domain": "orca",
+    "specialist_url": "http://localhost:8080",
+    "generalist_url": "http://localhost:8080",
+    "max_tokens": 512
+  },
+  "summary": {
+    "domain": "orca",
+    "num_problems": 10,
+    "specialist": {
+      "avg_score": 0.0,
+      "stdev": 0.0,
+      "min_score": 0.0,
+      "max_score": 0.0
+    },
+    "generalist": {
+      "avg_score": 0.0,
+      "stdev": 0.0,
+      "min_score": 0.0,
+      "max_score": 0.0
+    },
+    "specialist_win_rate": 0.0,
+    "generalist_win_rate": 0.0,
+    "tie_rate": 1.0
+  },
+  "results": [
+    {
+      "id": "orca_01",
+      "prompt": "Explain how ORCA optimizer handles correlated subqueries. What transformation does it apply?",
+      "expected_keywords": [
+        "correlated",
+        "subquery",
+        "decorrelat",
+        "apply",
+        "transform"
+      ],
+      "specialist": {
+        "response": "[ERROR: 200, message='Attempt to decode JSON with unexpected mimetype: text/plain; charset=utf-8', url='http://localhost:8080/v1/chat/completions']",
+        "latency_ms": 7386.46,
+        "score": 0.0,
+        "matched": 0,
+        "total": 5,
+        "matches": [],
+        "misses": [
+          "correlated",
+          "subquery",
+          "decorrelat",
+          "apply",
+          "transform"
+        ]
+      },
+      "generalist": {
+        "response": "[ERROR: 200, message='Attempt to decode JSON with unexpected mimetype: text/plain; charset=utf-8', url='http://localhost:8080/v1/chat/completions']",
+        "latency_ms": 7365.18,
+        "score": 0.0,
+        "matched": 0,
+        "total": 5,
+        "matches": [],
+        "misses": [
+          "correlated",
+          "subquery",
+          "decorrelat",
+          "apply",
+          "transform"
+        ]
+      }
+    },
+    {
+      "id": "orca_02",
+      "prompt": "What is the DXL (Data eXchange Language) format used by ORCA? How does it represent query plans?",
+      "expected_keywords": [
+        "DXL",
+        "XML",
+        "plan",
+        "query",
+        "represent"
+      ],
+      "specialist": {
+        "response": "[ERROR: 200, message='Attempt to decode JSON with unexpected mimetype: text/plain; charset=utf-8', url='http://localhost:8080/v1/chat/completions']",
+        "latency_ms": 7314.17,
+        "score": 0.0,
+        "matched": 0,
+        "total": 5,
+        "matches": [],
+        "misses": [
+          "DXL",
+          "XML",
+          "plan",
+          "query",
+          "represent"
+        ]
+      },
+      "generalist": {
+        "response": "[ERROR: 200, message='Attempt to decode JSON with unexpected mimetype: text/plain; charset=utf-8', url='http://localhost:8080/v1/chat/completions']",
+        "latency_ms": 7322.07,
+        "score": 0.0,
+        "matched": 0,
+        "total": 5,
+        "matches": [],
+        "misses": [
+          "DXL",
+          "XML",
+          "plan",
+          "query",
+          "represent"
+        ]
+      }
+    },
+    {
+      "id": "orca_03",
+      "prompt": "How does ORCA's memo structure work for plan enumeration? What are groups and group expressions?",
+      "expected_keywords": [
+        "memo",
+        "group",
+        "expression",
+        "enumerat",
+        "plan"
+      ],
+      "specialist": {
+        "response": "[ERROR: 200, message='Attempt to decode JSON with unexpected mimetype: text/plain; charset=utf-8', url='http://localhost:8080/v1/chat/completions']",
+        "latency_ms": 7288.28,
+        "score": 0.0,
+        "matched": 0,
+        "total": 5,
+        "matches": [],
+        "misses": [
+          "memo",
+          "group",
+          "expression",
+          "enumerat",
+          "plan"
+        ]
+      },
+      "generalist": {
+        "response": "[ERROR: 200, message='Attempt to decode JSON with unexpected mimetype: text/plain; charset=utf-8', url='http://localhost:8080/v1/chat/completions']",
+        "latency_ms": 7299.07,
+        "score": 0.0,
+        "matched": 0,
+        "total": 5,
+        "matches": [],
+        "misses": [
+          "memo",
+          "group",
+          "expression",
+          "enumerat",
+          "plan"
+        ]
+      }
+    },
+    {
+      "id": "orca_04",
+      "prompt": "Explain ORCA's cost model. How does it estimate the cost of hash joins vs nested loop joins?",
+      "expected_keywords": [
+        "cost",
+        "hash join",
+        "nested loop",
+        "estimat",
+        "cardinality"
+      ],
+      "specialist": {
+        "response": "[ERROR: 200, message='Attempt to decode JSON with unexpected mimetype: text/plain; charset=utf-8', url='http://localhost:8080/v1/chat/completions']",
+        "latency_ms": 7312.97,
+        "score": 0.0,
+        "matched": 0,
+        "total": 5,
+        "matches": [],
+        "misses": [
+          "cost",
+          "hash join",
+          "nested loop",
+          "estimat",
+          "cardinality"
+        ]
+      },
+      "generalist": {
+        "response": "[ERROR: 200, message='Attempt to decode JSON with unexpected mimetype: text/plain; charset=utf-8', url='http://localhost:8080/v1/chat/completions']",
+        "latency_ms": 7322.93,
+        "score": 0.0,
+        "matched": 0,
+        "total": 5,
+        "matches": [],
+        "misses": [
+          "cost",
+          "hash join",
+          "nested loop",
+          "estimat",
+          "cardinality"
+        ]
+      }
+    },
+    {
+      "id": "orca_05",
+      "prompt": "How does ORCA handle partition pruning in Greenplum? What metadata does it use?",
+      "expected_keywords": [
+        "partition",
+        "prun",
+        "Greenplum",
+        "metadata",
+        "scan"
+      ],
+      "specialist": {
+        "response": "[ERROR: 200, message='Attempt to decode JSON with unexpected mimetype: text/plain; charset=utf-8', url='http://localhost:8080/v1/chat/completions']",
+        "latency_ms": 7276.84,
+        "score": 0.0,
+        "matched": 0,
+        "total": 5,
+        "matches": [],
+        "misses": [
+          "partition",
+          "prun",
+          "Greenplum",
+          "metadata",
+          "scan"
+        ]
+      },
+      "generalist": {
+        "response": "[ERROR: 200, message='Attempt to decode JSON with unexpected mimetype: text/plain; charset=utf-8', url='http://localhost:8080/v1/chat/completions']",
+        "latency_ms": 7265.82,
+        "score": 0.0,
+        "matched": 0,
+        "total": 5,
+        "matches": [],
+        "misses": [
+          "partition",
+          "prun",
+          "Greenplum",
+          "metadata",
+          "scan"
+        ]
+      }
+    },
+    {
+      "id": "orca_06",
+      "prompt": "What are ORCA's transformation rules? Give examples of exploration and implementation rules.",
+      "expected_keywords": [
+        "transform",
+        "rule",
+        "explor",
+        "implement",
+        "logical"
+      ],
+      "specialist": {
+        "response": "[ERROR: 200, message='Attempt to decode JSON with unexpected mimetype: text/plain; charset=utf-8', url='http://localhost:8080/v1/chat/completions']",
+        "latency_ms": 7285.99,
+        "score": 0.0,
+        "matched": 0,
+        "total": 5,
+        "matches": [],
+        "misses": [
+          "transform",
+          "rule",
+          "explor",
+          "implement",
+          "logical"
+        ]
+      },
+      "generalist": {
+        "response": "[ERROR: 200, message='Attempt to decode JSON with unexpected mimetype: text/plain; charset=utf-8', url='http://localhost:8080/v1/chat/completions']",
+        "latency_ms": 7284.33,
+        "score": 0.0,
+        "matched": 0,
+        "total": 5,
+        "matches": [],
+        "misses": [
+          "transform",
+          "rule",
+          "explor",
+          "implement",
+          "logical"
+        ]
+      }
+    },
+    {
+      "id": "orca_07",
+      "prompt": "How does ORCA's search strategy (optimization phases) work? What is the role of the scheduler?",
+      "expected_keywords": [
+        "search",
+        "phase",
+        "scheduler",
+        "optim",
+        "job"
+      ],
+      "specialist": {
+        "response": "[ERROR: 200, message='Attempt to decode JSON with unexpected mimetype: text/plain; charset=utf-8', url='http://localhost:8080/v1/chat/completions']",
+        "latency_ms": 7304.37,
+        "score": 0.0,
+        "matched": 0,
+        "total": 5,
+        "matches": [],
+        "misses": [
+          "search",
+          "phase",
+          "scheduler",
+          "optim",
+          "job"
+        ]
+      },
+      "generalist": {
+        "response": "[ERROR: 200, message='Attempt to decode JSON with unexpected mimetype: text/plain; charset=utf-8', url='http://localhost:8080/v1/chat/completions']",
+        "latency_ms": 7311.73,
+        "score": 0.0,
+        "matched": 0,
+        "total": 5,
+        "matches": [],
+        "misses": [
+          "search",
+          "phase",
+          "scheduler",
+          "optim",
+          "job"
+        ]
+      }
+    },
+    {
+      "id": "orca_08",
+      "prompt": "Explain how ORCA generates motion operators for distributed query execution in Greenplum.",
+      "expected_keywords": [
+        "motion",
+        "distribut",
+        "gather",
+        "broadcast",
+        "redistribute"
+      ],
+      "specialist": {
+        "response": "[ERROR: 200, message='Attempt to decode JSON with unexpected mimetype: text/plain; charset=utf-8', url='http://localhost:8080/v1/chat/completions']",
+        "latency_ms": 7280.22,
+        "score": 0.0,
+        "matched": 0,
+        "total": 5,
+        "matches": [],
+        "misses": [
+          "motion",
+          "distribut",
+          "gather",
+          "broadcast",
+          "redistribute"
+        ]
+      },
+      "generalist": {
+        "response": "[ERROR: 200, message='Attempt to decode JSON with unexpected mimetype: text/plain; charset=utf-8', url='http://localhost:8080/v1/chat/completions']",
+        "latency_ms": 7284.17,
+        "score": 0.0,
+        "matched": 0,
+        "total": 5,
+        "matches": [],
+        "misses": [
+          "motion",
+          "distribut",
+          "gather",
+          "broadcast",
+          "redistribute"
+        ]
+      }
+    },
+    {
+      "id": "orca_09",
+      "prompt": "What statistics does ORCA use for cardinality estimation? How does it handle column correlations?",
+      "expected_keywords": [
+        "statistic",
+        "cardinality",
+        "histogram",
+        "correlat",
+        "estimat"
+      ],
+      "specialist": {
+        "response": "[ERROR: 200, message='Attempt to decode JSON with unexpected mimetype: text/plain; charset=utf-8', url='http://localhost:8080/v1/chat/completions']",
+        "latency_ms": 7285.96,
+        "score": 0.0,
+        "matched": 0,
+        "total": 5,
+        "matches": [],
+        "misses": [
+          "statistic",
+          "cardinality",
+          "histogram",
+          "correlat",
+          "estimat"
+        ]
+      },
+      "generalist": {
+        "response": "[ERROR: 200, message='Attempt to decode JSON with unexpected mimetype: text/plain; charset=utf-8', url='http://localhost:8080/v1/chat/completions']",
+        "latency_ms": 7272.75,
+        "score": 0.0,
+        "matched": 0,
+        "total": 5,
+        "matches": [],
+        "misses": [
+          "statistic",
+          "cardinality",
+          "histogram",
+          "correlat",
+          "estimat"
+        ]
+      }
+    },
+    {
+      "id": "orca_10",
+      "prompt": "How do you debug ORCA's query planning? What tools and flags are available for plan analysis?",
+      "expected_keywords": [
+        "debug",
+        "explain",
+        "plan",
+        "flag",
+        "trace"
+      ],
+      "specialist": {
+        "response": "[ERROR: 200, message='Attempt to decode JSON with unexpected mimetype: text/plain; charset=utf-8', url='http://localhost:8080/v1/chat/completions']",
+        "latency_ms": 7276.62,
+        "score": 0.0,
+        "matched": 0,
+        "total": 5,
+        "matches": [],
+        "misses": [
+          "debug",
+          "explain",
+          "plan",
+          "flag",
+          "trace"
+        ]
+      },
+      "generalist": {
+        "response": "[ERROR: 200, message='Attempt to decode JSON with unexpected mimetype: text/plain; charset=utf-8', url='http://localhost:8080/v1/chat/completions']",
+        "latency_ms": 7284.87,
+        "score": 0.0,
+        "matched": 0,
+        "total": 5,
+        "matches": [],
+        "misses": [
+          "debug",
+          "explain",
+          "plan",
+          "flag",
+          "trace"
+        ]
+      }
+    }
+  ]
+}

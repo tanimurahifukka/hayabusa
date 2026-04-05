@@ -301,7 +301,7 @@ async def health_check(url: str) -> bool:
     try:
         async with aiohttp.ClientSession() as session:
             async with session.get(
-                f"{url}/v1/models",
+                f"{url}/health",
                 timeout=aiohttp.ClientTimeout(total=5),
             ) as resp:
                 return resp.status == 200

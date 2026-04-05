@@ -1,0 +1,667 @@
+{
+  "experiment": "exp_c_token_cost",
+  "timestamp": "20260405_110157",
+  "config": {
+    "hayabusa_url": "http://localhost:8080",
+    "simulate_only": true,
+    "claude_input_cost_per_mtok": 15.0,
+    "claude_output_cost_per_mtok": 75.0
+  },
+  "cost_analysis": {
+    "total_tasks": 100,
+    "routing": {
+      "local": 61,
+      "escalate": 39,
+      "local_rate": 0.61
+    },
+    "claude_only": {
+      "total_tokens": 35165,
+      "input_tokens": 2685,
+      "output_tokens": 32480,
+      "cost_usd": 2.476275,
+      "input_cost_usd": 0.040275,
+      "output_cost_usd": 2.436
+    },
+    "kajiba": {
+      "total_tokens": 26962,
+      "input_tokens": 1472,
+      "output_tokens": 25490,
+      "classify_tokens_local": 5500,
+      "cost_usd": 1.93383,
+      "input_cost_usd": 0.02208,
+      "output_cost_usd": 1.91175
+    },
+    "reduction": {
+      "token_reduction_rate": 0.2333,
+      "cost_reduction_rate": 0.2191,
+      "tokens_saved": 8203,
+      "cost_saved_usd": 0.542445
+    }
+  },
+  "breakdown_by_difficulty": {
+    "medium": {
+      "count": 50,
+      "local": 31,
+      "escalate": 19,
+      "input_tokens": 1090,
+      "output_tokens": 10550
+    },
+    "light": {
+      "count": 30,
+      "local": 30,
+      "escalate": 0,
+      "input_tokens": 555,
+      "output_tokens": 330
+    },
+    "heavy": {
+      "count": 20,
+      "local": 0,
+      "escalate": 20,
+      "input_tokens": 1040,
+      "output_tokens": 21600
+    }
+  },
+  "classify_latency": {},
+  "routing_results": [
+    {
+      "task_id": "medium_001",
+      "decision": "escalate",
+      "classify_latency_ms": 0,
+      "source": "simulated_fallback"
+    },
+    {
+      "task_id": "medium_032",
+      "decision": "escalate",
+      "classify_latency_ms": 0,
+      "source": "simulated_fallback"
+    },
+    {
+      "task_id": "light_007",
+      "decision": "local",
+      "classify_latency_ms": 0,
+      "source": "simulated_fallback"
+    },
+    {
+      "task_id": "heavy_005",
+      "decision": "escalate",
+      "classify_latency_ms": 0,
+      "source": "simulated_fallback"
+    },
+    {
+      "task_id": "light_012",
+      "decision": "local",
+      "classify_latency_ms": 0,
+      "source": "simulated_fallback"
+    },
+    {
+      "task_id": "medium_023",
+      "decision": "local",
+      "classify_latency_ms": 0,
+      "source": "simulated_fallback"
+    },
+    {
+      "task_id": "medium_027",
+      "decision": "local",
+      "classify_latency_ms": 0,
+      "source": "simulated_fallback"
+    },
+    {
+      "task_id": "light_003",
+      "decision": "local",
+      "classify_latency_ms": 0,
+      "source": "simulated_fallback"
+    },
+    {
+      "task_id": "light_023",
+      "decision": "local",
+      "classify_latency_ms": 0,
+      "source": "simulated_fallback"
+    },
+    {
+      "task_id": "medium_035",
+      "decision": "local",
+      "classify_latency_ms": 0,
+      "source": "simulated_fallback"
+    },
+    {
+      "task_id": "light_013",
+      "decision": "local",
+      "classify_latency_ms": 0,
+      "source": "simulated_fallback"
+    },
+    {
+      "task_id": "medium_010",
+      "decision": "local",
+      "classify_latency_ms": 0,
+      "source": "simulated_fallback"
+    },
+    {
+      "task_id": "medium_044",
+      "decision": "local",
+      "classify_latency_ms": 0,
+      "source": "simulated_fallback"
+    },
+    {
+      "task_id": "light_002",
+      "decision": "local",
+      "classify_latency_ms": 0,
+      "source": "simulated_fallback"
+    },
+    {
+      "task_id": "medium_036",
+      "decision": "local",
+      "classify_latency_ms": 0,
+      "source": "simulated_fallback"
+    },
+    {
+      "task_id": "light_020",
+      "decision": "local",
+      "classify_latency_ms": 0,
+      "source": "simulated_fallback"
+    },
+    {
+      "task_id": "heavy_018",
+      "decision": "escalate",
+      "classify_latency_ms": 0,
+      "source": "simulated_fallback"
+    },
+    {
+      "task_id": "heavy_004",
+      "decision": "escalate",
+      "classify_latency_ms": 0,
+      "source": "simulated_fallback"
+    },
+    {
+      "task_id": "medium_037",
+      "decision": "escalate",
+      "classify_latency_ms": 0,
+      "source": "simulated_fallback"
+    },
+    {
+      "task_id": "medium_017",
+      "decision": "local",
+      "classify_latency_ms": 0,
+      "source": "simulated_fallback"
+    },
+    {
+      "task_id": "light_014",
+      "decision": "local",
+      "classify_latency_ms": 0,
+      "source": "simulated_fallback"
+    },
+    {
+      "task_id": "medium_014",
+      "decision": "local",
+      "classify_latency_ms": 0,
+      "source": "simulated_fallback"
+    },
+    {
+      "task_id": "heavy_019",
+      "decision": "escalate",
+      "classify_latency_ms": 0,
+      "source": "simulated_fallback"
+    },
+    {
+      "task_id": "medium_049",
+      "decision": "escalate",
+      "classify_latency_ms": 0,
+      "source": "simulated_fallback"
+    },
+    {
+      "task_id": "heavy_017",
+      "decision": "escalate",
+      "classify_latency_ms": 0,
+      "source": "simulated_fallback"
+    },
+    {
+      "task_id": "medium_013",
+      "decision": "local",
+      "classify_latency_ms": 0,
+      "source": "simulated_fallback"
+    },
+    {
+      "task_id": "medium_020",
+      "decision": "local",
+      "classify_latency_ms": 0,
+      "source": "simulated_fallback"
+    },
+    {
+      "task_id": "medium_007",
+      "decision": "escalate",
+      "classify_latency_ms": 0,
+      "source": "simulated_fallback"
+    },
+    {
+      "task_id": "light_018",
+      "decision": "local",
+      "classify_latency_ms": 0,
+      "source": "simulated_fallback"
+    },
+    {
+      "task_id": "medium_050",
+      "decision": "local",
+      "classify_latency_ms": 0,
+      "source": "simulated_fallback"
+    },
+    {
+      "task_id": "heavy_009",
+      "decision": "escalate",
+      "classify_latency_ms": 0,
+      "source": "simulated_fallback"
+    },
+    {
+      "task_id": "medium_015",
+      "decision": "escalate",
+      "classify_latency_ms": 0,
+      "source": "simulated_fallback"
+    },
+    {
+      "task_id": "light_001",
+      "decision": "local",
+      "classify_latency_ms": 0,
+      "source": "simulated_fallback"
+    },
+    {
+      "task_id": "medium_028",
+      "decision": "local",
+      "classify_latency_ms": 0,
+      "source": "simulated_fallback"
+    },
+    {
+      "task_id": "medium_038",
+      "decision": "escalate",
+      "classify_latency_ms": 0,
+      "source": "simulated_fallback"
+    },
+    {
+      "task_id": "medium_047",
+      "decision": "local",
+      "classify_latency_ms": 0,
+      "source": "simulated_fallback"
+    },
+    {
+      "task_id": "medium_024",
+      "decision": "local",
+      "classify_latency_ms": 0,
+      "source": "simulated_fallback"
+    },
+    {
+      "task_id": "light_025",
+      "decision": "local",
+      "classify_latency_ms": 0,
+      "source": "simulated_fallback"
+    },
+    {
+      "task_id": "medium_046",
+      "decision": "local",
+      "classify_latency_ms": 0,
+      "source": "simulated_fallback"
+    },
+    {
+      "task_id": "medium_009",
+      "decision": "local",
+      "classify_latency_ms": 0,
+      "source": "simulated_fallback"
+    },
+    {
+      "task_id": "medium_025",
+      "decision": "escalate",
+      "classify_latency_ms": 0,
+      "source": "simulated_fallback"
+    },
+    {
+      "task_id": "light_011",
+      "decision": "local",
+      "classify_latency_ms": 0,
+      "source": "simulated_fallback"
+    },
+    {
+      "task_id": "medium_040",
+      "decision": "local",
+      "classify_latency_ms": 0,
+      "source": "simulated_fallback"
+    },
+    {
+      "task_id": "heavy_012",
+      "decision": "escalate",
+      "classify_latency_ms": 0,
+      "source": "simulated_fallback"
+    },
+    {
+      "task_id": "heavy_011",
+      "decision": "escalate",
+      "classify_latency_ms": 0,
+      "source": "simulated_fallback"
+    },
+    {
+      "task_id": "light_004",
+      "decision": "local",
+      "classify_latency_ms": 0,
+      "source": "simulated_fallback"
+    },
+    {
+      "task_id": "light_006",
+      "decision": "local",
+      "classify_latency_ms": 0,
+      "source": "simulated_fallback"
+    },
+    {
+      "task_id": "heavy_007",
+      "decision": "escalate",
+      "classify_latency_ms": 0,
+      "source": "simulated_fallback"
+    },
+    {
+      "task_id": "medium_003",
+      "decision": "local",
+      "classify_latency_ms": 0,
+      "source": "simulated_fallback"
+    },
+    {
+      "task_id": "medium_033",
+      "decision": "local",
+      "classify_latency_ms": 0,
+      "source": "simulated_fallback"
+    },
+    {
+      "task_id": "light_015",
+      "decision": "local",
+      "classify_latency_ms": 0,
+      "source": "simulated_fallback"
+    },
+    {
+      "task_id": "light_024",
+      "decision": "local",
+      "classify_latency_ms": 0,
+      "source": "simulated_fallback"
+    },
+    {
+      "task_id": "light_026",
+      "decision": "local",
+      "classify_latency_ms": 0,
+      "source": "simulated_fallback"
+    },
+    {
+      "task_id": "medium_026",
+      "decision": "local",
+      "classify_latency_ms": 0,
+      "source": "simulated_fallback"
+    },
+    {
+      "task_id": "heavy_014",
+      "decision": "escalate",
+      "classify_latency_ms": 0,
+      "source": "simulated_fallback"
+    },
+    {
+      "task_id": "medium_008",
+      "decision": "local",
+      "classify_latency_ms": 0,
+      "source": "simulated_fallback"
+    },
+    {
+      "task_id": "medium_031",
+      "decision": "escalate",
+      "classify_latency_ms": 0,
+      "source": "simulated_fallback"
+    },
+    {
+      "task_id": "light_017",
+      "decision": "local",
+      "classify_latency_ms": 0,
+      "source": "simulated_fallback"
+    },
+    {
+      "task_id": "medium_043",
+      "decision": "local",
+      "classify_latency_ms": 0,
+      "source": "simulated_fallback"
+    },
+    {
+      "task_id": "medium_006",
+      "decision": "escalate",
+      "classify_latency_ms": 0,
+      "source": "simulated_fallback"
+    },
+    {
+      "task_id": "heavy_020",
+      "decision": "escalate",
+      "classify_latency_ms": 0,
+      "source": "simulated_fallback"
+    },
+    {
+      "task_id": "light_016",
+      "decision": "local",
+      "classify_latency_ms": 0,
+      "source": "simulated_fallback"
+    },
+    {
+      "task_id": "heavy_001",
+      "decision": "escalate",
+      "classify_latency_ms": 0,
+      "source": "simulated_fallback"
+    },
+    {
+      "task_id": "medium_004",
+      "decision": "local",
+      "classify_latency_ms": 0,
+      "source": "simulated_fallback"
+    },
+    {
+      "task_id": "light_019",
+      "decision": "local",
+      "classify_latency_ms": 0,
+      "source": "simulated_fallback"
+    },
+    {
+      "task_id": "medium_029",
+      "decision": "escalate",
+      "classify_latency_ms": 0,
+      "source": "simulated_fallback"
+    },
+    {
+      "task_id": "medium_021",
+      "decision": "escalate",
+      "classify_latency_ms": 0,
+      "source": "simulated_fallback"
+    },
+    {
+      "task_id": "medium_034",
+      "decision": "escalate",
+      "classify_latency_ms": 0,
+      "source": "simulated_fallback"
+    },
+    {
+      "task_id": "medium_041",
+      "decision": "escalate",
+      "classify_latency_ms": 0,
+      "source": "simulated_fallback"
+    },
+    {
+      "task_id": "medium_045",
+      "decision": "local",
+      "classify_latency_ms": 0,
+      "source": "simulated_fallback"
+    },
+    {
+      "task_id": "light_028",
+      "decision": "local",
+      "classify_latency_ms": 0,
+      "source": "simulated_fallback"
+    },
+    {
+      "task_id": "light_009",
+      "decision": "local",
+      "classify_latency_ms": 0,
+      "source": "simulated_fallback"
+    },
+    {
+      "task_id": "heavy_013",
+      "decision": "escalate",
+      "classify_latency_ms": 0,
+      "source": "simulated_fallback"
+    },
+    {
+      "task_id": "medium_022",
+      "decision": "escalate",
+      "classify_latency_ms": 0,
+      "source": "simulated_fallback"
+    },
+    {
+      "task_id": "medium_011",
+      "decision": "local",
+      "classify_latency_ms": 0,
+      "source": "simulated_fallback"
+    },
+    {
+      "task_id": "light_005",
+      "decision": "local",
+      "classify_latency_ms": 0,
+      "source": "simulated_fallback"
+    },
+    {
+      "task_id": "light_030",
+      "decision": "local",
+      "classify_latency_ms": 0,
+      "source": "simulated_fallback"
+    },
+    {
+      "task_id": "light_008",
+      "decision": "local",
+      "classify_latency_ms": 0,
+      "source": "simulated_fallback"
+    },
+    {
+      "task_id": "medium_012",
+      "decision": "local",
+      "classify_latency_ms": 0,
+      "source": "simulated_fallback"
+    },
+    {
+      "task_id": "light_029",
+      "decision": "local",
+      "classify_latency_ms": 0,
+      "source": "simulated_fallback"
+    },
+    {
+      "task_id": "medium_042",
+      "decision": "local",
+      "classify_latency_ms": 0,
+      "source": "simulated_fallback"
+    },
+    {
+      "task_id": "heavy_015",
+      "decision": "escalate",
+      "classify_latency_ms": 0,
+      "source": "simulated_fallback"
+    },
+    {
+      "task_id": "heavy_016",
+      "decision": "escalate",
+      "classify_latency_ms": 0,
+      "source": "simulated_fallback"
+    },
+    {
+      "task_id": "medium_019",
+      "decision": "escalate",
+      "classify_latency_ms": 0,
+      "source": "simulated_fallback"
+    },
+    {
+      "task_id": "medium_030",
+      "decision": "escalate",
+      "classify_latency_ms": 0,
+      "source": "simulated_fallback"
+    },
+    {
+      "task_id": "light_021",
+      "decision": "local",
+      "classify_latency_ms": 0,
+      "source": "simulated_fallback"
+    },
+    {
+      "task_id": "medium_002",
+      "decision": "local",
+      "classify_latency_ms": 0,
+      "source": "simulated_fallback"
+    },
+    {
+      "task_id": "medium_039",
+      "decision": "escalate",
+      "classify_latency_ms": 0,
+      "source": "simulated_fallback"
+    },
+    {
+      "task_id": "light_022",
+      "decision": "local",
+      "classify_latency_ms": 0,
+      "source": "simulated_fallback"
+    },
+    {
+      "task_id": "heavy_002",
+      "decision": "escalate",
+      "classify_latency_ms": 0,
+      "source": "simulated_fallback"
+    },
+    {
+      "task_id": "medium_048",
+      "decision": "local",
+      "classify_latency_ms": 0,
+      "source": "simulated_fallback"
+    },
+    {
+      "task_id": "light_010",
+      "decision": "local",
+      "classify_latency_ms": 0,
+      "source": "simulated_fallback"
+    },
+    {
+      "task_id": "heavy_003",
+      "decision": "escalate",
+      "classify_latency_ms": 0,
+      "source": "simulated_fallback"
+    },
+    {
+      "task_id": "heavy_008",
+      "decision": "escalate",
+      "classify_latency_ms": 0,
+      "source": "simulated_fallback"
+    },
+    {
+      "task_id": "heavy_010",
+      "decision": "escalate",
+      "classify_latency_ms": 0,
+      "source": "simulated_fallback"
+    },
+    {
+      "task_id": "medium_005",
+      "decision": "escalate",
+      "classify_latency_ms": 0,
+      "source": "simulated_fallback"
+    },
+    {
+      "task_id": "heavy_006",
+      "decision": "escalate",
+      "classify_latency_ms": 0,
+      "source": "simulated_fallback"
+    },
+    {
+      "task_id": "light_027",
+      "decision": "local",
+      "classify_latency_ms": 0,
+      "source": "simulated_fallback"
+    },
+    {
+      "task_id": "medium_016",
+      "decision": "local",
+      "classify_latency_ms": 0,
+      "source": "simulated_fallback"
+    },
+    {
+      "task_id": "medium_018",
+      "decision": "local",
+      "classify_latency_ms": 0,
+      "source": "simulated_fallback"
+    }
+  ]
+}
