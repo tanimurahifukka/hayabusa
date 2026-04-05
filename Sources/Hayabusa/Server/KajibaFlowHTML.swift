@@ -101,13 +101,24 @@ svg#lines {
 .node-hayabusa.active { box-shadow: 0 0 30px rgba(0, 212, 255, 0.5); }
 .node-hayabusa .name { color: #00d4ff; }
 
+/* Generalist — 中間層（シアン） */
+.node-generalist {
+  background: linear-gradient(135deg, #0a1a2a, #0f2a3a);
+  border: 1.5px solid #00d4ff;
+  box-shadow: 0 0 12px rgba(0, 212, 255, 0.2);
+}
+.node-generalist.active { box-shadow: 0 0 30px rgba(0, 212, 255, 0.5); }
+.node-generalist .name { color: #00d4ff; }
+
+/* Specialist — 末端ノード（緑） */
 .node-specialist {
   background: linear-gradient(135deg, #1a1a1a, #1a2a1a);
   border: 1.5px solid #00ff88;
   box-shadow: 0 0 10px rgba(0, 255, 136, 0.15);
+  font-size: 0.9em;
 }
 .node-specialist.active { box-shadow: 0 0 25px rgba(0, 255, 136, 0.4); }
-.node-specialist .name { color: #00ff88; }
+.node-specialist .name { color: #00ff88; font-size: 12px; }
 
 .node-classify {
   background: linear-gradient(135deg, #1a1a1a, #2a1a2a);
@@ -240,31 +251,48 @@ svg#lines {
 
 <script>
 // ── Node definitions ──
+// ── Waterfall Layout ──
+// Level 0: Claude (cloud)
+// Level 1: HAYABUSA (orchestrator)
+// Level 2: Classify / Qwen3.5 (generalist) / Gemma4 (generalist)
+// Level 3: Specialists under their parent generalist
 const NODES = [
-  { id: 'claude', name: 'Claude Code', detail: 'Opus 4.6 (Cloud)', type: 'claude', x: 0.08, y: 0.35 },
-  { id: 'hayabusa', name: 'HAYABUSA', detail: 'Router / Orchestrator', type: 'hayabusa', x: 0.35, y: 0.35 },
-  { id: 'classify', name: 'Classify', detail: 'Qwen3-0.6B (300MB)', type: 'classify', x: 0.35, y: 0.12 },
-  { id: 'qwen', name: 'Qwen3.5-9B', detail: 'FIX-BUG / IMPL-UI', type: 'specialist', x: 0.6, y: 0.15 },
-  { id: 'gemma', name: 'Gemma 4 E4B', detail: 'IMPL-ALGO / GEN-TEST', type: 'specialist', x: 0.75, y: 0.3 },
-  { id: 'stripe', name: 'kajiba-stripe', detail: 'IMPL-PAYMENT (1.7B)', type: 'specialist', x: 0.7, y: 0.5 },
-  { id: 'supabase', name: 'kajiba-supabase', detail: 'IMPL-DB (1.7B)', type: 'specialist', x: 0.58, y: 0.65 },
-  { id: 'dawn', name: 'kajiba-dawn', detail: 'DAWN系 (1.7B)', type: 'specialist', x: 0.78, y: 0.68 },
-  { id: 'orca', name: 'kajiba-orca', detail: 'O-CLINICAL (0.6B)', type: 'specialist', x: 0.42, y: 0.72 },
-  { id: 'swift', name: 'kajiba-swift', detail: 'Swift/MLX (1.7B)', type: 'specialist', x: 0.88, y: 0.48 },
+  // Level 0 — Cloud
+  { id: 'claude',    name: 'Claude Code',     detail: 'Opus 4.6 (Cloud)',        type: 'claude',     x: 0.06, y: 0.40 },
+  // Level 1 — Orchestrator
+  { id: 'hayabusa',  name: 'HAYABUSA',        detail: 'Router / Orchestrator',   type: 'hayabusa',   x: 0.24, y: 0.40 },
+  // Level 2 — Classify + Generalists
+  { id: 'classify',  name: 'Classify',        detail: 'Qwen3-0.6B (300MB)',      type: 'classify',   x: 0.24, y: 0.10 },
+  { id: 'qwen',      name: 'Qwen3.5-9B',     detail: 'FIX / UI / API (5GB)',    type: 'generalist', x: 0.44, y: 0.22 },
+  { id: 'gemma',     name: 'Gemma 4 E4B',    detail: 'ALGO / TEST (7.5GB)',     type: 'generalist', x: 0.44, y: 0.58 },
+  // Level 3 — Specialists (under Qwen)
+  { id: 'stripe',    name: 'kajiba-stripe',   detail: 'PAYMENT (1.7B)',          type: 'specialist', x: 0.66, y: 0.08 },
+  { id: 'supabase',  name: 'kajiba-supabase', detail: 'DB / RLS (1.7B)',        type: 'specialist', x: 0.66, y: 0.22 },
+  { id: 'orca',      name: 'kajiba-orca',     detail: 'O-CLINICAL (0.6B)',       type: 'specialist', x: 0.66, y: 0.36 },
+  // Level 3 — Specialists (under Gemma)
+  { id: 'swift',     name: 'kajiba-swift',    detail: 'Swift/MLX (1.7B)',        type: 'specialist', x: 0.66, y: 0.52 },
+  { id: 'dawn',      name: 'kajiba-dawn',     detail: 'DAWN系 (1.7B)',           type: 'specialist', x: 0.66, y: 0.66 },
 ];
 
+// ── Waterfall Connections ──
+// 親子関係でツリー構造を表現
 const CONNECTIONS = [
-  { from: 'claude', to: 'hayabusa', color: '#e94560' },
-  { from: 'hayabusa', to: 'classify', color: '#ff9f43' },
-  { from: 'hayabusa', to: 'qwen', color: '#00ff88' },
-  { from: 'hayabusa', to: 'gemma', color: '#00ff88' },
-  { from: 'hayabusa', to: 'stripe', color: '#00ff88' },
-  { from: 'hayabusa', to: 'supabase', color: '#00ff88' },
-  { from: 'hayabusa', to: 'dawn', color: '#00ff88' },
-  { from: 'hayabusa', to: 'orca', color: '#00ff88' },
-  { from: 'hayabusa', to: 'swift', color: '#00ff88' },
-  { from: 'classify', to: 'hayabusa', color: '#ff9f43' },
-  { from: 'hayabusa', to: 'claude', color: '#e94560' },
+  // Level 0→1: Claude ↔ Hayabusa
+  { from: 'claude',   to: 'hayabusa',  color: '#e94560' },
+  { from: 'hayabusa', to: 'claude',    color: '#e94560' },
+  // Level 1→2: Hayabusa → Classify
+  { from: 'hayabusa', to: 'classify',  color: '#ff9f43' },
+  { from: 'classify', to: 'hayabusa',  color: '#ff9f43' },
+  // Level 1→2: Hayabusa → Generalists
+  { from: 'hayabusa', to: 'qwen',      color: '#00d4ff' },
+  { from: 'hayabusa', to: 'gemma',     color: '#00d4ff' },
+  // Level 2→3: Qwen → Specialists
+  { from: 'qwen',     to: 'stripe',    color: '#00ff88' },
+  { from: 'qwen',     to: 'supabase',  color: '#00ff88' },
+  { from: 'qwen',     to: 'orca',      color: '#00ff88' },
+  // Level 2→3: Gemma → Specialists
+  { from: 'gemma',    to: 'swift',     color: '#00ff88' },
+  { from: 'gemma',    to: 'dawn',      color: '#00ff88' },
 ];
 
 // ── State ──
@@ -279,7 +307,7 @@ function renderNodes() {
 
   // コアノード（Claude, Hayabusa, Classify）は常に表示
   // スペシャリストは呼び出されるまで非表示（dormant）
-  const coreNodes = new Set(['claude', 'hayabusa', 'classify']);
+  const coreNodes = new Set(['claude', 'hayabusa', 'classify', 'qwen', 'gemma']);
 
   NODES.forEach(n => {
     const el = document.createElement('div');
@@ -320,7 +348,7 @@ function renderConnections() {
     line.setAttribute('data-to', conn.to);
     line.style.stroke = conn.color + '33';
     // スペシャリスト接続は非表示
-    const coreNodes = new Set(['claude', 'hayabusa', 'classify']);
+    const coreNodes = new Set(['claude', 'hayabusa', 'classify', 'qwen', 'gemma']);
     if (!coreNodes.has(conn.from) || !coreNodes.has(conn.to)) {
       if (!coreNodes.has(conn.to) && conn.to !== 'claude') {
         line.classList.add('dormant');
@@ -418,14 +446,14 @@ async function simulateFlow(task) {
   sendPulse('hayabusa', 'classify', '#ff9f43', 400);
   await delay(500);
 
-  // 3. Classify結果 → 色が変わる
+  // 3. Classify結果 → ウォーターフォールルーティング
   if (task.route === 'escalate') {
     // Classify → Hayabusa（エスカレーション: 赤）
     sendPulse('classify', 'hayabusa', '#e94560', 400);
     addLog(`⚡ Classify → ${task.genre} (ESCALATE)`, 'escalate');
     await delay(400);
 
-    // Hayabusa → Claude（赤パルス）
+    // Hayabusa → Claude（赤パルス: 上位へ戻す）
     sendPulse('hayabusa', 'claude', '#e94560', 600);
     stats.escalated++;
     addLog(`⬆ Escalated to Claude (${task.genre})`, 'escalate');
@@ -435,20 +463,45 @@ async function simulateFlow(task) {
     addLog(`⚡ Classify → ${task.genre} (LOCAL)`, 'local');
     await delay(300);
 
-    // Hayabusa → Specialist（緑パルス）
     const target = task.target || 'qwen';
-    sendPulse('hayabusa', target, '#00ff88', 500);
-    stats.local++;
-    stats.tokensSaved += task.tokens || 150;
-    stats.costSaved += (task.tokens || 150) * 0.000075;
-    addLog(`✓ Local → ${target} (${task.genre}, ${task.latency}ms)`, 'local');
+    // Generalist経由かどうか判定
+    const qwenChildren = new Set(['stripe', 'supabase', 'orca']);
+    const gemmaChildren = new Set(['swift', 'dawn']);
+    const parent = qwenChildren.has(target) ? 'qwen' : gemmaChildren.has(target) ? 'gemma' : null;
 
-    await delay(600);
-    // Specialist → Hayabusa（結果返却: 緑）
-    sendPulse(target, 'hayabusa', '#00ff88', 400);
-    await delay(400);
-    // Hayabusa → Claude（最終結果: シアン）
-    sendPulse('hayabusa', 'claude', '#00d4ff', 500);
+    if (parent) {
+      // Hayabusa → Generalist（シアン: 中間層へ）
+      sendPulse('hayabusa', parent, '#00d4ff', 400);
+      addLog(`↓ ${parent} に転送`, 'route');
+      await delay(400);
+
+      // Generalist → Specialist（緑: 末端へ）
+      sendPulse(parent, target, '#00ff88', 400);
+      stats.local++;
+      stats.tokensSaved += task.tokens || 150;
+      stats.costSaved += (task.tokens || 150) * 0.000075;
+      addLog(`✓ ${parent} → ${target} (${task.genre}, ${task.latency}ms)`, 'local');
+
+      await delay(600);
+      // Specialist → Generalist → Hayabusa → Claude（結果返却）
+      sendPulse(target, parent, '#00ff88', 300);
+      await delay(350);
+      sendPulse(parent, 'hayabusa', '#00d4ff', 300);
+      await delay(350);
+      sendPulse('hayabusa', 'claude', '#00d4ff', 400);
+    } else {
+      // Generalist自身が処理（Qwen or Gemma直接）
+      sendPulse('hayabusa', target, '#00d4ff', 400);
+      stats.local++;
+      stats.tokensSaved += task.tokens || 150;
+      stats.costSaved += (task.tokens || 150) * 0.000075;
+      addLog(`✓ ${target} が直接処理 (${task.genre}, ${task.latency}ms)`, 'local');
+
+      await delay(600);
+      sendPulse(target, 'hayabusa', '#00d4ff', 400);
+      await delay(400);
+      sendPulse('hayabusa', 'claude', '#00d4ff', 400);
+    }
   }
 
   stats.totalLatency += task.latency || 600;
@@ -480,18 +533,23 @@ function updateStats() {
 
 // ── Demo tasks ──
 const DEMO_TASKS = [
+  // Qwen直接処理
   { prompt: "TypeError: Cannot read properties of undefined", genre: "FIX-BUG", route: "local", target: "qwen", latency: 700, tokens: 150 },
+  { prompt: "React useEffect cleanup leak", genre: "FIX-BUG", route: "local", target: "qwen", latency: 600, tokens: 120 },
+  // Gemma直接処理
   { prompt: "Write binary search in Python", genre: "IMPL-ALGO", route: "local", target: "gemma", latency: 1400, tokens: 200 },
+  { prompt: "Debounce function in TypeScript", genre: "IMPL-ALGO", route: "local", target: "gemma", latency: 800, tokens: 160 },
+  // Qwen → Specialist（ウォーターフォール）
   { prompt: "Stripe webhook signature verification error", genre: "IMPL-PAYMENT", route: "local", target: "stripe", latency: 800, tokens: 180 },
   { prompt: "Supabase RLS policy not working", genre: "IMPL-DB", route: "local", target: "supabase", latency: 900, tokens: 160 },
+  { prompt: "Generate pytest for fibonacci function", genre: "GEN-TEST", route: "local", target: "qwen", latency: 2000, tokens: 300 },
+  // Gemma → Specialist（ウォーターフォール）
+  { prompt: "SwiftUI NavigationStack migration", genre: "Swift", route: "local", target: "swift", latency: 1200, tokens: 170 },
+  { prompt: "DAWN予約システムのAPI設計", genre: "DAWN", route: "local", target: "dawn", latency: 1100, tokens: 190 },
+  // エスカレーション（赤パルスでClaudeへ戻る）
   { prompt: "Design microservice architecture for 10K users", genre: "HEAVY", route: "escalate", target: "claude", latency: 3000, tokens: 0 },
-  { prompt: "Generate pytest for fibonacci function", genre: "GEN-TEST", route: "local", target: "gemma", latency: 2000, tokens: 300 },
   { prompt: "患者の保険請求でレセプトエラー", genre: "O-CLINICAL", route: "escalate", target: "claude", latency: 0, tokens: 0 },
-  { prompt: "SwiftUI NavigationStack migration", genre: "IMPL-ALGO", route: "local", target: "swift", latency: 1200, tokens: 170 },
-  { prompt: "DAWN予約システムのAPI設計", genre: "IMPL-API", route: "local", target: "dawn", latency: 1100, tokens: 190 },
-  { prompt: "React useEffect cleanup leak", genre: "FIX-BUG", route: "local", target: "qwen", latency: 600, tokens: 120 },
   { prompt: "Compare WebSocket vs SSE for chat app", genre: "HEAVY", route: "escalate", target: "claude", latency: 5000, tokens: 0 },
-  { prompt: "Debounce function in TypeScript", genre: "IMPL-ALGO", route: "local", target: "gemma", latency: 800, tokens: 160 },
 ];
 
 // ── Live polling (if server is running) ──
