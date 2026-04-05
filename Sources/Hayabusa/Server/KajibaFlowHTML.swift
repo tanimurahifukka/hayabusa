@@ -1,0 +1,488 @@
+// KajibaFlowHTML.swift — Auto-generated
+struct KajibaFlowHTML {
+    static let content = """
+<!DOCTYPE html>
+<html lang=\"ja\">
+<head>
+<meta charset=\"UTF-8\">
+<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">
+<title>KAJIBA Flow — Specialist AI Forge</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: #0a0a0f;
+  color: #e0e0e0;
+  font-family: 'SF Mono', 'Menlo', 'Monaco', monospace;
+  overflow: hidden;
+  height: 100vh;
+}
+
+/* ── Canvas ── */
+#canvas {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+}
+
+svg#lines {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ── Nodes ── */
+.node {
+  position: absolute;
+  border-radius: 12px;
+  padding: 12px 16px;
+  text-align: center;
+  z-index: 10;
+  transition: box-shadow 0.3s, transform 0.1s;
+  cursor: default;
+  min-width: 120px;
+}
+
+.node.active {
+  transform: scale(1.05);
+}
+
+.node .name {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+
+.node .detail {
+  font-size: 10px;
+  opacity: 0.6;
+}
+
+.node .status {
+  font-size: 9px;
+  margin-top: 4px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  display: inline-block;
+}
+
+/* Node types */
+.node-claude {
+  background: linear-gradient(135deg, #1a1a2e, #16213e);
+  border: 1.5px solid #e94560;
+  box-shadow: 0 0 15px rgba(233, 69, 96, 0.2);
+}
+.node-claude.active { box-shadow: 0 0 30px rgba(233, 69, 96, 0.5); }
+.node-claude .name { color: #e94560; }
+
+.node-hayabusa {
+  background: linear-gradient(135deg, #1a1a2e, #0f3460);
+  border: 1.5px solid #00d4ff;
+  box-shadow: 0 0 15px rgba(0, 212, 255, 0.2);
+}
+.node-hayabusa.active { box-shadow: 0 0 30px rgba(0, 212, 255, 0.5); }
+.node-hayabusa .name { color: #00d4ff; }
+
+.node-specialist {
+  background: linear-gradient(135deg, #1a1a1a, #1a2a1a);
+  border: 1.5px solid #00ff88;
+  box-shadow: 0 0 10px rgba(0, 255, 136, 0.15);
+}
+.node-specialist.active { box-shadow: 0 0 25px rgba(0, 255, 136, 0.4); }
+.node-specialist .name { color: #00ff88; }
+
+.node-classify {
+  background: linear-gradient(135deg, #1a1a1a, #2a1a2a);
+  border: 1.5px solid #ff9f43;
+  box-shadow: 0 0 10px rgba(255, 159, 67, 0.15);
+}
+.node-classify.active { box-shadow: 0 0 25px rgba(255, 159, 67, 0.4); }
+.node-classify .name { color: #ff9f43; }
+
+.status-online { background: #00ff8833; color: #00ff88; }
+.status-offline { background: #ff444433; color: #ff4444; }
+.status-busy { background: #ffaa0033; color: #ffaa00; }
+
+/* ── Connection lines ── */
+.conn-line {
+  stroke: #333;
+  stroke-width: 1.5;
+  fill: none;
+}
+
+/* ── Pulse animation ── */
+.pulse {
+  r: 4;
+  fill: #00d4ff;
+  filter: drop-shadow(0 0 6px currentColor);
+}
+
+@keyframes pulse-glow {
+  0%, 100% { opacity: 0.3; r: 3; }
+  50% { opacity: 1; r: 5; }
+}
+
+/* ── Info panel ── */
+#info {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  right: 20px;
+  background: #111118;
+  border: 1px solid #333;
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-size: 11px;
+  z-index: 100;
+  display: flex;
+  gap: 24px;
+  align-items: center;
+}
+
+#info .stat { text-align: center; }
+#info .stat .value { font-size: 18px; font-weight: 700; color: #00d4ff; }
+#info .stat .label { font-size: 9px; opacity: 0.5; margin-top: 2px; }
+
+/* ── Log ── */
+#log {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  width: 320px;
+  max-height: 300px;
+  overflow-y: auto;
+  background: #0d0d12cc;
+  border: 1px solid #222;
+  border-radius: 8px;
+  padding: 8px;
+  font-size: 10px;
+  z-index: 100;
+}
+
+#log .entry {
+  padding: 3px 6px;
+  border-bottom: 1px solid #1a1a1a;
+  animation: fadeIn 0.3s;
+}
+
+@keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; } }
+
+.entry .time { color: #666; }
+.entry .route { color: #00d4ff; }
+.entry .local { color: #00ff88; }
+.entry .escalate { color: #e94560; }
+
+/* ── Title ── */
+#title {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 100;
+}
+#title h1 {
+  font-size: 16px;
+  color: #00d4ff;
+  letter-spacing: 2px;
+}
+#title .sub {
+  font-size: 10px;
+  color: #666;
+  margin-top: 2px;
+}
+</style>
+</head>
+<body>
+
+<div id=\"title\">
+  <h1>KAJIBA FLOW</h1>
+  <div class=\"sub\">Specialist AI Forge — Real-time Orchestration</div>
+</div>
+
+<div id=\"canvas\">
+  <svg id=\"lines\"></svg>
+</div>
+
+<div id=\"log\">
+  <div style=\"color:#666; margin-bottom:4px;\">Activity Log</div>
+</div>
+
+<div id=\"info\">
+  <div class=\"stat\"><div class=\"value\" id=\"stat-requests\">0</div><div class=\"label\">Requests</div></div>
+  <div class=\"stat\"><div class=\"value\" id=\"stat-local\">0</div><div class=\"label\">Local ($0)</div></div>
+  <div class=\"stat\"><div class=\"value\" id=\"stat-escalated\">0</div><div class=\"label\">Escalated</div></div>
+  <div class=\"stat\"><div class=\"value\" id=\"stat-tokens\" style=\"color:#00ff88\">0</div><div class=\"label\">Tokens Saved</div></div>
+  <div class=\"stat\"><div class=\"value\" id=\"stat-cost\" style=\"color:#ff9f43\">$0.00</div><div class=\"label\">Cost Saved</div></div>
+  <div class=\"stat\"><div class=\"value\" id=\"stat-latency\">0ms</div><div class=\"label\">Avg Latency</div></div>
+</div>
+
+<script>
+// ── Node definitions ──
+const NODES = [
+  { id: 'claude', name: 'Claude Code', detail: 'Opus 4.6 (Cloud)', type: 'claude', x: 0.08, y: 0.35 },
+  { id: 'hayabusa', name: 'HAYABUSA', detail: 'Router / Orchestrator', type: 'hayabusa', x: 0.35, y: 0.35 },
+  { id: 'classify', name: 'Classify', detail: 'Qwen3-0.6B (300MB)', type: 'classify', x: 0.35, y: 0.12 },
+  { id: 'qwen', name: 'Qwen3.5-9B', detail: 'FIX-BUG / IMPL-UI', type: 'specialist', x: 0.6, y: 0.15 },
+  { id: 'gemma', name: 'Gemma 4 E4B', detail: 'IMPL-ALGO / GEN-TEST', type: 'specialist', x: 0.75, y: 0.3 },
+  { id: 'stripe', name: 'kajiba-stripe', detail: 'IMPL-PAYMENT (1.7B)', type: 'specialist', x: 0.7, y: 0.5 },
+  { id: 'supabase', name: 'kajiba-supabase', detail: 'IMPL-DB (1.7B)', type: 'specialist', x: 0.58, y: 0.65 },
+  { id: 'dawn', name: 'kajiba-dawn', detail: 'DAWN系 (1.7B)', type: 'specialist', x: 0.78, y: 0.68 },
+  { id: 'orca', name: 'kajiba-orca', detail: 'O-CLINICAL (0.6B)', type: 'specialist', x: 0.42, y: 0.72 },
+  { id: 'swift', name: 'kajiba-swift', detail: 'Swift/MLX (1.7B)', type: 'specialist', x: 0.88, y: 0.48 },
+];
+
+const CONNECTIONS = [
+  { from: 'claude', to: 'hayabusa', color: '#e94560' },
+  { from: 'hayabusa', to: 'classify', color: '#ff9f43' },
+  { from: 'hayabusa', to: 'qwen', color: '#00ff88' },
+  { from: 'hayabusa', to: 'gemma', color: '#00ff88' },
+  { from: 'hayabusa', to: 'stripe', color: '#00ff88' },
+  { from: 'hayabusa', to: 'supabase', color: '#00ff88' },
+  { from: 'hayabusa', to: 'dawn', color: '#00ff88' },
+  { from: 'hayabusa', to: 'orca', color: '#00ff88' },
+  { from: 'hayabusa', to: 'swift', color: '#00ff88' },
+  { from: 'classify', to: 'hayabusa', color: '#ff9f43' },
+  { from: 'hayabusa', to: 'claude', color: '#e94560' },
+];
+
+// ── State ──
+let stats = { requests: 0, local: 0, escalated: 0, tokensSaved: 0, costSaved: 0, totalLatency: 0 };
+let nodeElements = {};
+
+// ── Render nodes ──
+function renderNodes() {
+  const canvas = document.getElementById('canvas');
+  const W = window.innerWidth;
+  const H = window.innerHeight;
+
+  NODES.forEach(n => {
+    const el = document.createElement('div');
+    el.className = `node node-${n.type}`;
+    el.id = `node-${n.id}`;
+    el.innerHTML = `
+      <div class=\"name\">${n.name}</div>
+      <div class=\"detail\">${n.detail}</div>
+      <div class=\"status status-online\">READY</div>
+    `;
+    el.style.left = `${n.x * W - 60}px`;
+    el.style.top = `${n.y * H - 30}px`;
+    canvas.appendChild(el);
+    nodeElements[n.id] = el;
+  });
+}
+
+// ── Render connections ──
+function renderConnections() {
+  const svg = document.getElementById('lines');
+  const W = window.innerWidth;
+  const H = window.innerHeight;
+
+  CONNECTIONS.forEach(conn => {
+    const from = NODES.find(n => n.id === conn.from);
+    const to = NODES.find(n => n.id === conn.to);
+    if (!from || !to) return;
+
+    const x1 = from.x * W, y1 = from.y * H;
+    const x2 = to.x * W, y2 = to.y * H;
+
+    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    line.setAttribute('x1', x1); line.setAttribute('y1', y1);
+    line.setAttribute('x2', x2); line.setAttribute('y2', y2);
+    line.setAttribute('class', 'conn-line');
+    line.setAttribute('data-from', conn.from);
+    line.setAttribute('data-to', conn.to);
+    line.style.stroke = conn.color + '33';
+    svg.appendChild(line);
+  });
+}
+
+// ── Pulse animation ──
+function sendPulse(fromId, toId, color = '#00d4ff', duration = 800) {
+  const svg = document.getElementById('lines');
+  const W = window.innerWidth;
+  const H = window.innerHeight;
+  const from = NODES.find(n => n.id === fromId);
+  const to = NODES.find(n => n.id === toId);
+  if (!from || !to) return;
+
+  const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+  circle.setAttribute('r', '4');
+  circle.setAttribute('fill', color);
+  circle.style.filter = `drop-shadow(0 0 8px ${color})`;
+
+  const x1 = from.x * W, y1 = from.y * H;
+  const x2 = to.x * W, y2 = to.y * H;
+
+  const animate = document.createElementNS('http://www.w3.org/2000/svg', 'animate');
+  animate.setAttribute('attributeName', 'cx');
+  animate.setAttribute('from', x1); animate.setAttribute('to', x2);
+  animate.setAttribute('dur', `${duration}ms`);
+  animate.setAttribute('fill', 'freeze');
+
+  const animateY = document.createElementNS('http://www.w3.org/2000/svg', 'animate');
+  animateY.setAttribute('attributeName', 'cy');
+  animateY.setAttribute('from', y1); animateY.setAttribute('to', y2);
+  animateY.setAttribute('dur', `${duration}ms`);
+  animateY.setAttribute('fill', 'freeze');
+
+  // Size pulse
+  const animateR = document.createElementNS('http://www.w3.org/2000/svg', 'animate');
+  animateR.setAttribute('attributeName', 'r');
+  animateR.setAttribute('values', '3;6;3');
+  animateR.setAttribute('dur', `${duration}ms`);
+
+  circle.appendChild(animate);
+  circle.appendChild(animateY);
+  circle.appendChild(animateR);
+  svg.appendChild(circle);
+
+  // Highlight connection line
+  const line = svg.querySelector(`line[data-from=\"${fromId}\"][data-to=\"${toId}\"]`);
+  if (line) {
+    line.style.stroke = color + 'aa';
+    line.style.strokeWidth = '2.5';
+    setTimeout(() => { line.style.stroke = color + '33'; line.style.strokeWidth = '1.5'; }, duration);
+  }
+
+  // Activate nodes
+  nodeElements[fromId]?.classList.add('active');
+  nodeElements[toId]?.classList.add('active');
+  setTimeout(() => {
+    nodeElements[fromId]?.classList.remove('active');
+    nodeElements[toId]?.classList.remove('active');
+    circle.remove();
+  }, duration + 100);
+}
+
+// ── Simulate flow ──
+async function simulateFlow(task) {
+  const delay = ms => new Promise(r => setTimeout(r, ms));
+  stats.requests++;
+
+  addLog(`→ ${task.prompt.substring(0, 40)}...`, 'route');
+
+  // 1. Claude → Hayabusa
+  sendPulse('claude', 'hayabusa', '#e94560', 600);
+  await delay(300);
+
+  // 2. Hayabusa → Classify
+  sendPulse('hayabusa', 'classify', '#ff9f43', 400);
+  await delay(500);
+
+  // 3. Classify → Hayabusa (result)
+  sendPulse('classify', 'hayabusa', '#ff9f43', 400);
+  await delay(300);
+
+  // 4. Route to specialist or escalate
+  if (task.route === 'escalate') {
+    sendPulse('hayabusa', 'claude', '#e94560', 600);
+    stats.escalated++;
+    addLog(`⬆ Escalated to Claude (${task.genre})`, 'escalate');
+  } else {
+    const target = task.target || 'qwen';
+    sendPulse('hayabusa', target, '#00ff88', 500);
+    stats.local++;
+    stats.tokensSaved += task.tokens || 150;
+    stats.costSaved += (task.tokens || 150) * 0.000075;
+    addLog(`✓ Local → ${target} (${task.genre}, ${task.latency}ms)`, 'local');
+
+    await delay(600);
+    // Response back
+    sendPulse(target, 'hayabusa', '#00ff88', 400);
+    await delay(400);
+    sendPulse('hayabusa', 'claude', '#00d4ff', 500);
+  }
+
+  stats.totalLatency += task.latency || 600;
+  updateStats();
+}
+
+// ── Log ──
+function addLog(msg, type) {
+  const log = document.getElementById('log');
+  const time = new Date().toLocaleTimeString('ja-JP');
+  const entry = document.createElement('div');
+  entry.className = 'entry';
+  entry.innerHTML = `<span class=\"time\">${time}</span> <span class=\"${type}\">${msg}</span>`;
+  log.appendChild(entry);
+  log.scrollTop = log.scrollHeight;
+  if (log.children.length > 50) log.children[1].remove();
+}
+
+// ── Stats ──
+function updateStats() {
+  document.getElementById('stat-requests').textContent = stats.requests;
+  document.getElementById('stat-local').textContent = stats.local;
+  document.getElementById('stat-escalated').textContent = stats.escalated;
+  document.getElementById('stat-tokens').textContent = stats.tokensSaved.toLocaleString();
+  document.getElementById('stat-cost').textContent = `$${stats.costSaved.toFixed(4)}`;
+  const avg = stats.requests > 0 ? Math.round(stats.totalLatency / stats.requests) : 0;
+  document.getElementById('stat-latency').textContent = `${avg}ms`;
+}
+
+// ── Demo tasks ──
+const DEMO_TASKS = [
+  { prompt: \"TypeError: Cannot read properties of undefined\", genre: \"FIX-BUG\", route: \"local\", target: \"qwen\", latency: 700, tokens: 150 },
+  { prompt: \"Write binary search in Python\", genre: \"IMPL-ALGO\", route: \"local\", target: \"gemma\", latency: 1400, tokens: 200 },
+  { prompt: \"Stripe webhook signature verification error\", genre: \"IMPL-PAYMENT\", route: \"local\", target: \"stripe\", latency: 800, tokens: 180 },
+  { prompt: \"Supabase RLS policy not working\", genre: \"IMPL-DB\", route: \"local\", target: \"supabase\", latency: 900, tokens: 160 },
+  { prompt: \"Design microservice architecture for 10K users\", genre: \"HEAVY\", route: \"escalate\", target: \"claude\", latency: 3000, tokens: 0 },
+  { prompt: \"Generate pytest for fibonacci function\", genre: \"GEN-TEST\", route: \"local\", target: \"gemma\", latency: 2000, tokens: 300 },
+  { prompt: \"患者の保険請求でレセプトエラー\", genre: \"O-CLINICAL\", route: \"escalate\", target: \"claude\", latency: 0, tokens: 0 },
+  { prompt: \"SwiftUI NavigationStack migration\", genre: \"IMPL-ALGO\", route: \"local\", target: \"swift\", latency: 1200, tokens: 170 },
+  { prompt: \"DAWN予約システムのAPI設計\", genre: \"IMPL-API\", route: \"local\", target: \"dawn\", latency: 1100, tokens: 190 },
+  { prompt: \"React useEffect cleanup leak\", genre: \"FIX-BUG\", route: \"local\", target: \"qwen\", latency: 600, tokens: 120 },
+  { prompt: \"Compare WebSocket vs SSE for chat app\", genre: \"HEAVY\", route: \"escalate\", target: \"claude\", latency: 5000, tokens: 0 },
+  { prompt: \"Debounce function in TypeScript\", genre: \"IMPL-ALGO\", route: \"local\", target: \"gemma\", latency: 800, tokens: 160 },
+];
+
+// ── Live polling (if server is running) ──
+async function pollServer() {
+  try {
+    const resp = await fetch('http://localhost:8080/health');
+    if (resp.ok) {
+      const statusEl = nodeElements['hayabusa']?.querySelector('.status');
+      if (statusEl) { statusEl.className = 'status status-online'; statusEl.textContent = 'ONLINE'; }
+    }
+  } catch {
+    const statusEl = nodeElements['hayabusa']?.querySelector('.status');
+    if (statusEl) { statusEl.className = 'status status-offline'; statusEl.textContent = 'OFFLINE'; }
+  }
+}
+
+// ── Init ──
+window.addEventListener('load', () => {
+  renderNodes();
+  renderConnections();
+  updateStats();
+  pollServer();
+  setInterval(pollServer, 10000);
+
+  // Demo: continuous flow
+  let taskIdx = 0;
+  async function nextTask() {
+    const task = DEMO_TASKS[taskIdx % DEMO_TASKS.length];
+    taskIdx++;
+    await simulateFlow(task);
+    setTimeout(nextTask, 2000 + Math.random() * 3000);
+  }
+  setTimeout(nextTask, 1000);
+});
+
+// Resize handler
+window.addEventListener('resize', () => {
+  const svg = document.getElementById('lines');
+  svg.innerHTML = '';
+  document.querySelectorAll('.node').forEach(n => n.remove());
+  nodeElements = {};
+  renderNodes();
+  renderConnections();
+});
+</script>
+</body>
+</html>
+
+"""
+}

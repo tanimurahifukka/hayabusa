@@ -41,6 +41,17 @@ struct HayabusaServer {
             "{\"status\":\"ok\"}"
         }
 
+        // GET /flow — KAJIBA Flow UI
+        router.get("flow") { _, _ -> Response in
+            // HTMLを直接返す
+            let html = KajibaFlowHTML.content
+            return Response(
+                status: .ok,
+                headers: [.contentType: "text/html; charset=utf-8"],
+                body: .init(byteBuffer: .init(string: html))
+            )
+        }
+
         // POST /v1/chat/completions
         router.post("v1/chat/completions") { request, context in
             let chatRequest = try await context.requestDecoder.decode(
