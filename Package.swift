@@ -46,5 +46,17 @@ let package = Package(
             ],
             path: "Sources/Hayabusa"
         ),
+        // KAJIBA CLI — 軽量HTTPクライアント（モデルロードなし・依存ゼロ）
+        .executableTarget(
+            name: "HayabusaCLI",
+            dependencies: [],
+            path: "Sources/HayabusaCLI"
+        ),
+        // KAJIBA Uzu — ジャンル別クラスターオーケストレーション
+        .target(
+            name: "HayabusaUzu",
+            dependencies: [],
+            path: "Sources/HayabusaUzu"
+        ),
     ]
 )

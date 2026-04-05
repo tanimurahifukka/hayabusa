@@ -1,0 +1,13 @@
+{
+  "FIX-BUG": {"model": "mlx-community/Qwen3.5-9B-MLX-4bit", "elo": 1500},
+  "IMPL-API": {"model": "mlx-community/Qwen3.5-9B-MLX-4bit", "elo": 1500},
+  "IMPL-ALGO": {"model": "mlx-community/Qwen3.5-9B-MLX-4bit", "elo": 1500},
+  "IMPL-UI": {"model": "mlx-community/Qwen3.5-9B-MLX-4bit", "elo": 1500},
+  "IMPL-DB": {"model": "mlx-community/Qwen3.5-9B-MLX-4bit", "elo": 1500},
+  "GEN-TEST": {"model": "mlx-community/Qwen3.5-9B-MLX-4bit", "elo": 1500},
+  "GEN-DOCS": {"model": "mlx-community/Qwen3.5-9B-MLX-4bit", "elo": 1500},
+  "FIX-REFACTOR": {"model": "mlx-community/Qwen3.5-9B-MLX-4bit", "elo": 1500},
+  "FIX-PERF": {"model": "mlx-community/Qwen3.5-9B-MLX-4bit", "elo": 1500},
+  "CLASSIFY": {"model": "kajiba-classify-0.6b", "elo": 1500},
+  "O-CLINICAL": {"model": "kajiba-orca-0.6b", "elo": 1500}
+}
