@@ -26,6 +26,8 @@ struct HayabusaCLI {
             await JudgeCommand.run(args: subArgs)
         case "bench":
             await BenchCommand.run(args: subArgs)
+        case "agent":
+            await AgentCommand.run(args: subArgs)
         case "health":
             await healthCheck()
         case "savings":
@@ -103,6 +105,7 @@ struct HayabusaCLI {
           compress   プロンプト圧縮（Saku圧縮・17.5%削減）
           judge      2回答の品質比較（Arena用）
           bench      ジャンル別ベンチマーク実行
+          agent      マルチエージェント (Planner→Coder→Reviewer→Tester)
           health     サーバーヘルスチェック
           savings    トークン節約レポート表示
 
