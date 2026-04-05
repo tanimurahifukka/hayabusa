@@ -46,21 +46,35 @@ svg#lines { position: absolute; top: 0; left: 0; width: 100%; height: 100%; poin
   50% { box-shadow: 0 0 22px var(--glow), inset 0 0 8px var(--glow-inner); }
 }
 
+/* ── 心拍エフェクト（稼働中） ── */
 .node.alive {
-  animation: breathe 2.5s ease-in-out infinite;
+  border-width: 2.5px;
+  animation: heartbeat 1.2s ease-in-out infinite;
+}
+
+@keyframes heartbeat {
+  0%   { box-shadow: 0 0 6px var(--glow); border-width: 2.5px; }
+  15%  { box-shadow: 0 0 25px var(--glow), 0 0 50px var(--glow); border-width: 3.5px; }
+  30%  { box-shadow: 0 0 8px var(--glow); border-width: 2.5px; }
+  45%  { box-shadow: 0 0 20px var(--glow), 0 0 40px var(--glow); border-width: 3px; }
+  60%  { box-shadow: 0 0 6px var(--glow); border-width: 2.5px; }
+  100% { box-shadow: 0 0 6px var(--glow); border-width: 2.5px; }
 }
 
 .node.alive .indicator {
-  animation: dot-pulse 2s ease-in-out infinite;
+  animation: dot-beat 1.2s ease-in-out infinite;
 }
-@keyframes dot-pulse {
-  0%, 100% { box-shadow: 0 0 3px var(--dot-color); }
-  50% { box-shadow: 0 0 10px var(--dot-color), 0 0 20px var(--dot-color); }
+@keyframes dot-beat {
+  0%, 60%, 100% { transform: scale(1); box-shadow: 0 0 3px var(--dot-color); }
+  15% { transform: scale(1.5); box-shadow: 0 0 12px var(--dot-color), 0 0 24px var(--dot-color); }
+  45% { transform: scale(1.3); box-shadow: 0 0 8px var(--dot-color), 0 0 16px var(--dot-color); }
 }
 
 /* パルスが通過した瞬間のフラッシュ */
 .node.flash {
-  transform: scale(1.08);
+  transform: scale(1.1);
+  border-width: 4px !important;
+  filter: brightness(1.5);
 }
 
 /* 非表示（まだ一度も呼ばれていない） */
@@ -171,24 +185,29 @@ svg#lines { position: absolute; top: 0; left: 0; width: 100%; height: 100%; poin
 .term-pane .info-line { color: #555; }
 
 /* ── Input Bar ── */
+/* ── Input Bar（目立つデザイン） ── */
 #input-bar {
-  display: flex; gap: 8px; padding: 8px 12px;
-  background: #0c0c14; border-top: 1px solid #1a1a22; flex-shrink: 0;
+  display: flex; gap: 8px; padding: 10px 14px;
+  background: #0e0e18; border-top: 2px solid #3498db33; flex-shrink: 0;
+}
+#input-bar .input-label {
+  color: #3498db; font-size: 13px; font-weight: 600; line-height: 36px;
+  white-space: nowrap; padding-right: 4px;
 }
 #input-bar input {
-  flex: 1; background: #12121a; border: 1px solid #222; border-radius: 6px;
-  padding: 8px 12px; color: #eee; font-family: 'SF Mono', monospace; font-size: 13px;
-  outline: none;
+  flex: 1; background: #0a0a14; border: 1.5px solid #3498db44; border-radius: 8px;
+  padding: 8px 14px; color: #eee; font-family: 'SF Mono', monospace; font-size: 13px;
+  outline: none; transition: border-color 0.2s, box-shadow 0.2s;
 }
-#input-bar input:focus { border-color: #3498db; }
-#input-bar input::placeholder { color: #333; }
+#input-bar input:focus { border-color: #3498db; box-shadow: 0 0 12px #3498db33; }
+#input-bar input::placeholder { color: #3498db44; }
 #input-bar button {
-  background: #3498db22; border: 1px solid #3498db44; border-radius: 6px;
-  color: #5dade2; padding: 8px 16px; cursor: pointer; font-size: 12px;
+  background: #3498db; border: none; border-radius: 8px;
+  color: #fff; padding: 8px 20px; cursor: pointer; font-size: 12px; font-weight: 600;
   transition: all 0.2s;
 }
-#input-bar button:hover { background: #3498db44; }
-#input-bar button:disabled { opacity: 0.3; cursor: default; }
+#input-bar button:hover { background: #2980b9; }
+#input-bar button:disabled { opacity: 0.3; cursor: default; background: #333; }
 
 /* ── Activity Log（フロー右上） ── */
 #log {
@@ -268,7 +287,8 @@ svg#lines { position: absolute; top: 0; left: 0; width: 100%; height: 100%; poin
     <div class="term-pane" id="pane-events"></div>
   </div>
   <div id="input-bar">
-    <input type="text" id="prompt-input" placeholder="Ask Hayabusa... (Enter to send)" autocomplete="off" />
+    <div class="input-label">></div>
+    <input type="text" id="prompt-input" placeholder="Ask anything... (Enter)" autocomplete="off" />
     <button id="send-btn" onclick="sendPrompt()">Send</button>
   </div>
 </div>
