@@ -342,47 +342,58 @@ function updateStats() {
   document.getElementById('s-cost').textContent = `$${stats.costSaved.toFixed(4)}`;
 }
 
-// ── Live polling ──
-let lastT = 0;
+// ── SSE: リアルタイムイベント受信 ──
 let pending = {};
 
-async function poll() {
-  try {
-    const r = await fetch(`/flow/events?since=${lastT}`);
-    if (!r.ok) return;
-    const evs = await r.json();
+function handleEvent(ev) {
+  if (ev.type === 'request') {
+    pending[ev.id] = ev;
+    stats.requests++;
+    stats.local++;
+    const p = (ev.prompt || '').substring(0, 45);
+    log(`→ ${p}...`, 'route');
 
-    for (const ev of evs) {
-      lastT = Math.max(lastT, ev.timestamp || 0);
+    // リクエスト到着パルス（即座に表示）
+    pulse('claude', 'classify', '#e67e22', 400);
+    setTimeout(() => pulse('classify', 'qwen', '#3498db', 350), 450);
+  }
 
-      if (ev.type === 'request') {
-        pending[ev.id] = ev;
-        stats.requests++;
-        stats.local++;
-        const p = (ev.prompt || '').substring(0, 45);
-        log(`→ ${p}...`, 'route');
+  if (ev.type === 'completion') {
+    const tok = ev.total_tokens || 0;
+    stats.tokensSaved += tok;
+    stats.costSaved += tok * 0.000075;
+    log(`✓ ${tok} tok`, 'local');
 
-        pulse('claude', 'classify', '#e67e22', 450);
-        setTimeout(() => pulse('classify', 'qwen', '#3498db', 400), 500);
-      }
+    // 結果返却パルス（即座に表示）
+    pulse('qwen', 'classify', '#2ecc71', 300);
+    setTimeout(() => pulse('classify', 'claude', '#2ecc71', 350), 350);
+    delete pending[ev.id];
+  }
+  updateStats();
+}
 
-      if (ev.type === 'completion') {
-        const tok = ev.total_tokens || 0;
-        stats.tokensSaved += tok;
-        stats.costSaved += tok * 0.000075;
-        log(`✓ ${tok} tok`, 'local');
+function connectSSE() {
+  const es = new EventSource('/flow/stream');
 
-        pulse('qwen', 'classify', '#2ecc71', 350);
-        setTimeout(() => pulse('classify', 'claude', '#2ecc71', 400), 400);
-        delete pending[ev.id];
-      }
-      updateStats();
-    }
-  } catch {}
+  es.onmessage = (e) => {
+    try {
+      const ev = JSON.parse(e.data);
+      handleEvent(ev);
+    } catch {}
+  };
+
+  es.onerror = () => {
+    // 接続切れたら3秒後にリトライ
+    es.close();
+    log('⚠ SSE disconnected, retrying...', 'escalate');
+    setTimeout(connectSSE, 3000);
+  };
+
+  log('🔌 Connected (SSE real-time)', 'route');
 }
 
 // ── Init ──
-window.addEventListener('load', () => { render(); updateStats(); poll(); setInterval(poll, 1000); });
+window.addEventListener('load', () => { render(); updateStats(); connectSSE(); });
 window.addEventListener('resize', () => {
   document.getElementById('lines').innerHTML = '';
   document.querySelectorAll('.node').forEach(n => n.remove());

@@ -6,8 +6,31 @@ import Foundation
 final class FlowActivityLog: @unchecked Sendable {
     private let lock = NSLock()
     private var events: [[String: Any]] = []
-    private var totalRequests = 0
-    private var totalTokens = 0
+
+    // SSEリスナー
+    private var listeners: [(String) -> Void] = []
+
+    /// SSEリスナーを追加
+    func addListener(_ handler: @escaping (String) -> Void) {
+        lock.withLock { listeners.append(handler) }
+    }
+
+    /// 全リスナーにイベントをプッシュ
+    private func broadcast(_ event: [String: Any]) {
+        guard let data = try? JSONSerialization.data(withJSONObject: event),
+              let json = String(data: data, encoding: .utf8) else { return }
+        let sseMessage = "data: \(json)\n\n"
+        lock.withLock {
+            for listener in listeners {
+                listener(sseMessage)
+            }
+        }
+    }
+
+    /// リスナーをクリア（切断時）
+    func clearListeners() {
+        lock.withLock { listeners.removeAll() }
+    }
 
     /// リクエスト開始
     func logRequest(id: String, prompt: String) {
@@ -19,10 +42,9 @@ final class FlowActivityLog: @unchecked Sendable {
         ]
         lock.withLock {
             events.append(event)
-            totalRequests += 1
-            // 最大200件保持
             if events.count > 200 { events.removeFirst() }
         }
+        broadcast(event)
     }
 
     /// 完了
@@ -37,18 +59,15 @@ final class FlowActivityLog: @unchecked Sendable {
         ]
         lock.withLock {
             events.append(event)
-            totalTokens += promptTokens + completionTokens
             if events.count > 200 { events.removeFirst() }
         }
+        broadcast(event)
     }
 
-    /// 指定タイムスタンプ以降のイベントを返す
+    /// ポーリング用（フォールバック）
     func eventsSince(_ since: Double) -> [[String: Any]] {
         lock.withLock {
-            let filtered = events.filter {
-                ($0["timestamp"] as? Double ?? 0) > since
-            }
-            return filtered
+            events.filter { ($0["timestamp"] as? Double ?? 0) > since }
         }
     }
 }

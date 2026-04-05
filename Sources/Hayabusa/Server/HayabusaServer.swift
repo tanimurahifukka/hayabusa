@@ -54,14 +54,36 @@ struct HayabusaServer {
             )
         }
 
-        // GET /flow/events — UIがポーリングして実際のリクエスト履歴を取得
+        // GET /flow/events — ポーリングフォールバック
         router.get("flow/events") { request, _ -> String in
-            // ?since=<timestamp> で前回取得以降のイベントだけ返す
             let since = request.uri.queryParameters.get("since")
                 .flatMap { Double($0) } ?? 0
             let events = flowLog.eventsSince(since)
             let data = try JSONSerialization.data(withJSONObject: events, options: [])
             return String(data: data, encoding: .utf8) ?? "[]"
+        }
+
+        // GET /flow/stream — SSE（リアルタイムプッシュ）
+        router.get("flow/stream") { _, _ -> Response in
+            let (stream, continuation) = AsyncStream<ByteBuffer>.makeStream()
+
+            // リスナー登録: イベント発生時に即座にSSEメッセージをプッシュ
+            flowLog.addListener { message in
+                var buf = ByteBuffer()
+                buf.writeString(message)
+                continuation.yield(buf)
+            }
+
+            return Response(
+                status: .ok,
+                headers: [
+                    .contentType: "text/event-stream",
+                    .init("Cache-Control")!: "no-cache",
+                    .init("Connection")!: "keep-alive",
+                    .init("Access-Control-Allow-Origin")!: "*",
+                ],
+                body: .init(asyncSequence: stream)
+            )
         }
 
         // POST /v1/chat/completions
