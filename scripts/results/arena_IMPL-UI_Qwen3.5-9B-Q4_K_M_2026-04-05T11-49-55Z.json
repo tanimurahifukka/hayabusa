@@ -1,0 +1,17 @@
+{
+  "genre": "IMPL-UI",
+  "model": "Qwen3.5-9B-Q4_K_M",
+  "score": 0.0,
+  "problems_solved": 0,
+  "problems_total": 1,
+  "avg_latency_ms": 14701,
+  "timestamp": "2026-04-05T11:49:55Z",
+  "details": [
+    {
+      "id": "ui_01",
+      "passed": false,
+      "latency_ms": 14701.326792,
+      "response": "ERROR: 200, message='Attempt to decode JSON with unexpected mimetype: text/plain; charset=utf-8', url='http://localhost:8080/v1/chat/completions'"
+    }
+  ]
+}

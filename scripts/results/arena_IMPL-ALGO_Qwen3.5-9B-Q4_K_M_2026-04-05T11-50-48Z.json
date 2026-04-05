@@ -1,0 +1,29 @@
+{
+  "genre": "IMPL-ALGO",
+  "model": "Qwen3.5-9B-Q4_K_M",
+  "score": 0.0,
+  "problems_solved": 0,
+  "problems_total": 3,
+  "avg_latency_ms": 2087,
+  "timestamp": "2026-04-05T11:50:48Z",
+  "details": [
+    {
+      "id": "algo_01",
+      "passed": false,
+      "latency_ms": 1454.825875,
+      "response": ""
+    },
+    {
+      "id": "algo_02",
+      "passed": false,
+      "latency_ms": 2342.921917,
+      "response": ""
+    },
+    {
+      "id": "algo_03",
+      "passed": false,
+      "latency_ms": 2465.3458339999997,
+      "response": ""
+    }
+  ]
+}

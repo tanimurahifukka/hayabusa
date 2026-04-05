@@ -1,0 +1,29 @@
+{
+  "genre": "IMPL-ALGO",
+  "model": "Qwen3.5-9B-Q4_K_M",
+  "score": 0.0,
+  "problems_solved": 0,
+  "problems_total": 3,
+  "avg_latency_ms": 2092,
+  "timestamp": "2026-04-05T11:49:06Z",
+  "details": [
+    {
+      "id": "algo_01",
+      "passed": false,
+      "latency_ms": 1460.0438339999998,
+      "response": "ERROR: 200, message='Attempt to decode JSON with unexpected mimetype: text/plain; charset=utf-8', url='http://localhost:8080/v1/chat/completions'"
+    },
+    {
+      "id": "algo_02",
+      "passed": false,
+      "latency_ms": 2345.246125,
+      "response": "ERROR: 200, message='Attempt to decode JSON with unexpected mimetype: text/plain; charset=utf-8', url='http://localhost:8080/v1/chat/completions'"
+    },
+    {
+      "id": "algo_03",
+      "passed": false,
+      "latency_ms": 2472.8897500000003,
+      "response": "ERROR: 200, message='Attempt to decode JSON with unexpected mimetype: text/plain; charset=utf-8', url='http://localhost:8080/v1/chat/completions'"
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "genre": "IMPL-API",
+  "model": "Qwen3.5-9B-Q4_K_M",
+  "score": 0.0,
+  "problems_solved": 0,
+  "problems_total": 1,
+  "avg_latency_ms": 6474,
+  "timestamp": "2026-04-05T11:51:23Z",
+  "details": [
+    {
+      "id": "api_01",
+      "passed": false,
+      "latency_ms": 6474.331041999999,
+      "response": ""
+    }
+  ]
+}

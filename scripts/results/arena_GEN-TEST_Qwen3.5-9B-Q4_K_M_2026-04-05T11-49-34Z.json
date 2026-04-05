@@ -1,0 +1,23 @@
+{
+  "genre": "GEN-TEST",
+  "model": "Qwen3.5-9B-Q4_K_M",
+  "score": 0.0,
+  "problems_solved": 0,
+  "problems_total": 2,
+  "avg_latency_ms": 13770,
+  "timestamp": "2026-04-05T11:49:34Z",
+  "details": [
+    {
+      "id": "test_01",
+      "passed": false,
+      "latency_ms": 14697.3245,
+      "response": "ERROR: 200, message='Attempt to decode JSON with unexpected mimetype: text/plain; charset=utf-8', url='http://localhost:8080/v1/chat/completions'"
+    },
+    {
+      "id": "test_02",
+      "passed": false,
+      "latency_ms": 12843.793708,
+      "response": "ERROR: 200, message='Attempt to decode JSON with unexpected mimetype: text/plain; charset=utf-8', url='http://localhost:8080/v1/chat/completions'"
+    }
+  ]
+}

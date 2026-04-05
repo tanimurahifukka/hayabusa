@@ -1,0 +1,41 @@
+{
+  "genre": "FIX-BUG",
+  "model": "Qwen3.5-9B-Q4_K_M",
+  "score": 0.8,
+  "problems_solved": 4,
+  "problems_total": 5,
+  "avg_latency_ms": 669,
+  "timestamp": "2026-04-05T11:52:37Z",
+  "details": [
+    {
+      "id": "fix_01",
+      "passed": true,
+      "latency_ms": 734.892833,
+      "response": "```python\ndef is_sorted(lst):\n    for i in range(len(lst) - 1):\n        if lst[i] > lst[i+1]:\n            return False\n    return True\n```"
+    },
+    {
+      "id": "fix_02",
+      "passed": false,
+      "latency_ms": 631.618625,
+      "response": "```javascript\nfunction getUser(users, id) {\n  const user = users.find(u => u.id === id);\n  return user ? user.name : null;\n}\n```"
+    },
+    {
+      "id": "fix_03",
+      "passed": true,
+      "latency_ms": 613.8719580000001,
+      "response": "```python\nimport threading\n\ncounter = 0\nlock = threading.Lock()\n\ndef increment():\n    global counter\n    with lock:\n        counter += 1\n```"
+    },
+    {
+      "id": "fix_04",
+      "passed": true,
+      "latency_ms": 639.5679580000002,
+      "response": "```python\ndef get_user(db, username):\n    query = \"SELECT * FROM users WHERE name = ?\"\n    return db.execute(query, (username,))\n```"
+    },
+    {
+      "id": "fix_05",
+      "passed": true,
+      "latency_ms": 726.9609159999999,
+      "response": "```javascript\nconst cache = new Map();\nfunction getData(key) {\n  if (!cache.has(key)) cache.set(key, fetchFromDB(key));\n  return cache.get(key);\n}\n```"
+    }
+  ]
+}

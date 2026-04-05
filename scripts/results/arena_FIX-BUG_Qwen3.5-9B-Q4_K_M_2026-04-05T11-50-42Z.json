@@ -1,0 +1,41 @@
+{
+  "genre": "FIX-BUG",
+  "model": "Qwen3.5-9B-Q4_K_M",
+  "score": 0.0,
+  "problems_solved": 0,
+  "problems_total": 5,
+  "avg_latency_ms": 670,
+  "timestamp": "2026-04-05T11:50:42Z",
+  "details": [
+    {
+      "id": "fix_01",
+      "passed": false,
+      "latency_ms": 735.1933750000001,
+      "response": ""
+    },
+    {
+      "id": "fix_02",
+      "passed": false,
+      "latency_ms": 631.2079580000001,
+      "response": ""
+    },
+    {
+      "id": "fix_03",
+      "passed": false,
+      "latency_ms": 615.758667,
+      "response": ""
+    },
+    {
+      "id": "fix_04",
+      "passed": false,
+      "latency_ms": 640.9473750000001,
+      "response": ""
+    },
+    {
+      "id": "fix_05",
+      "passed": false,
+      "latency_ms": 727.3187500000003,
+      "response": ""
+    }
+  ]
+}

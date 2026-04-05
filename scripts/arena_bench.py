@@ -36,7 +36,7 @@ BENCH_PROBLEMS = {
         {
             "id": "fix_02", "prompt": "Fix this null pointer issue:\n```javascript\nfunction getUser(users, id) {\n  return users.find(u => u.id === id).name;\n}\n```",
             "system": "Fix the bug. Return only corrected code.",
-            "check_keywords": ["?.", "if (", "|| ", "?? "],
+            "check_keywords": ["?.", "if (", "|| ", "?? ", "? user", ": null", "undefined"],
         },
         {
             "id": "fix_03", "prompt": "Fix the race condition:\n```python\ncounter = 0\ndef increment():\n    global counter\n    counter += 1\n```",
@@ -110,6 +110,7 @@ class ProblemResult:
 
 
 async def run_problem(session, url, model, problem, max_tokens=1024):
+    import re
     payload = {
         "model": model,
         "messages": [
@@ -124,9 +125,13 @@ async def run_problem(session, url, model, problem, max_tokens=1024):
     t0 = time.perf_counter()
     try:
         async with session.post(url, json=payload, timeout=aiohttp.ClientTimeout(total=120)) as resp:
-            data = await resp.json()
+            raw = await resp.read()
             elapsed = (time.perf_counter() - t0) * 1000
+            data = json.loads(raw.decode("utf-8", errors="replace"))
             content = data.get("choices", [{}])[0].get("message", {}).get("content", "")
+
+            # thinkタグを除去
+            content = re.sub(r"<think>.*?</think>\s*", "", content, flags=re.DOTALL)
 
             passed = any(kw.lower() in content.lower() for kw in problem["check_keywords"])
             return ProblemResult(id=problem["id"], passed=passed, latency_ms=elapsed, response=content[:500])

@@ -1,0 +1,41 @@
+{
+  "genre": "FIX-BUG",
+  "model": "Qwen3.5-9B-Q4_K_M",
+  "score": 0.0,
+  "problems_solved": 0,
+  "problems_total": 5,
+  "avg_latency_ms": 671,
+  "timestamp": "2026-04-05T11:49:00Z",
+  "details": [
+    {
+      "id": "fix_01",
+      "passed": false,
+      "latency_ms": 740.8850419999999,
+      "response": "ERROR: 200, message='Attempt to decode JSON with unexpected mimetype: text/plain; charset=utf-8', url='http://localhost:8080/v1/chat/completions'"
+    },
+    {
+      "id": "fix_02",
+      "passed": false,
+      "latency_ms": 629.2857500000001,
+      "response": "ERROR: 200, message='Attempt to decode JSON with unexpected mimetype: text/plain; charset=utf-8', url='http://localhost:8080/v1/chat/completions'"
+    },
+    {
+      "id": "fix_03",
+      "passed": false,
+      "latency_ms": 617.4195,
+      "response": "ERROR: 200, message='Attempt to decode JSON with unexpected mimetype: text/plain; charset=utf-8', url='http://localhost:8080/v1/chat/completions'"
+    },
+    {
+      "id": "fix_04",
+      "passed": false,
+      "latency_ms": 640.0442909999997,
+      "response": "ERROR: 200, message='Attempt to decode JSON with unexpected mimetype: text/plain; charset=utf-8', url='http://localhost:8080/v1/chat/completions'"
+    },
+    {
+      "id": "fix_05",
+      "passed": false,
+      "latency_ms": 727.6570000000003,
+      "response": "ERROR: 200, message='Attempt to decode JSON with unexpected mimetype: text/plain; charset=utf-8', url='http://localhost:8080/v1/chat/completions'"
+    }
+  ]
+}
