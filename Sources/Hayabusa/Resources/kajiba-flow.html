@@ -269,20 +269,20 @@ const NODES = [
   { id: 'dawn',      name: 'kajiba-dawn',     detail: 'DAWN系 (1.7B)',           type: 'specialist', x: 0.60, y: 0.72 },
 ];
 
-// ── Connections（HAYABUSAなし — Claudeから直接ツリー） ──
+// ── Connections: Claude → Classify → Generalist → Specialist ──
 const CONNECTIONS = [
-  // Claude → Classify
-  { from: 'claude',   to: 'classify',  color: '#ff9f43' },
-  // Claude → Generalists
-  { from: 'claude',   to: 'qwen',      color: '#00d4ff' },
-  { from: 'claude',   to: 'gemma',     color: '#00d4ff' },
+  // Claude → Classify（入口）
+  { from: 'claude',    to: 'classify',  color: '#ff9f43' },
+  // Classify → Generalists（ルーティング）
+  { from: 'classify',  to: 'qwen',      color: '#00d4ff' },
+  { from: 'classify',  to: 'gemma',     color: '#00d4ff' },
   // Qwen → Specialists
-  { from: 'qwen',     to: 'stripe',    color: '#00ff88' },
-  { from: 'qwen',     to: 'supabase',  color: '#00ff88' },
-  { from: 'qwen',     to: 'orca',      color: '#00ff88' },
+  { from: 'qwen',      to: 'stripe',    color: '#00ff88' },
+  { from: 'qwen',      to: 'supabase',  color: '#00ff88' },
+  { from: 'qwen',      to: 'orca',      color: '#00ff88' },
   // Gemma → Specialists
-  { from: 'gemma',    to: 'swift',     color: '#00ff88' },
-  { from: 'gemma',    to: 'dawn',      color: '#00ff88' },
+  { from: 'gemma',     to: 'swift',     color: '#00ff88' },
+  { from: 'gemma',     to: 'dawn',      color: '#00ff88' },
 ];
 
 // ── State ──
@@ -556,7 +556,7 @@ async function pollEvents() {
       lastEventTime = Math.max(lastEventTime, ev.timestamp || 0);
 
       if (ev.type === 'request') {
-        // リクエスト開始: Claude → Classify → Qwen
+        // リクエスト: Claude → Classify → Qwen（ウォーターフォール）
         pendingRequests[ev.id] = ev;
         stats.requests++;
         stats.local++;
@@ -564,22 +564,28 @@ async function pollEvents() {
         const prompt = ev.prompt || '';
         addLog(`→ ${prompt.substring(0, 50)}...`, 'route');
 
-        // Classify パルス
+        // Claude → Classify（オレンジ: 分類）
         sendPulse('claude', 'classify', '#ff9f43', 400);
+        // Classify → Qwen（シアン: ルーティング）
         setTimeout(() => {
-          sendPulse('claude', 'qwen', '#00d4ff', 500);
+          sendPulse('classify', 'qwen', '#00d4ff', 400);
+          addLog(`⚡ Classify → Qwen (LOCAL)`, 'local');
         }, 500);
       }
 
       if (ev.type === 'completion') {
-        // 完了: Qwen → Claude（結果返却）
+        // 完了: Qwen → Classify → Claude（結果が上流に戻る）
         const tokens = ev.total_tokens || 0;
         stats.tokensSaved += tokens;
         stats.costSaved += tokens * 0.000075;
 
         addLog(`✓ 完了 ${tokens}tok`, 'local');
 
-        sendPulse('qwen', 'claude', '#00ff88', 500);
+        // 結果返却パルス（緑で逆流）
+        sendPulse('qwen', 'classify', '#00ff88', 350);
+        setTimeout(() => {
+          sendPulse('classify', 'claude', '#00ff88', 400);
+        }, 400);
 
         delete pendingRequests[ev.id];
       }
