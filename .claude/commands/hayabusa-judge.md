@@ -1,16 +1,14 @@
-# Hayabusa Judge
+2つの回答をローカルLLMで品質比較します（Arena用・トークン消費ゼロ）。
 
-2つの回答をローカルLLMで品質比較する（Arena用）
+以下のコマンドを実行してください:
 
-## いつ使うか
-複数の実装候補を比較評価したい時。
-
-## 実行
-```
-$HAYABUSA_BIN judge --a "$A" --b "$B" --task "$TASK"
+```bash
+/Users/tanimura/Desktop/hayabusa/.build/arm64-apple-macosx/release/HayabusaCLI judge --a "$ARGUMENTS"
 ```
 
-## 出力
-```json
-{"winner": "a", "scores": {"a": 0.87, "b": 0.71}, "reason": "回答Aの方がエラーハンドリングが適切", "genre": "FIX-BUG"}
-```
+引数の形式: --a "回答A" --b "回答B" --task "タスク説明"
+
+出力JSON:
+- winner: "a" or "b"
+- scores: {"a": 0.0-1.0, "b": 0.0-1.0}
+- reason: 判定理由

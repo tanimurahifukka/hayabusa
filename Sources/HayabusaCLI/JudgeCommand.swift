@@ -76,6 +76,9 @@ struct JudgeCommand {
             let jsonData = try JSONSerialization.data(withJSONObject: parsed, options: [.sortedKeys])
             print(String(data: jsonData, encoding: .utf8)!)
 
+            // 節約ログ記録
+            SavingsTracker.logJudge()
+
         } catch {
             fputs("Error: \(error)\n", stderr)
             Foundation.exit(1)

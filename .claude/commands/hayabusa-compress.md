@@ -1,17 +1,13 @@
-# Hayabusa Compress
+長いテキストをローカルLLMで圧縮します（トークン消費ゼロ・17-25%削減）。
 
-長いプロンプトをSaku圧縮してトークンを削減する
+以下のコマンドを実行して、結果をユーザーに報告してください:
 
-## いつ使うか
-500トークン以上のプロンプトをLLMに投げる前。
-17.5%削減が期待できる。
-
-## 実行
-```
-$HAYABUSA_BIN compress "$ARGUMENTS"
+```bash
+/Users/tanimura/Desktop/hayabusa/.build/arm64-apple-macosx/release/HayabusaCLI compress "$ARGUMENTS"
 ```
 
-## 出力
-```json
-{"compressed": "圧縮後テキスト", "original_tokens": 120, "compressed_tokens": 99, "reduction_rate": 0.175}
-```
+出力JSON:
+- compressed: 圧縮後テキスト
+- original_tokens: 元のトークン数（概算）
+- compressed_tokens: 圧縮後トークン数（概算）
+- reduction_rate: 削減率（0.175 = 17.5%）

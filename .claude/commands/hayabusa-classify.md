@@ -1,23 +1,17 @@
-# Hayabusa Classify
+ローカルLLMでタスクを分類します（トークン消費ゼロ・爆速）。
 
-ローカルLLMでタスクを分類する（トークン消費なし・爆速）
+以下のコマンドを実行して、結果をユーザーに報告してください:
 
-## いつ使うか
-タスクの種類・複雑度を判定したい時。
-Claude Code自身のトークンを使う前に必ず呼ぶこと。
-confidenceが低い場合は自分で処理する。
-
-## 実行
-```
-$HAYABUSA_BIN classify "$ARGUMENTS"
+```bash
+/Users/tanimura/Desktop/hayabusa/.build/arm64-apple-macosx/release/HayabusaCLI classify "$ARGUMENTS"
 ```
 
-## 出力
-```json
-{"category": "FIX-BUG", "confidence": 0.92, "latency_ms": 45, "action": "ROUTE_SPECIALIST"}
-```
+出力JSON:
+- category: タスクジャンル（FIX-BUG, IMPL-API, O-CLINICAL等）
+- confidence: 確信度（0-1）
+- action: ルーティング先
+  - ROUTE_SPECIALIST → ローカル専門AI（$0）
+  - RECLASSIFY_QWEN → 汎用モデルで再判定（$0）
+  - ESCALATE_CLAUDE → Claude Codeで処理（トークン消費）
 
-## ルーティング
-- `ROUTE_SPECIALIST` — 専門スペシャリストに直行（confidence > 0.85）
-- `RECLASSIFY_QWEN` — 汎用Qwen3.5-9Bで再判定（confidence 0.6〜0.85）
-- `ESCALATE_CLAUDE` — Claude Codeで処理（confidence < 0.6 or O-CLINICAL）
+actionがROUTE_SPECIALISTの場合、該当タスクをHayabusaに投げることでトークン節約できます。

@@ -28,6 +28,8 @@ struct HayabusaCLI {
             await BenchCommand.run(args: subArgs)
         case "health":
             await healthCheck()
+        case "savings":
+            showSavings()
         case "--help", "-h", "help":
             printUsage()
         case "--version", "-v":
@@ -50,6 +52,45 @@ struct HayabusaCLI {
         }
     }
 
+    static func showSavings() {
+        let logPath = NSHomeDirectory() + "/.hayabusa/savings.jsonl"
+        guard let content = try? String(contentsOfFile: logPath, encoding: .utf8) else {
+            print("No savings data yet. Use classify/compress/judge to start tracking.")
+            return
+        }
+
+        var totalTokens = 0
+        var totalCost = 0.0
+        var count = 0
+        var byType: [String: (count: Int, tokens: Int, cost: Double)] = [:]
+
+        for line in content.split(separator: "\n") {
+            guard let data = String(line).data(using: .utf8),
+                  let entry = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else { continue }
+
+            let type = entry["type"] as? String ?? "unknown"
+            let tokens = (entry["tokens_saved"] as? Int) ?? Int(entry["tokens_saved"] as? Double ?? 0)
+            let cost = (entry["cost_saved_usd"] as? Double) ?? 0
+
+            totalTokens += tokens
+            totalCost += cost
+            count += 1
+
+            let prev = byType[type] ?? (0, 0, 0)
+            byType[type] = (prev.count + 1, prev.tokens + tokens, prev.cost + cost)
+        }
+
+        print("")
+        print("KAJIBA Savings Report")
+        print("=====================")
+        for (type, data) in byType.sorted(by: { $0.value.tokens > $1.value.tokens }) {
+            print("  \(type): \(data.count) calls, \(data.tokens) tokens saved, $\(String(format: "%.4f", data.cost))")
+        }
+        print("-----")
+        print("  TOTAL: \(count) calls, \(totalTokens) tokens saved, $\(String(format: "%.4f", totalCost))")
+        print("")
+    }
+
     static func printUsage() {
         print("""
         KAJIBA - Hayabusa Specialist AI Forge
@@ -63,6 +104,7 @@ struct HayabusaCLI {
           judge      2回答の品質比較（Arena用）
           bench      ジャンル別ベンチマーク実行
           health     サーバーヘルスチェック
+          savings    トークン節約レポート表示
 
         Examples:
           hayabusa server start models/Qwen3.5-9B-Q4_K_M.gguf
