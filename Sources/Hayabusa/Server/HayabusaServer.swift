@@ -124,6 +124,58 @@ struct HayabusaServer {
             return jsonString
         }
 
+        // ── Project Mode: ファイルAPI ──
+
+        // GET /flow/files?path=... — ディレクトリ一覧
+        router.get("flow/files") { request, _ -> Response in
+            let basePath = request.uri.queryParameters.get("path") ?? FileManager.default.currentDirectoryPath
+            let fm = FileManager.default
+
+            guard fm.fileExists(atPath: basePath) else {
+                return Response(status: .notFound, body: .init(byteBuffer: .init(string: "{\"error\":\"not found\"}")))
+            }
+
+            var isDir: ObjCBool = false
+            fm.fileExists(atPath: basePath, isDirectory: &isDir)
+
+            if !isDir.boolValue {
+                // ファイル内容を返す
+                let data = fm.contents(atPath: basePath) ?? Data()
+                let content = String(data: data, encoding: .utf8) ?? "(binary)"
+                let escaped = content
+                    .replacingOccurrences(of: "\\", with: "\\\\")
+                    .replacingOccurrences(of: "\"", with: "\\\"")
+                    .replacingOccurrences(of: "\n", with: "\\n")
+                    .replacingOccurrences(of: "\r", with: "")
+                    .replacingOccurrences(of: "\t", with: "\\t")
+                let json = "{\"type\":\"file\",\"path\":\"\(basePath)\",\"content\":\"\(escaped)\"}"
+                return Response(
+                    status: .ok,
+                    headers: [.contentType: "application/json"],
+                    body: .init(byteBuffer: .init(string: json))
+                )
+            }
+
+            // ディレクトリ一覧
+            let items = (try? fm.contentsOfDirectory(atPath: basePath)) ?? []
+            let entries = items
+                .filter { !$0.hasPrefix(".") }
+                .sorted()
+                .prefix(100)
+                .map { name -> String in
+                    let full = (basePath as NSString).appendingPathComponent(name)
+                    var d: ObjCBool = false
+                    fm.fileExists(atPath: full, isDirectory: &d)
+                    return "{\"name\":\"\(name)\",\"isDir\":\(d.boolValue)}"
+                }
+            let json = "{\"type\":\"dir\",\"path\":\"\(basePath)\",\"entries\":[\(entries.joined(separator: ","))]}"
+            return Response(
+                status: .ok,
+                headers: [.contentType: "application/json"],
+                body: .init(byteBuffer: .init(string: json))
+            )
+        }
+
         // GET /slots — diagnostic endpoint
         router.get("slots") { _, _ -> String in
             let summary = engine.slotSummary()

@@ -257,6 +257,41 @@ svg#lines { position: absolute; top: 0; left: 0; width: 100%; height: 100%; poin
 .cfg-badge.online { background: #2ecc7122; color: #2ecc71; }
 .cfg-badge.offline { background: #e74c3c22; color: #e74c3c; }
 
+/* ── File Browser ── */
+#file-browser { font-family: 'SF Mono', monospace; font-size: 12px; }
+.fb-path {
+  padding: 6px 8px; background: #0a0a14; border-bottom: 1px solid #1a1a22;
+  color: #5dade2; font-size: 11px; display: flex; gap: 8px; align-items: center;
+  position: sticky; top: 0;
+}
+.fb-path button {
+  background: #1a1a22; border: 1px solid #333; border-radius: 4px;
+  color: #888; padding: 2px 8px; cursor: pointer; font-size: 10px;
+}
+.fb-path button:hover { color: #ddd; }
+.fb-item {
+  padding: 4px 10px; cursor: pointer; display: flex; gap: 8px; align-items: center;
+  border-bottom: 1px solid #0c0c12; transition: background 0.15s;
+}
+.fb-item:hover { background: #12121a; }
+.fb-item .icon { width: 16px; text-align: center; font-size: 13px; }
+.fb-item .name { color: #ccc; }
+.fb-item.dir .name { color: #5dade2; }
+.fb-code {
+  padding: 10px; background: #0a0a10; font-size: 11px; line-height: 1.5;
+  color: #bbb; white-space: pre-wrap; word-break: break-all;
+}
+.fb-code .line-num { color: #333; display: inline-block; width: 36px; text-align: right; margin-right: 12px; user-select: none; }
+.fb-action-bar {
+  padding: 6px 8px; background: #0c0c14; border-top: 1px solid #1a1a22;
+  display: flex; gap: 6px; position: sticky; bottom: 0;
+}
+.fb-action-bar button {
+  background: #2ecc7122; border: 1px solid #2ecc7144; border-radius: 4px;
+  color: #2ecc71; padding: 4px 12px; cursor: pointer; font-size: 10px;
+}
+.fb-action-bar button:hover { background: #2ecc7144; }
+
 #title { position: absolute; top: 12px; left: 16px; z-index: 100; }
 #title h1 { font-size: 14px; color: #5dade2; letter-spacing: 3px; font-weight: 300; }
 #title .sub { font-size: 9px; color: #333; }
@@ -284,12 +319,14 @@ svg#lines { position: absolute; top: 0; left: 0; width: 100%; height: 100%; poin
 <div id="terminal-area">
   <div id="term-tabs">
     <div class="tab active" data-pane="chat">Chat</div>
+    <div class="tab" data-pane="files">Files</div>
     <div class="tab" data-pane="config">Config</div>
-    <div class="tab" data-pane="server">Server Log</div>
+    <div class="tab" data-pane="server">Log</div>
     <div class="tab" data-pane="events">Events</div>
   </div>
   <div id="term-panes">
     <div class="term-pane active" id="pane-chat"></div>
+    <div class="term-pane" id="pane-files"><div id="file-browser"></div></div>
     <div class="term-pane" id="pane-config"><div id="config-panel"></div></div>
     <div class="term-pane" id="pane-server"></div>
     <div class="term-pane" id="pane-events"></div>
@@ -521,6 +558,9 @@ function connectSSE() {
   };
 
   log('🔌 Connected (SSE real-time)', 'route');
+  // Claude Codeノードは常にalive（接続中）
+  const claudeEl = nodeEls['claude'];
+  if (claudeEl) { claudeEl.classList.add('alive'); }
 }
 
 // ── Terminal ──
@@ -717,12 +757,73 @@ function saveConfig() {
   }
 }
 
+// ── File Browser ──
+let currentPath = '';
+
+async function loadDir(path) {
+  currentPath = path || '';
+  const fb = document.getElementById('file-browser');
+  try {
+    const url = path ? '/flow/files?path=' + encodeURIComponent(path) : '/flow/files';
+    const r = await fetch(url);
+    const data = await r.json();
+
+    if (data.type === 'file') {
+      // ファイル内容表示
+      const lines = (data.content || '').split('\\n');
+      const numbered = lines.map((l, i) =>
+        '<span class="line-num">' + (i+1) + '</span>' + l.replace(/</g,'&lt;')
+      ).join('\n');
+      fb.innerHTML =
+        '<div class="fb-path"><button onclick="loadDir(\'' + parentDir(data.path) + '\')">← Back</button><span>' + data.path.split('/').pop() + '</span></div>' +
+        '<div class="fb-code">' + numbered + '</div>' +
+        '<div class="fb-action-bar"><button onclick="askAboutFile()">Ask AI about this file</button></div>';
+      return;
+    }
+
+    // ディレクトリ表示
+    let html = '<div class="fb-path">';
+    if (path) html += '<button onclick="loadDir(\'' + parentDir(path) + '\')">← Up</button>';
+    html += '<span>' + (data.path || '.') + '</span></div>';
+
+    const dirs = data.entries.filter(e => e.isDir);
+    const files = data.entries.filter(e => !e.isDir);
+
+    for (const d of dirs) {
+      const full = (path || data.path) + '/' + d.name;
+      html += '<div class="fb-item dir" onclick="loadDir(\'' + full.replace(/'/g,"\\'") + '\')"><span class="icon">📁</span><span class="name">' + d.name + '</span></div>';
+    }
+    for (const f of files) {
+      const full = (path || data.path) + '/' + f.name;
+      html += '<div class="fb-item" onclick="loadDir(\'' + full.replace(/'/g,"\\'") + '\')"><span class="icon">📄</span><span class="name">' + f.name + '</span></div>';
+    }
+    fb.innerHTML = html;
+  } catch(e) {
+    fb.innerHTML = '<div style="padding:12px;color:#e74c3c;">Error: ' + e.message + '</div>';
+  }
+}
+
+function parentDir(p) {
+  const parts = p.split('/');
+  parts.pop();
+  return parts.join('/') || '/';
+}
+
+function askAboutFile() {
+  // Chatタブに切り替えてファイルについて質問
+  document.querySelector('[data-pane="chat"]').click();
+  const input = document.getElementById('prompt-input');
+  input.value = 'Explain this file: ' + currentPath;
+  input.focus();
+}
+
 // ── Init ──
 window.addEventListener('load', () => {
   render();
   updateStats();
   connectSSE();
   renderConfig();
+  loadDir('');
   document.getElementById('prompt-input').focus();
   termWrite('chat', 'KAJIBA Terminal — Type a prompt and press Enter', 'info-line');
   termWrite('server', 'Waiting for server events...', 'info-line');
