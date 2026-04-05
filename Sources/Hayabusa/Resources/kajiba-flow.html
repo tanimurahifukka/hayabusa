@@ -436,12 +436,13 @@ function pulse(fromId, toId, color, dur = 700) {
     el.classList.remove('idle');
     el.classList.add('alive');
 
-    // idle化タイマー: coreNodes以外は5秒後に灰色
+    // coreNodes以外は5秒後に消す
     if (!coreNodes.has(id)) {
       clearTimeout(el._idleTimer);
       el._idleTimer = setTimeout(() => {
         el.classList.remove('alive', 'processing');
-        el.classList.add('idle');
+        el.classList.add('dormant');
+        document.querySelectorAll(`path[data-from="${id}"], path[data-to="${id}"]`).forEach(p => p.classList.add('dormant'));
       }, 5000);
     }
   });
