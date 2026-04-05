@@ -49,6 +49,21 @@ svg#lines {
   transform: scale(1.05);
 }
 
+/* 未呼び出しノードは非表示 */
+.node.dormant {
+  opacity: 0;
+  transform: scale(0.7);
+  pointer-events: none;
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+/* 呼び出されたらフェードイン */
+.node.awakened {
+  opacity: 1;
+  transform: scale(1);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
 .node .name {
   font-size: 13px;
   font-weight: 700;
@@ -111,6 +126,11 @@ svg#lines {
   stroke: #333;
   stroke-width: 1.5;
   fill: none;
+  transition: opacity 0.6s ease;
+}
+
+.conn-line.dormant {
+  opacity: 0;
 }
 
 /* ── Pulse animation ── */
@@ -257,14 +277,19 @@ function renderNodes() {
   const W = window.innerWidth;
   const H = window.innerHeight;
 
+  // コアノード（Claude, Hayabusa, Classify）は常に表示
+  // スペシャリストは呼び出されるまで非表示（dormant）
+  const coreNodes = new Set(['claude', 'hayabusa', 'classify']);
+
   NODES.forEach(n => {
     const el = document.createElement('div');
-    el.className = `node node-${n.type}`;
+    const isDormant = !coreNodes.has(n.id);
+    el.className = `node node-${n.type}${isDormant ? ' dormant' : ''}`;
     el.id = `node-${n.id}`;
     el.innerHTML = `
       <div class="name">${n.name}</div>
       <div class="detail">${n.detail}</div>
-      <div class="status status-online">READY</div>
+      <div class="status ${isDormant ? 'status-offline' : 'status-online'}">${isDormant ? 'STANDBY' : 'READY'}</div>
     `;
     el.style.left = `${n.x * W - 60}px`;
     el.style.top = `${n.y * H - 30}px`;
@@ -294,6 +319,13 @@ function renderConnections() {
     line.setAttribute('data-from', conn.from);
     line.setAttribute('data-to', conn.to);
     line.style.stroke = conn.color + '33';
+    // スペシャリスト接続は非表示
+    const coreNodes = new Set(['claude', 'hayabusa', 'classify']);
+    if (!coreNodes.has(conn.from) || !coreNodes.has(conn.to)) {
+      if (!coreNodes.has(conn.to) && conn.to !== 'claude') {
+        line.classList.add('dormant');
+      }
+    }
     svg.appendChild(line);
   });
 }
@@ -346,7 +378,22 @@ function sendPulse(fromId, toId, color = '#00d4ff', duration = 800) {
     setTimeout(() => { line.style.stroke = color + '33'; line.style.strokeWidth = '1.5'; }, duration);
   }
 
-  // Activate nodes
+  // Awaken dormant nodes on first use
+  [fromId, toId].forEach(id => {
+    const el = nodeElements[id];
+    if (el && el.classList.contains('dormant')) {
+      el.classList.remove('dormant');
+      el.classList.add('awakened');
+      const statusEl = el.querySelector('.status');
+      if (statusEl) { statusEl.className = 'status status-online'; statusEl.textContent = 'ACTIVE'; }
+      // 接続線も表示
+      document.querySelectorAll(`line[data-from="${id}"], line[data-to="${id}"]`).forEach(l => {
+        l.classList.remove('dormant');
+      });
+    }
+  });
+
+  // Activate nodes (glow)
   nodeElements[fromId]?.classList.add('active');
   nodeElements[toId]?.classList.add('active');
   setTimeout(() => {
