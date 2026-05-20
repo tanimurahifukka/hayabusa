@@ -1,0 +1,19 @@
+{
+  "schema": "command-room-pbx/event/v1",
+  "eventId": "openpbx:clinic-main:1779019841.7",
+  "source": "openpbx",
+  "pbxInstanceId": "clinic-main",
+  "workspaceExternalKey": "tamura-hifuka",
+  "call": {
+    "uniqueId": "1779019841.7",
+    "kind": "no_recording",
+    "direction": "inbound",
+    "extension": "9000",
+    "callerId": "1003",
+    "callerName": "Reception 1003",
+    "calleeExtension": null,
+    "durationSec": 3
+  },
+  "recording": null,
+  "receivedAt": "2026-05-17T13:34:08Z"
+}

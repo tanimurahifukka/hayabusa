@@ -1,0 +1,25 @@
+{
+  "schema": "command-room-pbx/event/v1",
+  "eventId": "openpbx:clinic-main:1779019798.0",
+  "source": "openpbx",
+  "pbxInstanceId": "clinic-main",
+  "workspaceExternalKey": "tamura-hifuka",
+  "call": {
+    "uniqueId": "1779019798.0",
+    "kind": "same_day_reservation",
+    "direction": "inbound",
+    "extension": "9001",
+    "callerId": "1001",
+    "callerName": "Reception 1001",
+    "calleeExtension": "9001",
+    "durationSec": null
+  },
+  "recording": {
+    "fileName": "1779019798.0-9001-1001.wav",
+    "relativePath": "1779019798.0-9001-1001.wav",
+    "contentType": "audio/wav",
+    "sizeBytes": null,
+    "sha256": null
+  },
+  "receivedAt": "2026-05-17T13:27:03Z"
+}
