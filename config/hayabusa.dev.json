@@ -1,0 +1,21 @@
+{
+  "node": {
+    "id": "edge-mac-studio-dev-01",
+    "role": "sub",
+    "capabilities": {
+      "jobTypes": ["echo"]
+    },
+    "policy": {
+      "maxConcurrentJobs": 2,
+      "acceptPriority": [],
+      "refuseWhenMemoryPressure": ["critical", "emergency"],
+      "leaseBatchSize": 4,
+      "pollIntervalSeconds": 2.0
+    },
+    "lease": {
+      "enabled": true,
+      "commandRoomBaseUrl": "http://localhost:3000",
+      "authTokenEnv": "HAYABUSA_WORKER_TOKEN"
+    }
+  }
+}
