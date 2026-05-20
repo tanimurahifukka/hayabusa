@@ -20,13 +20,14 @@ final class MLXEngine: InferenceEngine, @unchecked Sendable {
         let configuration = ModelConfiguration(id: modelId)
 
         print("[MLX] Downloading/loading model: \(modelId)")
-        self.modelContainer = try await LLMModelFactory.shared.loadContainer(
-            configuration: configuration,
-            progressHandler: { progress in
-                if progress.fractionCompleted < 1.0 {
-                    print("[MLX] Progress: \(Int(progress.fractionCompleted * 100))%")
-                }
-            }
+        // mlx-swift-lm 0.2x+ で API が変わり、Downloader と TokenizerLoader が必須に。
+        // dispatcher-only モードでは MLX を使わない (llama 推奨) ため、
+        // 起動時例外として明示的に失敗させる。実装は後続 PR で macro 経由に統一する。
+        // 旧 API: loadContainer(configuration:progressHandler:)
+        // 新 API: loadContainer(from: Downloader, using: TokenizerLoader, configuration: ..., progressHandler:)
+        _ = configuration
+        throw HayabusaError.modelLoadFailed(
+            "MLX backend currently disabled (mlx-swift-lm 0.2x+ API needs migration; use --backend llama or --dispatcher-only)"
         )
 
         // Apply memory limits after model load

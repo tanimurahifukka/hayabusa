@@ -25,6 +25,9 @@ struct HayabusaApp {
         var vllmEndpoint: String?
         var genomeMode = false
         var genomeOutputPath: String?
+        // dispatcher-only モード: model/Engine 無しで Job dispatcher loop だけ動かす。
+        // dev / Whisper 専用 / Echo Worker 検証用。chat completions endpoint は無効。
+        var dispatcherOnly = false
 
         var i = 0
         while i < args.count {
@@ -91,6 +94,8 @@ struct HayabusaApp {
             case "--genome-output-path":
                 i += 1
                 if i < args.count { genomeOutputPath = args[i] }
+            case "--dispatcher-only":
+                dispatcherOnly = true
             default:
                 if modelPath == nil && !args[i].hasPrefix("-") {
                     modelPath = args[i]
@@ -104,6 +109,37 @@ struct HayabusaApp {
         // Speculative decoding mode uses --draft-model and --target-model instead
         let isSpeculativeMode = draftModelPath != nil && targetModelPath != nil
         let isVllmMode = backend == "vllm-mlx"
+
+        // dispatcher-only モード: model 不要、HTTP server も起動しない。
+        // command-room の Job dispatcher (Echo / STT 等 Engine 非依存) を回したいときに使う。
+        if dispatcherOnly {
+            print("[Hayabusa] dispatcher-only mode (no model, no HTTP server)")
+            let nodeConfig = NodeConfig.loadFromEnvOrDefault()
+            if nodeConfig.role == .standalone || !nodeConfig.lease.enabled {
+                FileHandle.standardError.write(Data("[Hayabusa] dispatcher-only requires HAYABUSA_CONFIG with role != standalone and lease.enabled=true\n".utf8))
+                Foundation.exit(1)
+            }
+            do {
+                let leaseClient = try JobLeaseClient.from(config: nodeConfig)
+                let registry = WorkerRegistry()
+                registry.register(EchoWorker())
+                registry.register(STTWorker())
+                let dispatcher = JobDispatcher(config: nodeConfig, client: leaseClient, registry: registry)
+                await dispatcher.start()
+                print("[Hayabusa] dispatcher started (role=\(nodeConfig.role.rawValue), capabilities=\(nodeConfig.capabilities.jobTypes.joined(separator: ",")))")
+            } catch {
+                FileHandle.standardError.write(Data("[Hayabusa] dispatcher init failed: \(error)\n".utf8))
+                Foundation.exit(1)
+            }
+            // sleep forever; dispatcher actor runs detached task internally.
+            // 標準入力が閉じられるか SIGINT/SIGTERM で終わる想定。
+            await withTaskCancellationHandler {
+                while !Task.isCancelled {
+                    try? await Task.sleep(nanoseconds: 60_000_000_000)
+                }
+            } onCancel: {}
+            return
+        }
 
         guard isSpeculativeMode || isVllmMode || (resolvedPath != nil && !resolvedPath!.isEmpty) else {
             print("Usage: hayabusa <model-path> [--backend llama|mlx|vllm-mlx] [--slots N] [--ctx-per-slot N]")

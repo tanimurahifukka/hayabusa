@@ -14,7 +14,7 @@
     },
     "lease": {
       "enabled": true,
-      "commandRoomBaseUrl": "http://localhost:3000",
+      "commandRoomBaseUrl": "http://localhost:3001",
       "authTokenEnv": "HAYABUSA_WORKER_TOKEN"
     }
   }
