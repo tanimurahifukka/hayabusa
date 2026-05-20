@@ -270,6 +270,31 @@ struct HayabusaApp {
             kvQuantizeMode: kvQuantize,
             layerSkipConfig: activeLayerSkip
         )
+
+        // command-room → hayabusa Job lease dispatcher。
+        // HAYABUSA_CONFIG env で示された JSON 設定に従って起動する。
+        // 既存挙動温存のため、role=standalone or lease.enabled=false なら起動しない。
+        let nodeConfig = NodeConfig.loadFromEnvOrDefault()
+        if nodeConfig.role != .standalone && nodeConfig.lease.enabled {
+            do {
+                let leaseClient = try JobLeaseClient.from(config: nodeConfig)
+                let registry = WorkerRegistry()
+                registry.register(EchoWorker())
+                registry.register(STTWorker())
+                let dispatcher = JobDispatcher(
+                    config: nodeConfig,
+                    client: leaseClient,
+                    registry: registry
+                )
+                await dispatcher.start()
+                print("[Hayabusa] dispatcher started (role=\(nodeConfig.role.rawValue), capabilities=\(nodeConfig.capabilities.jobTypes.joined(separator: ",")))")
+            } catch {
+                FileHandle.standardError.write(Data("[Hayabusa] dispatcher init failed: \(error)\n".utf8))
+            }
+        } else {
+            print("[Hayabusa] dispatcher disabled (role=\(nodeConfig.role.rawValue), lease.enabled=\(nodeConfig.lease.enabled))")
+        }
+
         try await server.run()
     }
 }
