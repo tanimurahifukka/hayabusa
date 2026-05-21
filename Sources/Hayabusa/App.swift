@@ -123,7 +123,12 @@ struct HayabusaApp {
                 let leaseClient = try JobLeaseClient.from(config: nodeConfig)
                 let registry = WorkerRegistry()
                 registry.register(EchoWorker())
-                registry.register(STTWorker())
+                if let stt = STTWorker.fromEnv() {
+                    registry.register(stt)
+                    print("[Hayabusa] STTWorker registered (model=\(ProcessInfo.processInfo.environment["HAYABUSA_WHISPER_MODEL"] ?? ""))")
+                } else {
+                    print("[Hayabusa] STTWorker disabled (set HAYABUSA_WHISPER_BIN + HAYABUSA_WHISPER_MODEL to enable)")
+                }
                 let dispatcher = JobDispatcher(config: nodeConfig, client: leaseClient, registry: registry)
                 await dispatcher.start()
                 print("[Hayabusa] dispatcher started (role=\(nodeConfig.role.rawValue), capabilities=\(nodeConfig.capabilities.jobTypes.joined(separator: ",")))")
@@ -316,7 +321,12 @@ struct HayabusaApp {
                 let leaseClient = try JobLeaseClient.from(config: nodeConfig)
                 let registry = WorkerRegistry()
                 registry.register(EchoWorker())
-                registry.register(STTWorker())
+                if let stt = STTWorker.fromEnv() {
+                    registry.register(stt)
+                    print("[Hayabusa] STTWorker registered (model=\(ProcessInfo.processInfo.environment["HAYABUSA_WHISPER_MODEL"] ?? ""))")
+                } else {
+                    print("[Hayabusa] STTWorker disabled (set HAYABUSA_WHISPER_BIN + HAYABUSA_WHISPER_MODEL to enable)")
+                }
                 let dispatcher = JobDispatcher(
                     config: nodeConfig,
                     client: leaseClient,

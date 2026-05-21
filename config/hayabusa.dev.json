@@ -3,7 +3,7 @@
     "id": "edge-mac-studio-dev-01",
     "role": "sub",
     "capabilities": {
-      "jobTypes": ["echo"]
+      "jobTypes": ["echo", "stt.transcribe"]
     },
     "policy": {
       "maxConcurrentJobs": 2,
