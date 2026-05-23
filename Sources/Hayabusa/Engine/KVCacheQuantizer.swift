@@ -13,8 +13,8 @@ enum KVQuantizeMode: String {
         switch self {
         case .off:  return GGML_TYPE_F16
         case .int8: return GGML_TYPE_Q8_0
-        case .tq3:  return GGML_TYPE_TQ3_0
-        case .tq4:  return GGML_TYPE_TQ4_0
+        case .tq3:  return GGML_TYPE_TQ1_0
+        case .tq4:  return GGML_TYPE_TQ2_0
         }
     }
 
@@ -24,8 +24,8 @@ enum KVQuantizeMode: String {
         switch self {
         case .off:  return GGML_TYPE_F16
         case .int8: return GGML_TYPE_Q8_0
-        case .tq3:  return GGML_TYPE_TQ3_0
-        case .tq4:  return GGML_TYPE_TQ4_0
+        case .tq3:  return GGML_TYPE_TQ1_0
+        case .tq4:  return GGML_TYPE_TQ2_0
         }
     }
 
