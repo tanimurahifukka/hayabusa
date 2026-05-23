@@ -76,7 +76,11 @@ struct HayabusaApp {
             case "--kv-quantize":
                 i += 1
                 if i < args.count {
-                    kvQuantize = KVQuantizeMode(rawValue: args[i].lowercased()) ?? .off
+                    let parsed = KVQuantizeMode.parseCLIValue(args[i])
+                    kvQuantize = parsed.mode
+                    if let warning = parsed.warning {
+                        FileHandle.standardError.write(Data((warning + "\n").utf8))
+                    }
                 }
             case "--layer-skip":
                 i += 1
@@ -130,7 +134,7 @@ struct HayabusaApp {
                     print("[Hayabusa] STTWorker disabled (set HAYABUSA_WHISPER_BIN + HAYABUSA_WHISPER_MODEL to enable)")
                 }
                 let dispatcher = JobDispatcher(config: nodeConfig, client: leaseClient, registry: registry)
-                await dispatcher.start()
+                try await dispatcher.start()
                 print("[Hayabusa] dispatcher started (role=\(nodeConfig.role.rawValue), capabilities=\(nodeConfig.capabilities.jobTypes.joined(separator: ",")))")
             } catch {
                 FileHandle.standardError.write(Data("[Hayabusa] dispatcher init failed: \(error)\n".utf8))
@@ -164,8 +168,9 @@ struct HayabusaApp {
             print("")
             print("  KV Cache Quantization:")
             print("  --kv-quantize int8    Quantize KV cache to int8 (~50% memory savings)")
-            print("  --kv-quantize tq3     TurboQuant 3-bit KV cache (~78% memory savings)")
-            print("  --kv-quantize tq4     TurboQuant 4-bit KV cache (~72% memory savings)")
+            print("  --kv-quantize tq1     TurboQuant TQ1_0 (~1.7 bpw, ~78% memory savings)")
+            print("  --kv-quantize tq2     TurboQuant TQ2_0 (~2.0 bpw, ~72% memory savings)")
+            print("                        (tq3/tq4 are deprecated aliases for tq1/tq2)")
             print("")
             print("  Layer Skipping (MLX only):")
             print("  --layer-skip 0.3      Skip layers with importance <= 30%")
@@ -332,7 +337,7 @@ struct HayabusaApp {
                     client: leaseClient,
                     registry: registry
                 )
-                await dispatcher.start()
+                try await dispatcher.start()
                 print("[Hayabusa] dispatcher started (role=\(nodeConfig.role.rawValue), capabilities=\(nodeConfig.capabilities.jobTypes.joined(separator: ",")))")
             } catch {
                 FileHandle.standardError.write(Data("[Hayabusa] dispatcher init failed: \(error)\n".utf8))

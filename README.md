@@ -2,7 +2,9 @@
 
 ### Swift-Native LLM Inference Server for Apple Silicon
 
-Hayabusa is a high-performance LLM inference server built from scratch in Swift, optimized for Apple Silicon. It delivers significantly faster inference than existing solutions by leveraging continuous batching, dual backends (llama.cpp + MLX), and zero Python overhead.
+Hayabusa is a high-performance LLM inference server built from scratch in Swift, optimized for Apple Silicon. It uses continuous batching on llama.cpp with zero Python overhead.
+
+> **Status (2026-05):** the llama.cpp backend is the supported execution path on `main`. The MLX backend is currently disabled at startup pending a migration to the new `mlx-swift-lm` 0.2x+ API; use `--backend llama` or `--dispatcher-only`. The benchmark tables below were captured on an earlier revision where the MLX backend was operational and are kept as historical reference rather than reproducible numbers on the current commit.
 
 ## Why Hayabusa?
 
@@ -16,6 +18,8 @@ Hayabusa is a high-performance LLM inference server built from scratch in Swift,
 
 ## Performance
 
+> The tables in this section were measured on a revision where both backends were operational and `bench_vs_ollama.py` ran the streaming path. The current server does not yet implement SSE streaming, so re-running the same script today will not reproduce the streaming TTFT numbers — see Roadmap. Numbers are presented as historical reference, not a reproducible baseline on the current commit.
+
 ### Hayabusa vs Ollama (Qwen3.5-9B, same model, same hardware)
 
 | Metric | Hayabusa | Ollama | Improvement |
@@ -24,7 +28,7 @@ Hayabusa is a high-performance LLM inference server built from scratch in Swift,
 | P95 Latency (conc=1) | 20,914 ms | 76,009 ms | **3.6x faster** |
 | Throughput (conc=8) | 51.9 tok/s | 33.4 tok/s | **1.6x higher** |
 
-> Mac Studio M3 Ultra 96GB, Qwen3.5-9B Q4_K_M, max_tokens=128
+> Mac Studio M3 Ultra 96GB, Qwen3.5-9B Q4_K_M, max_tokens=128. Captured before MLX backend was disabled on `main`.
 
 ### llama.cpp vs MLX Backend (Qwen3-8B, 512-token I/O)
 
@@ -63,11 +67,12 @@ Hayabusa is a high-performance LLM inference server built from scratch in Swift,
 ## Features
 
 - **Swift Native** -- zero Python overhead, direct Metal GPU access
-- **OpenAI-Compatible API** -- drop-in replacement (`/v1/chat/completions`)
-- **Dual Backend** -- llama.cpp (GGUF) and MLX (HuggingFace) via `--backend` flag
+- **OpenAI-Compatible API** -- non-streaming `/v1/chat/completions` (SSE streaming is on the roadmap)
+- **llama.cpp backend** -- GGUF models with continuous batching (default, supported on `main`)
+- **MLX backend** -- HuggingFace models; currently disabled pending mlx-swift-lm 0.2x+ migration
 - **Continuous Batching** -- concurrent request processing with shared KV cache
-- **Priority Scheduler** -- realtime and batch priority lanes
-- **Qwen3.5 Support** -- first MLX-backend server with Qwen3.5 (GatedDeltaNet hybrid architecture)
+- **Job dispatcher** -- command-room Job lease integration (`--dispatcher-only` mode for edge nodes)
+- **Slot priority** -- two-level (`high` / `low`) admission via the `priority` field; a richer realtime / batch lane model is in progress
 
 ## Quick Start
 
@@ -79,9 +84,17 @@ Hayabusa is a high-performance LLM inference server built from scratch in Swift,
 
 ### Build llama.cpp
 
+`vendor/llama.cpp` is intentionally untracked so users build it locally. Pin to a
+known-good commit when cloning to keep builds reproducible:
+
 ```bash
+# Pin to the upstream llama.cpp commit Hayabusa was last built and tested against.
+# Update this SHA (and rebuild) whenever you intentionally move to a newer llama.cpp.
+LLAMA_CPP_REF=c9872a2575acc65834deb15a1f5155f6dbc75229
+
 git clone https://github.com/ggml-org/llama.cpp vendor/llama.cpp
 cd vendor/llama.cpp
+git checkout "$LLAMA_CPP_REF"
 cmake -B build -DGGML_METAL=ON -DBUILD_SHARED_LIBS=OFF
 cmake --build build --config Release -j$(sysctl -n hw.ncpu)
 cd ../..
@@ -93,9 +106,6 @@ cd ../..
 # GGUF (for llama.cpp backend)
 huggingface-cli download unsloth/Qwen3.5-9B-GGUF Qwen3.5-9B-Q4_K_M.gguf \
   --local-dir models/
-
-# MLX (auto-downloaded from HuggingFace on first run)
-# Just pass the model ID: mlx-community/Qwen3.5-9B-MLX-4bit
 ```
 
 ### Build & Run
@@ -104,16 +114,22 @@ huggingface-cli download unsloth/Qwen3.5-9B-GGUF Qwen3.5-9B-Q4_K_M.gguf \
 # Build
 swift build
 
-# Run with llama.cpp backend
+# Run with llama.cpp backend (supported on main)
 .build/debug/Hayabusa models/Qwen3.5-9B-Q4_K_M.gguf --backend llama
 
-# Run with MLX backend
-.build/debug/Hayabusa mlx-community/Qwen3.5-9B-MLX-4bit --backend mlx
+# Dispatcher-only mode (no model, no HTTP server; for edge worker nodes)
+HAYABUSA_CONFIG=config/hayabusa.dev.json \
+  .build/debug/Hayabusa --dispatcher-only
 
 # Custom port and slot count
 HAYABUSA_PORT=8081 .build/debug/Hayabusa models/Qwen3.5-9B-Q4_K_M.gguf \
   --backend llama --slots 8 --ctx-per-slot 4096
 ```
+
+> The MLX backend exists in the source tree (`--backend mlx`) but currently
+> raises `modelLoadFailed` at startup because the `mlx-swift-lm` 0.2x+ loader
+> API needs a migration. Do not include `--backend mlx` in scripts until that
+> migration lands.
 
 ### Send a Request
 
@@ -182,9 +198,13 @@ Diagnostic endpoint showing KV cache slot states.
 
 ## Roadmap
 
+- [ ] MLX backend migration to mlx-swift-lm 0.2x+ loader API (currently disabled at startup)
+- [ ] Streaming responses (SSE) on `/v1/chat/completions` — benchmark scripts depend on this for TTFT
+- [ ] Unify slot priority lanes (realtime / high / normal / low / batch) across HTTP path and Job dispatcher
+- [ ] Replace handcrafted JSON in `/slots`, `/v1/memory`, `/v1/cluster/status`, `/v1/stats` with `Codable` encoders
+- [ ] AuthN/AuthZ for cluster mode (currently binds `0.0.0.0` with no token check)
+- [ ] Qwen3.5 MLX batch inference (blocked on MLX backend migration)
 - [ ] Weight-shared 20-parallel inference
-- [ ] Qwen3.5 MLX batch inference (pending mlx-swift-lm API)
-- [ ] Streaming responses (SSE)
 - [ ] arXiv paper
 
 ## Use Cases

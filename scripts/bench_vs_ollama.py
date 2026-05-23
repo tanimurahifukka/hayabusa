@@ -568,12 +568,17 @@ async def main_async(args):
 
     all_results: list[BenchResult] = []
 
+    # SSE streaming on /v1/chat/completions is not implemented on Hayabusa main yet
+    # (see Roadmap). Force non-streaming so the TTFT figures don't silently fall back
+    # to the "non-streaming = full-response latency" path on Hayabusa while Ollama
+    # genuinely streams. Re-enable via --use-streaming once SSE lands.
+    use_streaming = bool(getattr(args, "use_streaming", False))
     for conc in concurrencies:
         for name, url, model in available_targets:
             print(f"--- {name} (concurrency={conc}) ---")
             result = await run_bench(
                 url, model, name, conc, num_samples,
-                max_tokens, use_streaming=True,
+                max_tokens, use_streaming=use_streaming,
             )
             all_results.append(result)
             print(
@@ -621,6 +626,14 @@ def main():
     parser.add_argument(
         "--hayabusa-port", type=int, default=8080,
         help="Hayabusa port (default: 8080)",
+    )
+    parser.add_argument(
+        "--use-streaming", action="store_true",
+        help=(
+            "Use SSE streaming endpoints. Default off because Hayabusa's "
+            "/v1/chat/completions does not implement SSE on main; enabling this "
+            "before the SSE roadmap item lands will mis-report TTFT."
+        ),
     )
     args = parser.parse_args()
     asyncio.run(main_async(args))

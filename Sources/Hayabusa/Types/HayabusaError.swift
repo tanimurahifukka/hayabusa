@@ -1,4 +1,4 @@
-enum HayabusaError: Error, CustomStringConvertible {
+public enum HayabusaError: Error, CustomStringConvertible {
     case modelLoadFailed(String)
     case vocabLoadFailed
     case contextCreationFailed
@@ -9,8 +9,11 @@ enum HayabusaError: Error, CustomStringConvertible {
     case noSlotsAvailable
     case contextExceeded
     case remoteNodeFailed
+    /// Dispatcher refused to start because the worker registry is missing
+    /// at least one Worker for a declared capability jobType.
+    case dispatcherWorkerMissing([String])
 
-    var description: String {
+    public var description: String {
         switch self {
         case .modelLoadFailed(let path): "Failed to load model: \(path)"
         case .vocabLoadFailed: "Failed to get vocabulary"
@@ -22,6 +25,8 @@ enum HayabusaError: Error, CustomStringConvertible {
         case .noSlotsAvailable: "All KV cache slots are occupied"
         case .contextExceeded: "Prompt + max_tokens exceeds slot context size"
         case .remoteNodeFailed: "Remote cluster node failed to respond"
+        case .dispatcherWorkerMissing(let jobTypes):
+            "dispatcher refused: no Worker registered for jobType(s): \(jobTypes.joined(separator: ", "))"
         }
     }
 }

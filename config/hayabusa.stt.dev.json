@@ -1,0 +1,22 @@
+{
+  "_comment": "Dev config for STT-enabled edge nodes. Requires the following env to be set before launching Hayabusa --dispatcher-only: HAYABUSA_WHISPER_BIN, HAYABUSA_WHISPER_MODEL. Optional: HAYABUSA_WHISPER_LANG, HAYABUSA_WHISPER_THREADS, HAYABUSA_STT_TIMEOUT_SEC, HAYABUSA_STT_RECORDINGS_ROOT, HAYABUSA_STT_MAX_AUDIO_MB, HAYABUSA_STT_PROD_MODE.",
+  "node": {
+    "id": "edge-mac-studio-stt-dev-01",
+    "role": "sub",
+    "capabilities": {
+      "jobTypes": ["echo", "stt.transcribe"]
+    },
+    "policy": {
+      "maxConcurrentJobs": 2,
+      "acceptPriority": [],
+      "refuseWhenMemoryPressure": ["critical", "emergency"],
+      "leaseBatchSize": 4,
+      "pollIntervalSeconds": 2.0
+    },
+    "lease": {
+      "enabled": true,
+      "commandRoomBaseUrl": "http://localhost:3001",
+      "authTokenEnv": "HAYABUSA_WORKER_TOKEN"
+    }
+  }
+}

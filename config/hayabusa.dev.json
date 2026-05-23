@@ -1,9 +1,10 @@
 {
+  "_comment": "Default dev config: echo Worker only. STT (whisper-cli) requires HAYABUSA_WHISPER_BIN + HAYABUSA_WHISPER_MODEL env to be set — use config/hayabusa.stt.dev.json when you want the dispatcher to lease stt.transcribe jobs.",
   "node": {
     "id": "edge-mac-studio-dev-01",
     "role": "sub",
     "capabilities": {
-      "jobTypes": ["echo", "stt.transcribe"]
+      "jobTypes": ["echo"]
     },
     "policy": {
       "maxConcurrentJobs": 2,

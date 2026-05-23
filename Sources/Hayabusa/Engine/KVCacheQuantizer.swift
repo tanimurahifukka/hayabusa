@@ -2,30 +2,36 @@ import Foundation
 import CLlama
 
 /// KV Cache quantization mode.
+///
+/// Note on naming: the CLI flag values intentionally match the underlying
+/// GGML type (TQ1_0 / TQ2_0). Earlier revisions exposed `tq3` / `tq4`,
+/// which were misnomers — they always mapped to GGML_TYPE_TQ1_0 /
+/// GGML_TYPE_TQ2_0 internally. `tq3` / `tq4` are accepted as deprecated
+/// aliases at the CLI layer; new code should use `tq1` / `tq2`.
 enum KVQuantizeMode: String {
     case off       // float16 (default)
     case int8      // Q8_0 quantization (~50% memory reduction)
-    case tq3       // TQ3_0 TurboQuant 3-bit (~78% memory reduction)
-    case tq4       // TQ4_0 TurboQuant 4-bit (~72% memory reduction)
+    case tq1       // TQ1_0 TurboQuant ~1.7 bpw (~78% memory reduction)
+    case tq2       // TQ2_0 TurboQuant ~2.0 bpw (~72% memory reduction)
 
     /// Returns the GGML type for KV cache keys.
     var keyType: ggml_type {
         switch self {
         case .off:  return GGML_TYPE_F16
         case .int8: return GGML_TYPE_Q8_0
-        case .tq3:  return GGML_TYPE_TQ1_0
-        case .tq4:  return GGML_TYPE_TQ2_0
+        case .tq1:  return GGML_TYPE_TQ1_0
+        case .tq2:  return GGML_TYPE_TQ2_0
         }
     }
 
     /// Returns the GGML type for KV cache values.
-    /// Both K and V caches use the same quantization type since Metal FA kernels now exist for TQ3/TQ4.
+    /// Both K and V caches use the same quantization type since Metal FA kernels exist for TQ1_0 / TQ2_0.
     var valueType: ggml_type {
         switch self {
         case .off:  return GGML_TYPE_F16
         case .int8: return GGML_TYPE_Q8_0
-        case .tq3:  return GGML_TYPE_TQ1_0
-        case .tq4:  return GGML_TYPE_TQ2_0
+        case .tq1:  return GGML_TYPE_TQ1_0
+        case .tq2:  return GGML_TYPE_TQ2_0
         }
     }
 
@@ -33,8 +39,22 @@ enum KVQuantizeMode: String {
         switch self {
         case .off:  return "float16 (default)"
         case .int8: return "int8 (Q8_0, ~50% memory savings)"
-        case .tq3:  return "tq3 (TQ3_0, 3-bit TurboQuant, ~78% memory savings)"
-        case .tq4:  return "tq4 (TQ4_0, 4-bit TurboQuant, ~72% memory savings)"
+        case .tq1:  return "tq1 (TQ1_0, ~1.7 bpw TurboQuant, ~78% memory savings)"
+        case .tq2:  return "tq2 (TQ2_0, ~2.0 bpw TurboQuant, ~72% memory savings)"
+        }
+    }
+
+    /// Parse a CLI value, honoring deprecated aliases (`tq3` → `tq1`, `tq4` → `tq2`).
+    /// Returns the resolved mode and an optional deprecation warning message.
+    static func parseCLIValue(_ raw: String) -> (mode: KVQuantizeMode, warning: String?) {
+        let lower = raw.lowercased()
+        switch lower {
+        case "tq3":
+            return (.tq1, "[Hayabusa] --kv-quantize tq3 is deprecated, use tq1 (underlying GGML type is TQ1_0)")
+        case "tq4":
+            return (.tq2, "[Hayabusa] --kv-quantize tq4 is deprecated, use tq2 (underlying GGML type is TQ2_0)")
+        default:
+            return (KVQuantizeMode(rawValue: lower) ?? .off, nil)
         }
     }
 }
@@ -61,7 +81,7 @@ struct KVCacheQuantizer {
         params.type_v = mode.valueType
 
         // TurboQuant: Both K and V caches quantized, Metal FA kernels accelerate attention.
-        if mode == .tq3 || mode == .tq4 {
+        if mode == .tq1 || mode == .tq2 {
             print("[KVCache] TurboQuant: K=\(mode.rawValue), V=\(mode.rawValue) (Metal FA accelerated)")
         }
     }
@@ -88,11 +108,11 @@ struct KVCacheQuantizer {
             // Q8_0: 1 byte per element + 2 bytes scale per 32 elements
             let scaleOverhead = (totalElements / 32) * 2
             actualQuantizedBytes = totalElements * 1 + scaleOverhead
-        case .tq3:
-            // K=TQ3_0 (14 bytes/32 elements) + V=TQ3_0 (14 bytes/32 elements)
+        case .tq1:
+            // K=TQ1_0 (14 bytes/32 elements) + V=TQ1_0 (14 bytes/32 elements)
             actualQuantizedBytes = (totalElements / 32) * 14
-        case .tq4:
-            // K=TQ4_0 (18 bytes/32 elements) + V=TQ4_0 (18 bytes/32 elements)
+        case .tq2:
+            // K=TQ2_0 (18 bytes/32 elements) + V=TQ2_0 (18 bytes/32 elements)
             actualQuantizedBytes = (totalElements / 32) * 18
         }
 

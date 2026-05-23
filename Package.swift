@@ -9,7 +9,13 @@ let package = Package(
     platforms: [.macOS(.v14)],
     dependencies: [
         .package(url: "https://github.com/hummingbird-project/hummingbird.git", from: "2.0.0"),
-        .package(url: "https://github.com/ml-explore/mlx-swift-lm.git", branch: "main"),
+        // mlx-swift-lm is pinned to the commit that was resolved when the MLX backend
+        // was last operational. The backend currently throws at startup pending an
+        // API migration; updating this revision should happen as part of that work.
+        .package(
+            url: "https://github.com/ml-explore/mlx-swift-lm.git",
+            revision: "52e999486e133dfb94a5c329befcb11eb52d908a"
+        ),
     ],
     targets: [
         .target(

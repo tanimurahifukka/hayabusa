@@ -26,7 +26,8 @@ scripts/bench_llama_vs_mlx.json
 scripts/bench_qwen35_final.json
 
 # SwiftPM
-Package.resolved
+# Package.resolved is intentionally tracked so that swift package dependency
+# resolution is reproducible across machines and CI runs.
 
 # Vendor (users build llama.cpp locally)
 vendor/

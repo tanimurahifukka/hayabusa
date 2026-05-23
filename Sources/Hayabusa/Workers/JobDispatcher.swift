@@ -24,13 +24,17 @@ public actor JobDispatcher {
         self.registry = registry
     }
 
-    public func start() {
+    /// Start the dispatcher loop.
+    ///
+    /// Throws `HayabusaError.dispatcherWorkerMissing` when the registry does not
+    /// contain a Worker for every jobType in the node's capabilities. The caller
+    /// is responsible for logging an appropriate "started"/"refused" line — this
+    /// function no longer prints to stderr on rejection.
+    public func start() throws {
         guard !running else { return }
         let missing = registry.missing(forCapability: config.capabilities)
         if !missing.isEmpty {
-            let msg = "[Hayabusa] dispatcher refused: missing workers for jobTypes: \(missing.joined(separator: ", "))\n"
-            FileHandle.standardError.write(Data(msg.utf8))
-            return
+            throw HayabusaError.dispatcherWorkerMissing(missing)
         }
         running = true
         let intervalNanos = UInt64(max(0.25, config.policy.pollIntervalSeconds) * 1_000_000_000)
