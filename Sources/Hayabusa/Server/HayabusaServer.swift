@@ -36,13 +36,13 @@ struct HayabusaServer {
         let kvQuantizeMode = self.kvQuantizeMode
         let layerSkipConfig = self.layerSkipConfig
 
-        // GET /health
-        router.get("health") { _, _ -> String in
-            "{\"status\":\"ok\"}"
+        // GET /health  — Codable + application/json
+        router.get("health") { _, _ -> Response in
+            try jsonResponse(HealthResponse(status: "ok"))
         }
 
-        // POST /v1/chat/completions
-        router.post("v1/chat/completions") { request, context in
+        // POST /v1/chat/completions — Codable + application/json
+        router.post("v1/chat/completions") { request, context -> Response in
             let chatRequest = try await context.requestDecoder.decode(
                 ChatRequest.self, from: request, context: context
             )
@@ -61,10 +61,7 @@ struct HayabusaServer {
                 promptTokens: result.promptTokens,
                 completionTokens: result.completionTokens
             )
-
-            let jsonData = try JSONEncoder().encode(response)
-            let jsonString = String(data: jsonData, encoding: .utf8) ?? "{}"
-            return jsonString
+            return try jsonResponse(response)
         }
 
         // GET /slots — diagnostic endpoint
