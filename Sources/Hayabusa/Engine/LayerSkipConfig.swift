@@ -144,6 +144,8 @@ struct LayerSkipConfig: Sendable {
     // MARK: - Stats
 
     /// JSON-compatible summary for /v1/stats endpoint.
+    /// Codable な構造体に対応した version は `statsView` を使う。
+    /// 旧式の手組み JSON は文字列補間でフォーマットが揺れやすいので非推奨。
     var statsJSON: String {
         let indices = skipLayerIndices.sorted().map { "\($0)" }.joined(separator: ",")
         return """
@@ -154,5 +156,17 @@ struct LayerSkipConfig: Sendable {
         "skippedLayers":\(skipLayerIndices.count),\
         "skippedIndices":[\(indices)]}
         """
+    }
+
+    /// `/v1/stats` の Codable response 用 view。
+    var statsView: LayerSkipStats {
+        LayerSkipStats(
+            enabled: true,
+            threshold: skipThreshold,
+            task: "\(taskProfile)",
+            totalLayers: totalLayers,
+            skippedLayers: skipLayerIndices.count,
+            skippedIndices: skipLayerIndices.sorted()
+        )
     }
 }
