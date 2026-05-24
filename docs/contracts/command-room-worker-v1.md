@@ -86,31 +86,41 @@ response:
 
 Job 完了 / 失敗時に投稿する。
 
-success 時 request:
+success 時 request (stt.transcribe の例):
 
 ```jsonc
 {
   "status": "succeeded",
-  "resultJson": {
-    "transcriptStatus": "completed",
-    "summary": "発信者: 03-1234-5678 / 用件: 当日予約 / 希望時刻: 午後",
+  "result": {
+    "transcript": "...transcript の本文 (cloud DB には保存されない)...",
+    "transcriptRef": {
+      "kind": "local_node_file",
+      "provider": "local_node",
+      "uri": "local-node://edge-mac-studio-01/transcripts/<callRecordId>.txt"
+    },
     "language": "ja",
-    "durationSec": 38
-  },
-  "metricsJson": {
-    "promptTokens": 1024,
-    "completionTokens": 480,
-    "totalLatencyMs": 12430,
-    "modelId": "whisper-large-v3"
+    "durationMs": 38000,
+    "model": "whisper-large-v3"
   }
 }
 ```
 
-> **重要 (privacy)**: `resultJson` に **transcript 全文を含めない**。
-> 全文は別エンドポイント (`POST /api/v1/call-records/{id}/transcript-full`) に
-> Sensitive データクラスとして直送し、`resultJson` には summary と
-> meta だけ入れる。これは command-room CLAUDE §2.5 / ADR 0009 の Sensitive
-> Originals 規約に対応する。
+> **重要 (privacy / CLAUDE §2.5)**:
+>
+> 同じ `POST /api/v1/worker-nodes/jobs/{id}/result` エンドポイントで transcript
+> 本文を HTTP body に乗せて送るが、command-room 側 `applySttResult` が:
+>
+> - 先頭 240 文字だけを `CallTranscriptSummary.summary` に保存
+> - `transcriptCharLen` だけを保存
+> - `transcriptRef` を `assertCloudSafeStoragePointer` で validate して保存
+>   (kind=object_storage / local_node_file / obsidian_note 等の cloud-safe pointer)
+> - **transcript 全文は Job.resultJson にも DB の他のフィールドにも書き込まない**
+>   (`buildSttResultForStorage` が strip する)
+>
+> したがって専用の `transcript-full` エンドポイントは存在しない。
+> 「Sensitive 経路」とはこの "送るが保存しない" 振る舞い全体を指す。
+> Edge にある full transcript を後で見たい staff には、`transcriptRef.uri` を
+> 表示して Local Node / Vault から手動アクセスしてもらう (UI は別 PR)。
 
 failure 時 request:
 
@@ -185,8 +195,8 @@ failure 時 request:
   推論サーバであり、command-room からは直接叩かない。lease 経路だけが
   command-room との contract
 - SSE / streaming はまだ未実装 (README の Roadmap)
-- transcript 全文の Sensitive 経路 (`/api/v1/call-records/{id}/transcript-full`)
-  は command-room 側で実装中。stable 化は別 PR
+- transcript 全文は `/jobs/{id}/result` で送るが、Cloud DB には保存されない
+  (上記 §2 参照)。Edge での参照 UI は別 PR で実装予定
 
 ## 6. 改版方針
 
