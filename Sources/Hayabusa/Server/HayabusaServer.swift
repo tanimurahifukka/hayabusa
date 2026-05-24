@@ -64,113 +64,132 @@ struct HayabusaServer {
             return try jsonResponse(response)
         }
 
-        // GET /slots — diagnostic endpoint
-        router.get("slots") { _, _ -> String in
+        // GET /slots — diagnostic endpoint (Codable)
+        router.get("slots") { _, _ -> Response in
             let summary = engine.slotSummary()
             let slots = summary.map { slot in
-                "{\"index\":\(slot.index),\"state\":\"\(slot.state)\",\"priority\":\"\(slot.priority)\",\"pos\":\(slot.pos)}"
+                SlotInfoResponse(
+                    index: slot.index,
+                    state: slot.state,
+                    priority: slot.priority,
+                    pos: slot.pos
+                )
             }
-            return "[\(slots.joined(separator: ","))]"
+            return try jsonResponse(slots)
         }
 
-        // GET /v1/memory — memory status (available for any backend)
-        router.get("v1/memory") { _, _ -> String in
-            if let info = engine.memoryInfo() {
-                return """
-                {"totalPhysical":\(info.totalPhysical),"rssBytes":\(info.rssBytes),\
-                "freeEstimate":\(info.freeEstimate),"activeSlots":\(info.activeSlots),\
-                "pressure":"\(info.pressure)","slots":\(engine.slotCount)}
-                """
+        // GET /v1/memory — memory status (Codable)
+        router.get("v1/memory") { _, _ -> Response in
+            guard let info = engine.memoryInfo() else {
+                return try jsonResponse(MemoryStatusResponse.unknown)
             }
-            return "{\"pressure\":\"unknown\"}"
+            return try jsonResponse(
+                MemoryStatusResponse(
+                    totalPhysical: info.totalPhysical,
+                    rssBytes: info.rssBytes,
+                    freeEstimate: info.freeEstimate,
+                    activeSlots: info.activeSlots,
+                    pressure: info.pressure,
+                    slots: engine.slotCount
+                )
+            )
         }
 
-        // GET /v1/cluster/status — cluster node listing with memory info
-        router.get("v1/cluster/status") { _, _ -> String in
+        // GET /v1/cluster/status — cluster node listing with memory info (Codable)
+        router.get("v1/cluster/status") { _, _ -> Response in
             // Update local node memory before responding
             if let cm = clusterManager, let info = engine.memoryInfo() {
                 cm.updateLocalMemory(info)
             }
 
             guard let cm = clusterManager else {
-                return "{\"cluster\":false}"
+                return try jsonResponse(ClusterStatusResponse.singleNode)
             }
-            let nodes = cm.allNodes()
-            let nodesJson = nodes.map { node in
-                """
-                {"id":"\(node.id)","host":"\(node.host)","port":\(node.port),\
-                "backend":"\(node.backend)","model":"\(node.model)","slots":\(node.slots),\
-                "isLocal":\(node.isLocal),"isHealthy":\(node.isHealthy),\
-                "consecutiveFailures":\(node.consecutiveFailures),\
-                "totalMemory":\(node.totalMemory),"rssBytes":\(node.rssBytes),\
-                "freeMemory":\(node.freeMemory),"memoryPressure":"\(node.memoryPressure)"}
-                """
+
+            let nodes = cm.allNodes().map { node in
+                ClusterNodeView(
+                    id: node.id,
+                    host: node.host,
+                    port: node.port,
+                    backend: node.backend,
+                    model: node.model,
+                    slots: node.slots,
+                    isLocal: node.isLocal,
+                    isHealthy: node.isHealthy,
+                    consecutiveFailures: node.consecutiveFailures,
+                    totalMemory: node.totalMemory,
+                    rssBytes: node.rssBytes,
+                    freeMemory: node.freeMemory,
+                    memoryPressure: node.memoryPressure
+                )
             }
-            let bandwidthJson = cm.bandwidthSnapshots().map { s in
-                """
-                {"nodeId":"\(s.nodeId)","isLocal":\(s.isLocal),\
-                "ewmaTokPerSec":\(String(format: "%.1f", s.ewmaTokPerSec)),\
-                "activeRequests":\(s.activeRequests),\
-                "totalRequests":\(s.totalRequests),"totalTokens":\(s.totalTokens)}
-                """
+            let bandwidth = cm.bandwidthSnapshots().map { s in
+                BandwidthView(
+                    nodeId: s.nodeId,
+                    isLocal: s.isLocal,
+                    ewmaTokPerSec: s.ewmaTokPerSec,
+                    activeRequests: s.activeRequests,
+                    totalRequests: s.totalRequests,
+                    totalTokens: s.totalTokens
+                )
             }
-            return """
-            {"cluster":true,"routing":"uzu",\
-            "nodes":[\(nodesJson.joined(separator: ","))],\
-            "bandwidth":[\(bandwidthJson.joined(separator: ","))]}
-            """
+            return try jsonResponse(
+                ClusterStatusResponse(
+                    cluster: true,
+                    routing: "uzu",
+                    nodes: nodes,
+                    bandwidth: bandwidth
+                )
+            )
         }
 
-        // GET /v1/stats — speculative decoding & KV quantization metrics
-        router.get("v1/stats") { _, _ -> String in
-            var parts: [String] = []
-
+        // GET /v1/stats — speculative decoding & KV quantization metrics (Codable)
+        router.get("v1/stats") { _, _ -> Response in
             // Speculative decoding metrics
-            if let sd = speculativeDecoder {
+            let speculative: SpeculativeStats = {
+                guard let sd = speculativeDecoder else { return .disabled }
                 let m = sd.metrics
-                parts.append("""
-                "speculative":{\
-                "enabled":true,\
-                "speculativeTokens":\(4),\
-                "totalDraftTokens":\(m.totalDraftTokens),\
-                "acceptedTokens":\(m.acceptedTokens),\
-                "acceptanceRate":\(String(format: "%.4f", m.acceptanceRate)),\
-                "totalGenerations":\(m.totalGenerations),\
-                "totalCompletionTokens":\(m.totalCompletionTokens),\
-                "effectiveTokPerSec":\(String(format: "%.1f", m.totalGenerations > 0 ? Double(m.totalCompletionTokens) / Double(m.totalGenerations) : 0))}
-                """)
-            } else {
-                parts.append("\"speculative\":{\"enabled\":false}")
+                let effective = m.totalGenerations > 0
+                    ? Double(m.totalCompletionTokens) / Double(m.totalGenerations)
+                    : 0
+                return SpeculativeStats(
+                    enabled: true,
+                    speculativeTokens: 4,
+                    totalDraftTokens: m.totalDraftTokens,
+                    acceptedTokens: m.acceptedTokens,
+                    acceptanceRate: m.acceptanceRate,
+                    totalGenerations: m.totalGenerations,
+                    totalCompletionTokens: m.totalCompletionTokens,
+                    effectiveTokPerSec: effective
+                )
+            }()
+
+            let kv = KvQuantizeStats(
+                enabled: kvQuantizeMode != .off,
+                mode: kvQuantizeMode.rawValue,
+                description: kvQuantizeMode.description
+            )
+
+            let layerSkip: LayerSkipStats =
+                layerSkipConfig?.statsView ?? .disabled
+
+            let memory: MemoryStats? = engine.memoryInfo().map { info in
+                MemoryStats(
+                    totalPhysical: info.totalPhysical,
+                    rssBytes: info.rssBytes,
+                    freeEstimate: info.freeEstimate,
+                    pressure: info.pressure
+                )
             }
 
-            // KV cache quantization info
-            let kvEnabled = kvQuantizeMode != .off
-            parts.append("""
-            "kvQuantize":{\
-            "enabled":\(kvEnabled),\
-            "mode":"\(kvQuantizeMode.rawValue)",\
-            "description":"\(kvQuantizeMode.description)"}
-            """)
-
-            // Layer skipping info
-            if let ls = layerSkipConfig {
-                parts.append("\"layerSkip\":\(ls.statsJSON)")
-            } else {
-                parts.append("\"layerSkip\":{\"enabled\":false}")
-            }
-
-            // Memory info
-            if let info = engine.memoryInfo() {
-                parts.append("""
-                "memory":{\
-                "totalPhysical":\(info.totalPhysical),\
-                "rssBytes":\(info.rssBytes),\
-                "freeEstimate":\(info.freeEstimate),\
-                "pressure":"\(info.pressure)"}
-                """)
-            }
-
-            return "{\(parts.joined(separator: ","))}"
+            return try jsonResponse(
+                StatsResponse(
+                    speculative: speculative,
+                    kvQuantize: kv,
+                    layerSkip: layerSkip,
+                    memory: memory
+                )
+            )
         }
 
         let app = Application(
