@@ -20,6 +20,7 @@ final class GenerationJob: @unchecked Sendable {
     var slotHandle: SlotHandle?
     var sampler: UnsafeMutablePointer<llama_sampler>?
     var outputTokens: [llama_token] = []
+    var textBuffer: String = ""       // incremental detokenized output for stop-sequence detection
     var currentPos: Int32 = 0
     var promptEvalOffset: Int = 0     // chunked prompt eval progress
 

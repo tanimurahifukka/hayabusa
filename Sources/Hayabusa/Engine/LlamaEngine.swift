@@ -21,6 +21,7 @@ final class LlamaEngine: InferenceEngine, @unchecked Sendable {
     let modelDescription: String
     let slotCount: Int
     private let isGemmaModel: Bool
+    private let stopSequences: [String]
 
     // --- Scheduler state (accessed only on queue) ---
     private var pendingJobs: [GenerationJob] = []
@@ -67,6 +68,12 @@ final class LlamaEngine: InferenceEngine, @unchecked Sendable {
             || modelPath.lowercased().contains("gemma-4")
             || modelPath.lowercased().contains("gemma4")
         self.isGemmaModel = isGemma4 || modelPath.lowercased().contains("gemma")
+
+        // Text-based stop sequences as fallback for GGUFs that don't mark
+        // stop tokens as EOG (e.g. Gemma 4 <end_of_turn>).
+        self.stopSequences = (isGemma4 || modelPath.lowercased().contains("gemma"))
+            ? ["<end_of_turn>", "<start_of_turn>"]
+            : ["<|im_end|>", "<|im_start|>"]
 
         var ctxParams = llama_context_default_params()
         let nBatch: Int32 = 2048
@@ -317,19 +324,32 @@ final class LlamaEngine: InferenceEngine, @unchecked Sendable {
                 // Qwen3.5: </think> is marked EOG but we continue past it
                 let tokenText = detokenizeSingle(token: newToken)
                 if !tokenText.contains("</think>") {
-                    let text = detokenize(tokens: job.outputTokens)
-                    job.complete(text: text)
+                    job.complete(text: job.textBuffer)
                     continue
                 }
             }
 
             job.outputTokens.append(newToken)
+            job.textBuffer += detokenizeSingle(token: newToken)
+
+            // Text-based stop sequence detection — catches GGUFs that don't
+            // mark stop tokens as EOG (e.g. Gemma 4 <end_of_turn>).
+            if checkStopSequence(job: job) { continue }
 
             if job.outputTokens.count >= job.maxTokens {
-                let text = detokenize(tokens: job.outputTokens)
-                job.complete(text: text)
+                job.complete(text: job.textBuffer)
             }
         }
+    }
+
+    private func checkStopSequence(job: GenerationJob) -> Bool {
+        for stop in stopSequences {
+            guard let range = job.textBuffer.range(of: stop) else { continue }
+            let cleanText = String(job.textBuffer[job.textBuffer.startIndex..<range.lowerBound])
+            job.complete(text: cleanText)
+            return true
+        }
+        return false
     }
 
     // Phase 6: Clean up finished/failed jobs

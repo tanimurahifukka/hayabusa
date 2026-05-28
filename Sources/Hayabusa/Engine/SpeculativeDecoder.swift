@@ -48,6 +48,7 @@ final class SpeculativeDecoder: InferenceEngine, @unchecked Sendable {
 
     let modelDescription: String
     let slotCount: Int
+    private let stopSequences: [String]
 
     init(
         draftModelPath: String,
@@ -130,6 +131,11 @@ final class SpeculativeDecoder: InferenceEngine, @unchecked Sendable {
         var descBuf = [CChar](repeating: 0, count: 256)
         llama_model_desc(tModel, &descBuf, 256)
         self.modelDescription = "Speculative(\(String(cString: descBuf)))"
+
+        let isGemma = targetModelPath.lowercased().contains("gemma")
+        self.stopSequences = isGemma
+            ? ["<end_of_turn>", "<start_of_turn>"]
+            : ["<|im_end|>", "<|im_start|>"]
 
         print("[Speculative] Draft: \(draftModelPath)")
         print("[Speculative] Target: \(targetModelPath)")
@@ -318,7 +324,14 @@ final class SpeculativeDecoder: InferenceEngine, @unchecked Sendable {
         metrics.totalGenerations += 1
         metrics.totalCompletionTokens += outputTokens.count
 
-        let text = detokenize(vocab: targetVocab, tokens: outputTokens)
+        var text = detokenize(vocab: targetVocab, tokens: outputTokens)
+        // Strip text at first stop sequence (fallback for GGUFs missing EOG marks)
+        for stop in stopSequences {
+            if let range = text.range(of: stop) {
+                text = String(text[text.startIndex..<range.lowerBound])
+                break
+            }
+        }
         return GenerationResult(
             text: text,
             promptTokens: promptTokens.count,
