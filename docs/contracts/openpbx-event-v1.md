@@ -130,6 +130,7 @@ command-room はこのイベントを `ExternalEvent` / `CallRecord` に upsert 
 |---|---|
 | `same_day_reservation` | 特番 9001。当日予約録音 |
 | `callback_request` | 特番 9002。折り返し依頼録音 |
+| `voicemail` | 留守電ボックスへの録音。CHIPS 側では受付のチケット候補として扱う |
 | `no_recording` | 録音なしで終わった通話（IVR 途中で hangup 等） |
 | 将来拡張 | enum 追加は minor。値の削除/改名は major |
 
@@ -184,6 +185,7 @@ command-room はこのイベントを `ExternalEvent` / `CallRecord` に upsert 
 
 - `fixtures/openpbx-event-v1/same_day_reservation.meta.json` — sha256/sizeBytes が null（昇格直後の状態）
 - `fixtures/openpbx-event-v1/callback_request.meta.json` — sha256/sizeBytes 計算済み（送信直前の状態）
+- `fixtures/openpbx-event-v1/voicemail.meta.json` — 留守電録音（受付チケット化の代表例）
 - `fixtures/openpbx-event-v1/no_recording.meta.json` — `recording: null`
 
 これらの fixture が 3 repo の試験で通れば contract が噛み合っていると見なす（完了条件）。
