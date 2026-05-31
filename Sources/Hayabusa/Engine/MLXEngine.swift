@@ -1,92 +1,26 @@
 import Foundation
-import MLX
-import MLXLLM
-import MLXLMCommon
+
+// MLX backend is currently disabled pending mlx-swift-lm 0.2x+ API migration.
+// init always throws HayabusaError.modelLoadFailed; no instance is ever created.
+// Use --backend llama (default) or --dispatcher-only instead.
+// See: Package.swift comment, README, and Roadmap.
 
 final class MLXEngine: InferenceEngine, @unchecked Sendable {
-    private let modelContainer: ModelContainer
-    private let scheduler: MLXBatchScheduler
-    private let memoryMonitor: MemoryMonitor
+    // Stored properties required for InferenceEngine protocol conformance.
+    // These are never initialized because init always throws before reaching
+    // any self.* assignment.
     let modelDescription: String
-    private let initialSlotCount: Int
+    var slotCount: Int
     let layerSkipConfig: LayerSkipConfig?
-
-    var slotCount: Int { scheduler.currentSlotCount }
 
     init(modelId: String, slotCount: Int = 4, maxMemoryGB: Double? = nil, maxContext: Int? = nil,
          layerSkipConfig: LayerSkipConfig? = nil) async throws {
-        self.initialSlotCount = slotCount
-
-        let configuration = ModelConfiguration(id: modelId)
-
-        print("[MLX] Downloading/loading model: \(modelId)")
-        // mlx-swift-lm 0.2x+ で API が変わり、Downloader と TokenizerLoader が必須に。
-        // dispatcher-only モードでは MLX を使わない (llama 推奨) ため、
-        // 起動時例外として明示的に失敗させる。実装は後続 PR で macro 経由に統一する。
-        // 旧 API: loadContainer(configuration:progressHandler:)
-        // 新 API: loadContainer(from: Downloader, using: TokenizerLoader, configuration: ..., progressHandler:)
-        _ = configuration
+        // MLX backend is disabled: mlx-swift-lm 0.2x+ API needs migration.
+        // Downloader and TokenizerLoader are now required; old loadContainer API removed.
+        // Migration is tracked for a future PR; use --backend llama or --dispatcher-only.
         throw HayabusaError.modelLoadFailed(
             "MLX backend currently disabled (mlx-swift-lm 0.2x+ API needs migration; use --backend llama or --dispatcher-only)"
         )
-
-        // Apply memory limits after model load
-        if let gb = maxMemoryGB {
-            let bytes = Int(gb * 1024 * 1024 * 1024)
-            Memory.memoryLimit = bytes
-            Memory.cacheLimit = min(256 * 1024 * 1024, bytes / 10)
-            Memory.clearCache()
-            print("[MLX] Memory limit: \(gb)GB, cache limit: \(min(256, Int(gb * 1024) / 10))MB")
-        }
-        if let ctx = maxContext {
-            print("[MLX] Max KV context: \(ctx)")
-        }
-
-        // Apply layer skipping before creating scheduler
-        self.layerSkipConfig = layerSkipConfig
-        if let config = layerSkipConfig {
-            await config.apply(to: modelContainer)
-        }
-
-        self.modelDescription = "MLX \(modelId)"
-        self.scheduler = MLXBatchScheduler(modelContainer: modelContainer, slotCount: slotCount, maxContext: maxContext)
-
-        // Set up memory monitor with dynamic slot adjustment
-        let sched = self.scheduler
-        self.memoryMonitor = MemoryMonitor(activeSlots: { [weak sched] in
-            sched?.activeSlotCount ?? 0
-        })
-
-        let initSlots = slotCount
-        self.memoryMonitor.onPressureChange = { [weak sched] pressure, info in
-            guard let sched else { return }
-            let current = sched.currentSlotCount
-
-            switch pressure {
-            case .normal:
-                // Free > 4GB: can grow back toward initial count (or +1)
-                if current < initSlots {
-                    sched.adjustSlots(to: current + 1)
-                }
-            case .low:
-                // 2-4GB free: hold steady, no changes
-                break
-            case .critical:
-                // 1-2GB free: reduce by 1 slot
-                if current > MLXBatchScheduler.minimumSlots {
-                    sched.adjustSlots(to: current - 1)
-                }
-                Memory.clearCache()
-            case .emergency:
-                // < 1GB free: emergency — drop to minimum + clear cache
-                sched.adjustSlots(to: MLXBatchScheduler.minimumSlots)
-                Memory.clearCache()
-                print("[MLX] EMERGENCY: memory critically low, forced to \(MLXBatchScheduler.minimumSlots) slot(s)")
-            }
-        }
-
-        self.memoryMonitor.start()
-        print("[MLX] Model loaded successfully (batch scheduler + memory monitor active)")
     }
 
     func generate(
@@ -95,43 +29,22 @@ final class MLXEngine: InferenceEngine, @unchecked Sendable {
         temperature: Float,
         priority: SlotPriority
     ) async throws -> GenerationResult {
-        let mlxMessages: [[String: String]] = messages.map {
-            ["role": $0.role, "content": $0.content]
-        }
-
-        return try await withCheckedThrowingContinuation { continuation in
-            let job = MLXGenerationJob(
-                messages: mlxMessages,
-                maxTokens: maxTokens,
-                temperature: temperature,
-                priority: priority,
-                continuation: continuation
-            )
-            scheduler.submit(job)
-        }
+        // Unreachable: init always throws, so no MLXEngine instance is ever created.
+        fatalError("MLXEngine.generate called on disabled backend")
     }
 
     func slotSummary() -> [(index: Int, state: String, priority: String, pos: Int32)] {
-        scheduler.slotSummary()
+        // Unreachable: init always throws, so no MLXEngine instance is ever created.
+        fatalError("MLXEngine.slotSummary called on disabled backend")
     }
 
     func collectGenome(config: GenomeConfig) async throws {
-        try await GenomeCollector.collect(
-            from: modelContainer,
-            modelName: modelDescription,
-            config: config
-        )
+        // Unreachable: init always throws, so no MLXEngine instance is ever created.
+        fatalError("MLXEngine.collectGenome called on disabled backend")
     }
 
     func memoryInfo() -> EngineMemoryInfo? {
-        let info = memoryMonitor.latestInfo
-        let pressure = memoryMonitor.currentPressure
-        return EngineMemoryInfo(
-            totalPhysical: info.totalPhysical,
-            rssBytes: info.rssBytes,
-            freeEstimate: info.freeEstimate,
-            activeSlots: info.activeSlots,
-            pressure: pressure.rawValue
-        )
+        // Unreachable: init always throws, so no MLXEngine instance is ever created.
+        fatalError("MLXEngine.memoryInfo called on disabled backend")
     }
 }
