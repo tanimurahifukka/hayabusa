@@ -19,12 +19,17 @@ jobs:
 
       - name: Clone llama.cpp
         run: |
+          # Keep org / pinned SHA in sync with README.md "Build llama.cpp".
+          LLAMA_CPP_REF=c9872a2575acc65834deb15a1f5155f6dbc75229
           mkdir -p vendor
-          cd vendor
-          git clone --depth 1 https://github.com/ggerganov/llama.cpp.git
+          git clone https://github.com/ggml-org/llama.cpp.git vendor/llama.cpp
+          cd vendor/llama.cpp
+          git checkout "$LLAMA_CPP_REF"
 
       - name: Build llama.cpp (Metal)
         run: |
+          # BUILD_SHARED_LIBS=OFF matches README (static linking; Package.swift
+          # links the .a artifacts from build/src and build/ggml/src/*).
           cd vendor/llama.cpp
           mkdir build && cd build
           cmake .. \
@@ -32,7 +37,7 @@ jobs:
             -DGGML_METAL=ON \
             -DGGML_BLAS=ON \
             -DGGML_BLAS_VENDOR=Apple \
-            -DBUILD_SHARED_LIBS=ON \
+            -DBUILD_SHARED_LIBS=OFF \
             -DGGML_METAL_EMBED_LIBRARY=ON
           cmake --build . --config Release -j $(sysctl -n hw.ncpu)
 
