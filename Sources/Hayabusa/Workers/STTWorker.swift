@@ -54,6 +54,10 @@ public struct STTWorker: Worker {
     private let recordingsRoot: String?
     private let maxAudioBytes: Int
     private let productionMode: Bool
+    /// GPU(Metal) を無効化して CPU 推論にする。launchd(LaunchAgent) 配下では
+    /// GUI/WindowServer セッションが無く Metal の GPU 初期化がデッドロックするため、
+    /// 常駐ディスパッチャからの実行では CPU-only にする必要がある。
+    private let noGpu: Bool
 
     private static let allowedExtensions: Set<String> = ["wav", "mp3", "m4a", "flac", "ogg", "opus", "aac"]
 
@@ -66,7 +70,8 @@ public struct STTWorker: Worker {
         timeoutSec: Int = 300,
         recordingsRoot: String? = nil,
         maxAudioBytes: Int = 200 * 1024 * 1024,
-        productionMode: Bool = false
+        productionMode: Bool = false,
+        noGpu: Bool = false
     ) {
         self.jobType = jobType
         self.whisperBin = whisperBin
@@ -77,6 +82,7 @@ public struct STTWorker: Worker {
         self.recordingsRoot = recordingsRoot
         self.maxAudioBytes = maxAudioBytes
         self.productionMode = productionMode
+        self.noGpu = noGpu
     }
 
     /// env から作る factory。HAYABUSA_WHISPER_BIN / HAYABUSA_WHISPER_MODEL /
@@ -96,6 +102,8 @@ public struct STTWorker: Worker {
         let maxAudioBytes = max(1, maxMb) * 1024 * 1024
         let prodRaw = env["HAYABUSA_STT_PROD_MODE"]?.lowercased() ?? ""
         let productionMode = prodRaw == "1" || prodRaw == "true" || prodRaw == "yes"
+        let noGpuRaw = env["HAYABUSA_STT_NO_GPU"]?.lowercased() ?? ""
+        let noGpu = noGpuRaw == "1" || noGpuRaw == "true" || noGpuRaw == "yes"
         return STTWorker(
             whisperBin: bin,
             modelPath: model,
@@ -104,7 +112,8 @@ public struct STTWorker: Worker {
             timeoutSec: timeoutSec,
             recordingsRoot: root,
             maxAudioBytes: maxAudioBytes,
-            productionMode: productionMode
+            productionMode: productionMode,
+            noGpu: noGpu
         )
     }
 
@@ -132,7 +141,7 @@ public struct STTWorker: Worker {
 
         let process = Process()
         process.executableURL = URL(fileURLWithPath: whisperBin)
-        process.arguments = [
+        var args = [
             "-m", modelPath,
             "-f", rawAudioPath,
             "-of", outBase,
@@ -141,6 +150,11 @@ public struct STTWorker: Worker {
             "--threads", String(threads),
             "--no-prints",
         ]
+        if noGpu {
+            // CPU-only。launchd 配下の Metal GPU 初期化デッドロック回避 (HAYABUSA_STT_NO_GPU)。
+            args.append("--no-gpu")
+        }
+        process.arguments = args
         let stdoutPipe = Pipe()
         let stderrPipe = Pipe()
         process.standardOutput = stdoutPipe
