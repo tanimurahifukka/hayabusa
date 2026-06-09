@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  常駐 whisper-server (whisper.cpp examples/server) の LaunchAgent。
+
+  GUI セッションの LaunchAgent (~/Library/LaunchAgents) として動かすこと。
+  launchd の Daemon (システム context) では Metal の GPU 初期化が
+  デッドロックするため不可。Agent ならモデル常駐 + Metal GPU の両方が得られる。
+
+  導入:
+    1. モデルパス・バイナリパスを環境に合わせて編集
+    2. cp config/com.tanimura.whisper-server.plist ~/Library/LaunchAgents/
+    3. launchctl load ~/Library/LaunchAgents/com.tanimura.whisper-server.plist
+    4. curl http://127.0.0.1:7892/health  → 200 でロード完了
+    5. ログで "Metal" バックエンド初期化を確認 (/tmp/whisper-server.err.log)
+
+  initial prompt はここでは設定しない (STTWorker がリクエスト毎に kind 別
+  プロンプトを multipart "prompt" フィールドで送る)。
+-->
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.tanimura.whisper-server</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/Users/tanimura/dev/command-room-stack/hayabusa/vendor/whisper.cpp/build/bin/whisper-server</string>
+        <!-- 2026-06-10 eval: large-v3-q5_0 + clinical prompt = CER 0.048 / 用語再現 93%
+             (turbo-q5_0 は CER 0.087 / 79%)。常駐 Metal なら速度差も僅少 (0.36s→0.75s)。
+             host-stt/eval/whispercpp_results.json 参照。 -->
+        <string>-m</string>
+        <string>/Users/tanimura/dev/command-room-stack/hayabusa/vendor/whisper.cpp/models/ggml-large-v3-q5_0.bin</string>
+        <string>--host</string>
+        <string>127.0.0.1</string>
+        <string>--port</string>
+        <string>7892</string>
+        <string>-l</string>
+        <string>ja</string>
+        <string>-t</string>
+        <string>8</string>
+        <!-- --convert 必須: 無いと multipart の中身をファイル名として扱い 400 になる
+             (この vendor 版の既知の不整合)。ffmpeg が PATH に必要。 -->
+        <string>--convert</string>
+        <string>--tmp-dir</string>
+        <string>/tmp</string>
+    </array>
+    <key>EnvironmentVariables</key>
+    <dict>
+        <!-- launchd の既定 PATH には /opt/homebrew/bin が無く ffmpeg を見つけられない -->
+        <key>PATH</key>
+        <string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string>
+    </dict>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>KeepAlive</key>
+    <true/>
+    <key>StandardOutPath</key>
+    <string>/tmp/whisper-server.out.log</string>
+    <key>StandardErrorPath</key>
+    <string>/tmp/whisper-server.err.log</string>
+</dict>
+</plist>

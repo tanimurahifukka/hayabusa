@@ -1,0 +1,22 @@
+{
+  "_comment": "Dev config for full edge nodes: STT + clinical summarize. Required env: HAYABUSA_WHISPER_BIN, HAYABUSA_WHISPER_MODEL, HAYABUSA_STT_TRANSCRIPTS_DIR, and either an in-process model (non dispatcher-only) or HAYABUSA_LLM_URL. Recommended: HAYABUSA_WHISPER_SERVER_URL=http://127.0.0.1:7892 (resident whisper-server, see config/com.tanimura.whisper-server.plist), HAYABUSA_WHISPER_PROMPT_CLINICAL / HAYABUSA_WHISPER_PROMPT_VOICEMAIL (medical-term biasing).",
+  "node": {
+    "id": "edge-mac-studio-dev-01",
+    "role": "sub",
+    "capabilities": {
+      "jobTypes": ["echo", "stt.transcribe", "llm.summarize_call"]
+    },
+    "policy": {
+      "maxConcurrentJobs": 2,
+      "acceptPriority": [],
+      "refuseWhenMemoryPressure": ["critical", "emergency"],
+      "leaseBatchSize": 4,
+      "pollIntervalSeconds": 2.0
+    },
+    "lease": {
+      "enabled": true,
+      "commandRoomBaseUrl": "http://localhost:3001",
+      "authTokenEnv": "HAYABUSA_WORKER_TOKEN"
+    }
+  }
+}
