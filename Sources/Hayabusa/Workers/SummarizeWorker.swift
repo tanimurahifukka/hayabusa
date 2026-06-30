@@ -163,19 +163,24 @@ public struct SummarizeWorker: Worker {
 
     // MARK: - プロンプト
 
-    /// OpenPBX apps/web の旧 transcribe route (buildPrompt) と同一文面。
-    /// 変更する場合は host-stt/eval/eval_llm.py の評価プロンプトも更新すること。
+    /// 診察 (clinical) と留守電 (voicemail) の要約プロンプト。本ファイルが唯一の正本。
+    /// command-room の WorkerPromptTemplate / settings/prompts UI は要約ワーカーに
+    /// 未接続なので、文面変更はここで行い、hayabusa を再ビルド+再デプロイすること。
     static func buildPrompt(kind: String, transcript: String) -> String {
         if kind == "clinical" {
             return """
             以下は診察中の会話の文字起こし（句読点なし）です。
-            診療録の補助メモとして重要情報を日本語で整理してください。
+            診療録の補助メモとして、会話で確認できた重要情報を日本語で整理してください。
 
             文字起こし:
             \(transcript)
 
-            以下の形式で出力してください（不明な場合は「不明」）:
-            【要旨】（1〜2文で診察内容を要約）
+            以下の見出しごとに、会話内容を箇条書き（各項目を「- 」で始める）で出力してください。
+            - 各項目は1行1要点で簡潔にまとめ、文字起こしの丸写しはしない
+            - 診断や断定はせず、会話で実際に述べられた事実のみを記載する
+            - 該当する情報がない見出しには「- 不明」と記載する
+
+            【要旨】（診察内容の要点を2〜3項目の箇条書きで）
             【患者名】
             【主訴・処置内容】
             【処方】
