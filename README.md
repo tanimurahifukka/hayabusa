@@ -131,6 +131,53 @@ HAYABUSA_PORT=8081 .build/debug/Hayabusa models/Qwen3.5-9B-Q4_K_M.gguf \
 > API needs a migration. Do not include `--backend mlx` in scripts until that
 > migration lands.
 
+### Edge STT + Clinical Summarize (clinic voicemail pipeline)
+
+The `stt.transcribe` and `llm.summarize_call` workers process clinic voicemail
+through the command-room job queue (OpenPBX emits events / command-room decides /
+Hayabusa processes — PBX never calls AI services directly).
+
+```bash
+# 1. Resident whisper-server (model stays loaded, Metal GPU).
+#    Must run as a GUI-session LaunchAgent — running whisper under launchd
+#    daemons (or spawning it from one) deadlocks Metal initialization.
+#    Edit model path in the plist first.
+cp config/com.tanimura.whisper-server.plist ~/Library/LaunchAgents/
+launchctl load ~/Library/LaunchAgents/com.tanimura.whisper-server.plist
+curl http://127.0.0.1:7892/health   # 200 once the model is loaded
+
+# 2. Edge worker node (STT via resident server + clinical summarize)
+HAYABUSA_CONFIG=config/hayabusa.edge.dev.json \
+HAYABUSA_WORKER_TOKEN=... \
+HAYABUSA_WHISPER_BIN=vendor/whisper.cpp/build/bin/whisper-cli \
+HAYABUSA_WHISPER_MODEL=$HOME/models/ggml-large-v3-turbo-q5_0.bin \
+HAYABUSA_WHISPER_SERVER_URL=http://127.0.0.1:7892 \
+HAYABUSA_WHISPER_PROMPT_CLINICAL='以下は皮膚科診察中の医師の口述記録です。…' \
+HAYABUSA_WHISPER_PROMPT_VOICEMAIL='以下は皮膚科クリニックへの留守電です。…' \
+HAYABUSA_STT_TRANSCRIPTS_DIR=$HOME/hayabusa-data/transcripts \
+HAYABUSA_LLM_URL=http://127.0.0.1:8080 \
+  .build/release/Hayabusa --dispatcher-only
+```
+
+Notes:
+
+- `HAYABUSA_WHISPER_SERVER_URL` enables the resident-server mode (per-request
+  `prompt`, no model reload per job). On any server failure the worker falls
+  back to spawning `whisper-cli` (CPU-only under launchd via
+  `HAYABUSA_STT_NO_GPU`).
+- whisper-server must run with `--convert` (and ffmpeg on PATH): without it,
+  this vendor revision treats the uploaded multipart body as a file *name* and
+  every `/inference` request fails with HTTP 400.
+- `sttKind` in the job payload (`"clinical"` for the 診療 9010 box,
+  `"voicemail"` otherwise) selects the initial prompt.
+- `HAYABUSA_STT_TRANSCRIPTS_DIR` keeps the full transcript on the edge; only a
+  `transcriptRef` (`edge://<pbxInstanceId>/<uniqueId>`) is reported to
+  command-room. The `llm.summarize_call` worker resolves that ref locally and
+  returns only the structured summary.
+- Do NOT link whisper.cpp into Hayabusa as a SwiftPM library: the binary
+  already links llama.cpp's ggml, and a second ggml copy causes symbol
+  conflicts. The resident whisper-server + HTTP client is the supported path.
+
 ### Send a Request
 
 ```bash

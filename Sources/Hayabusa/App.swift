@@ -129,9 +129,16 @@ struct HayabusaApp {
                 registry.register(EchoWorker())
                 if let stt = STTWorker.fromEnv() {
                     registry.register(stt)
-                    print("[Hayabusa] STTWorker registered (model=\(ProcessInfo.processInfo.environment["HAYABUSA_WHISPER_MODEL"] ?? ""))")
+                    print("[Hayabusa] STTWorker registered (model=\(ProcessInfo.processInfo.environment["HAYABUSA_WHISPER_MODEL"] ?? ""), mode=\(stt.modeDescription))")
                 } else {
                     print("[Hayabusa] STTWorker disabled (set HAYABUSA_WHISPER_BIN + HAYABUSA_WHISPER_MODEL to enable)")
+                }
+                // dispatcher-only では model が無いので要約は HTTP 転送 (HAYABUSA_LLM_URL)。
+                if let summarize = SummarizeWorker.fromEnv(engine: nil) {
+                    registry.register(summarize)
+                    print("[Hayabusa] SummarizeWorker registered (mode=\(summarize.modeDescription))")
+                } else {
+                    print("[Hayabusa] SummarizeWorker disabled (set HAYABUSA_STT_TRANSCRIPTS_DIR + HAYABUSA_LLM_URL to enable)")
                 }
                 let dispatcher = JobDispatcher(config: nodeConfig, client: leaseClient, registry: registry)
                 try await dispatcher.start()
@@ -328,9 +335,16 @@ struct HayabusaApp {
                 registry.register(EchoWorker())
                 if let stt = STTWorker.fromEnv() {
                     registry.register(stt)
-                    print("[Hayabusa] STTWorker registered (model=\(ProcessInfo.processInfo.environment["HAYABUSA_WHISPER_MODEL"] ?? ""))")
+                    print("[Hayabusa] STTWorker registered (model=\(ProcessInfo.processInfo.environment["HAYABUSA_WHISPER_MODEL"] ?? ""), mode=\(stt.modeDescription))")
                 } else {
                     print("[Hayabusa] STTWorker disabled (set HAYABUSA_WHISPER_BIN + HAYABUSA_WHISPER_MODEL to enable)")
+                }
+                // model 同居起動: プロセス内 engine で要約 (自己 HTTP 不要)。
+                if let summarize = SummarizeWorker.fromEnv(engine: engine) {
+                    registry.register(summarize)
+                    print("[Hayabusa] SummarizeWorker registered (mode=\(summarize.modeDescription))")
+                } else {
+                    print("[Hayabusa] SummarizeWorker disabled (set HAYABUSA_STT_TRANSCRIPTS_DIR to enable)")
                 }
                 let dispatcher = JobDispatcher(
                     config: nodeConfig,
