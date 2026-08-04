@@ -330,7 +330,14 @@ final class LlamaEngine: InferenceEngine, @unchecked Sendable {
             }
 
             job.outputTokens.append(newToken)
-            job.textBuffer += detokenizeSingle(token: newToken)
+            // CJK chars are often split across tokens; decoding per-token corrupts
+            // them to U+FFFD. Accumulate raw bytes and decode only complete sequences.
+            job.pendingBytes.append(contentsOf: pieceBytes(token: newToken))
+            let (complete, pending) = Self.splitCompleteUTF8(job.pendingBytes)
+            if !complete.isEmpty {
+                job.textBuffer += String(decoding: complete, as: UTF8.self)
+            }
+            job.pendingBytes = pending
 
             // Text-based stop sequence detection — catches GGUFs that don't
             // mark stop tokens as EOG (e.g. Gemma 4 <end_of_turn>).
@@ -384,6 +391,43 @@ final class LlamaEngine: InferenceEngine, @unchecked Sendable {
         return (0..<Int(count)).map { tokens[$0] }
     }
 
+    private func pieceBytes(token: llama_token) -> [UInt8] {
+        var buf = [CChar](repeating: 0, count: 256)
+        var n = llama_token_to_piece(vocab, token, &buf, Int32(buf.count), 0, false)
+        if n < 0 {
+            buf = [CChar](repeating: 0, count: Int(-n))
+            n = llama_token_to_piece(vocab, token, &buf, Int32(buf.count), 0, false)
+        }
+        guard n > 0 else { return [] }
+        return buf[0..<Int(n)].map { UInt8(bitPattern: $0) }
+    }
+
+    // Split bytes into a decodable prefix and an incomplete trailing UTF-8 sequence.
+    static func splitCompleteUTF8(_ bytes: [UInt8]) -> (complete: [UInt8], pending: [UInt8]) {
+        var splitIndex = bytes.count
+        var i = bytes.count - 1
+        var continuations = 0
+        while i >= 0 && continuations < 4 {
+            let b = bytes[i]
+            if b & 0xC0 == 0x80 {  // continuation byte, keep walking back
+                i -= 1
+                continuations += 1
+                continue
+            }
+            let needed: Int
+            if b & 0x80 == 0x00 { needed = 1 }
+            else if b & 0xE0 == 0xC0 { needed = 2 }
+            else if b & 0xF0 == 0xE0 { needed = 3 }
+            else if b & 0xF8 == 0xF0 { needed = 4 }
+            else { needed = 1 }  // invalid lead byte: let the decoder deal with it
+            if bytes.count - i < needed {
+                splitIndex = i
+            }
+            break
+        }
+        return (Array(bytes[..<splitIndex]), Array(bytes[splitIndex...]))
+    }
+
     private func detokenizeSingle(token: llama_token) -> String {
         var buf = [CChar](repeating: 0, count: 256)
         let n = llama_token_to_piece(vocab, token, &buf, Int32(buf.count), 0, false)
@@ -395,27 +439,11 @@ final class LlamaEngine: InferenceEngine, @unchecked Sendable {
     }
 
     private func detokenize(tokens: [llama_token]) -> String {
-        var result = ""
+        var bytes: [UInt8] = []
         for token in tokens {
-            var buf = [CChar](repeating: 0, count: 256)
-            let n = llama_token_to_piece(vocab, token, &buf, Int32(buf.count), 0, false)
-            if n > 0 {
-                buf[Int(n)] = 0
-                if let s = String(validatingCString: buf) {
-                    result += s
-                }
-            } else if n < 0 {
-                var bigBuf = [CChar](repeating: 0, count: Int(-n) + 1)
-                let n2 = llama_token_to_piece(vocab, token, &bigBuf, Int32(bigBuf.count), 0, false)
-                if n2 > 0 {
-                    bigBuf[Int(n2)] = 0
-                    if let s = String(validatingCString: bigBuf) {
-                        result += s
-                    }
-                }
-            }
+            bytes.append(contentsOf: pieceBytes(token: token))
         }
-        return result
+        return String(decoding: bytes, as: UTF8.self)
     }
 
     // MARK: - Chat Template
